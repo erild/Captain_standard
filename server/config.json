@@ -3,7 +3,9 @@
   "host": "0.0.0.0",
   "port": 3000,
   "remoting": {
-    "context": false,
+    "context": {
+      "enableHttpContext": false
+    },
     "rest": {
       "normalizeHttpPath": false,
       "xml": false
@@ -17,7 +19,9 @@
       "limit": "100kb"
     },
     "cors": false,
-    "handleErrors": false
+    "errorHandler": {
+      "disableStackTrace": false
+    }
   },
   "legacyExplorer": false
 }

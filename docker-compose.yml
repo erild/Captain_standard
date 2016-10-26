@@ -1,0 +1,16 @@
+version: '2'
+services:
+  pg:
+    image: postgres
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_PASSWORD: mypassword
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+  lb:
+    image: pdesgarets/loopback
+    volumes:
+      - .:/app
+    depends_on:
+      - pg

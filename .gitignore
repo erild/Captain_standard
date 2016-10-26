@@ -17,8 +17,5 @@
 coverage
 node_modules
 npm-debug.log
-.editorconfig
-.eslintignore
-.eslintrc
-.yo-rc.json
-server/config.json
+pgdata
+docker-compose.override.yml
