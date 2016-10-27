@@ -20,4 +20,4 @@ To launch a shell on the app container: `docker-compose exec lb bash`
 
 We use yarn rather than npm because it is much faster. To install a package, launch a shell on the app container and run `yarn add {package}` (or `yarn add {package} --dev` for a dev dependency).
 
-Generally speaking, use your local machine for coding and git, and the container shell for everything else (lint/test/package management), so that we all do those stuffs in the same environment.
+In dev, you should launch the react hot-reloaded dev server with `npm start` in the `client` folder. In prod, `npm run build` will build the static files in `client/build` folder, that will be served by loopback server.
