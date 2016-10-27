@@ -1,0 +1,5 @@
+---
+# update tzdata
+- name: update-tzdata
+  command: dpkg-reconfigure --frontend noninteractive tzdata
+

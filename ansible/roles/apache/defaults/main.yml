@@ -1,0 +1,3 @@
+---
+apache_root: "{{ app_path }}"
+apache_server_name: localhost
