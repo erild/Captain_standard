@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become: true
+  vars:
+    app_path: /app
+    app_name: captain_standard
+    postgresql:
+      user: default
+      password: password
+      database: password
+  roles:
+    - common
+    - apache
+    - nodejs
+    - postgresql

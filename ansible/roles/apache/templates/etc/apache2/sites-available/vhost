@@ -1,0 +1,15 @@
+<VirtualHost *:80>
+        DocumentRoot {{ apache_root }}
+        ServerName {{ apache_server_name }}
+        ProxyPass / http://localhost:3000
+        ProxyPassReverse / http://localhost:3000
+</VirtualHost>
+<VirtualHost *:443>
+        DocumentRoot {{ apache_root }}
+        ServerName {{ apache_server_name }}
+        SSLEngine On
+        SSLCertificateFile /etc/ssl/cert.pem
+        SSLCertificateKeyFile /etc/ssl/key.pem
+        ProxyPass / http://localhost:3000
+        ProxyPassReverse / http://localhost:3000
+</VirtualHost>

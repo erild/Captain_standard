@@ -19,3 +19,5 @@ node_modules
 npm-debug.log
 pgdata
 docker-compose.override.yml
+ansible/playbook.retry
+.vagrant

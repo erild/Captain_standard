@@ -1,0 +1,13 @@
+- name: install node repo
+  shell: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+
+- name: Install nodejs
+  apt:
+    name: nodejs
+    update_cache: yes
+
+- name: Install yarn
+  npm: name=yarn global=yes
+
+- name: install strongloop
+  npm: name=strongloop global=yes
