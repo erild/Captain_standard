@@ -4,6 +4,7 @@
   vars:
     app_path: /app
     app_name: captain_standard
+    app_port: 2000
     postgresql:
       user: default
       password: password
