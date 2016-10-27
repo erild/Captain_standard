@@ -43,6 +43,9 @@ Vagrant.configure(2) do |config|
   if Vagrant::Util::Platform.windows? then
     config.vm.synced_folder ".", "/app", type: "smb"
   else
+    unless Vagrant.has_plugin?("vagrant-bindfs")
+      raise "Plugin missing. Run : vagrant plugin install vagrant-bindfs"
+    end
     config.vm.synced_folder ".", "/tmp-nfs",
       :type => :nfs,
       :create => true,
@@ -54,9 +57,6 @@ Vagrant.configure(2) do |config|
       :user => :vagrant,
       :group => :vagrant,
       "create-as-user" => true
-  end
-  unless Vagrant.has_plugin?("vagrant-bindfs")
-    raise "Plugin missing. Run : vagrant plugin install vagrant-bindfs"
   end
 
   if Vagrant.has_plugin?("vagrant-hostmanager") then
