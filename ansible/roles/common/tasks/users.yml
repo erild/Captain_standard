@@ -3,11 +3,13 @@
 - name: update root shell
   user: name=root shell=/bin/zsh
 
-- name: update vagrant settings
-  user: name=vagrant shell=/bin/zsh #generate_ssh_key=yes ssh_key_comment={{ user.email }}
+- name: update user settings
+  user: name={{ ansible_user }} shell=/bin/zsh #generate_ssh_key=yes ssh_key_comment={{ user.email }}
 
 - name: set correct permissions
-  file: path=/app owner=vagrant group=vagrant mode=0755 state=directory
+  when: env != 'production'
+  file: path={{ app_path }} owner={{ ansible_user }} group={{ ansible_user }} mode=0755 state=directory
 
 - name: add vagrant to sudoers
+  when: env != 'production'
   copy: src=etc/sudoers.d/10-vagrant dest=/etc/sudoers.d/10-vagrant owner=root group=root mode=0440 validate="visudo -cf %s"

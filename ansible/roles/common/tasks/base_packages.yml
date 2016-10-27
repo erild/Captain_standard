@@ -21,4 +21,4 @@
     - openssl
 
 - name: configure zsh and vim
-  script: ../files/vim_zsh.sh creates=/home/vagrant/.zshrc
+  script: ../files/vim_zsh.sh {{ ansible_user }} creates=/root/.zshrc

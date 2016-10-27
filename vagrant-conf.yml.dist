@@ -1,0 +1,9 @@
+ports:
+  host:
+    api: 8000
+    front: 8080
+    pg: 5555
+  guest:
+    api: 2000
+    front: 3000
+    pg: 5432
