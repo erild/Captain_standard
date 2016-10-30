@@ -2,7 +2,7 @@
 - hosts: all
   become: true
   vars:
-    app_path: /app
+    app_path: /vagrant
     app_name: captain_standard
     app_port: 2000
     postgresql:

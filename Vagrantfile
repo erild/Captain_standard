@@ -30,9 +30,8 @@ Vagrant.configure(2) do |config|
     exec "vagrant plugin install #{plugin};vagrant #{ARGV.join(" ")}" unless Vagrant.has_plugin? plugin || ARGV[0] == 'plugin'
   end
 
-  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
   if Vagrant::Util::Platform.windows?
-    config.vm.synced_folder ".", "/app", type: "smb"
+    config.vm.synced_folder ".", "/vagrant", type: "smb"
   else
     unless Vagrant.has_plugin?("vagrant-bindfs")
       raise "Plugin missing. Run : vagrant plugin install vagrant-bindfs"
@@ -43,7 +42,7 @@ Vagrant.configure(2) do |config|
       :mount_options => ["rw,rsize=32768,wsize=32768,intr,noatime"],
       :nfs_udp => true,
       :nfs_version => "4"
-    config.bindfs.bind_folder "/tmp-nfs", "/app",
+    config.bindfs.bind_folder "/tmp-nfs", "/vagrant",
       :perms => "u=rwD:g=rD:o=rD",
       :user => :vagrant,
       :group => :vagrant,
@@ -61,6 +60,8 @@ Vagrant.configure(2) do |config|
 
   if Vagrant::Util::Platform.windows? then
     config.vm.provision :ansible_local do |ansible|
+      ansible.install_mode = :pip
+      ansible.version = :latest
       ansible.extra_vars = { ansible_user: 'vagrant', env: 'dev'}
       ansible.playbook = "ansible/playbook.yml"
     end
