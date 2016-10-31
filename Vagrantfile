@@ -57,6 +57,13 @@ Vagrant.configure(2) do |config|
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "1024"
   end
+  config.vm.provider "hyperv" do |hyperv, override|
+    override.vm.box = "jessie-hyperv"
+    hyperv.memory = 512
+    hyperv.maxmemory = 1536
+    hyperv.ip_address_timeout = 240
+    hyperv.vmname= "captain"
+  end
 
   if Vagrant::Util::Platform.windows? then
     config.vm.provision :ansible_local do |ansible|
