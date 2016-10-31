@@ -28,9 +28,20 @@ In dev, you should launch the react hot-reloaded dev server with `npm start` in 
 
 #### Vagrant
 
+If you can't have a true docker install (for instance Windows < 10) or if you just don't like it, you may use vagrant.  If you are using a Windows host machine, you have to use a local account for the computer (instead of a connected Outlook account) to be able to use a password for the SMB sharing.
+
 If the ports in `vagrant-conf.yml.dist` don't fit your config, create a `vagrant-conf.yml` and change whatever you wanna change.
 
-Install vagrant and ansible (ansible normally not needed if you use a Windows host machine), then launch `vagrant up`. It should work out of the box, after vagrant is done with the provisioning.
+Install vagrant, virtualbox and ansible (ansible not needed if you use a Windows host machine), then launch `vagrant up`. It should work out of the box, after vagrant is done with the provisioning.
+
+##### Using Hyper-V instead of Virtualbox
+
+If you have Hyper-V (for instance if you use Docker For Windows Beta), you can't use VirtualBox at the same time. You can either:
+
+- Use a dual boot entry to choose to boot with or without Hyper-V : see http://www.hanselman.com/blog/SwitchEasilyBetweenVirtualBoxAndHyperVWithABCDEditBootEntryInWindows81.aspx
+- Use a hyper-v vagrant box: download https://people.ragg.fr/~kiwi/shared/jessie-hyperv.box, and type in a command line `vagrant box add jessie-hyperv \path\to\jessie-hyperv.box`. Then you'll have to configure a virtual switch : Go in the Hyper V Configuration Management tool, choose in the right panel "Network switch", and add an external switch linked with the interface connected to the Internet. You're now ready to `vagrant up --provider=hyperv` !
+
+NB: With Hyper V, you have to use Vagrant in a CLI/GUI launched with administrator privileges.
 
 
 ### Ansible
