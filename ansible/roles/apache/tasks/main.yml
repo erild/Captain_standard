@@ -12,9 +12,34 @@
   command: a2enmod proxy
   notify: restart-apache
 
+- name: create prod csr
+  command: openssl req -new -newkey rsa:2048 -sha256 -nodes -keyout /etc/ssl/private/key.pem -out /etc/ssl/{{ apache_server_name }}.der -outform der -subj "/C=FR/ST=Paris/L=Paris/O={{ apache_server_name }}/emailAddress=root@{{ apache_server_name}}/CN={{ apache_server_name }}" -reqexts SAN
+  when: env == 'production'
+
 - name: create self-signed certificate
-  command: openssl req -new -nodes -x509 -subj "/C=FR/ST=Dtc/L=Dtc/O=I/CN={{ apache_server_name }}" -days 3650 -keyout /etc/ssl/key.pem -out /etc/ssl/cert.pem -extensions v3_ca creates=/etc/ssl/cert.pem
+  command: openssl req -new -nodes -x509 -subj "/C=FR/ST=Dtc/L=Dtc/O=I/CN={{ apache_server_name }}" -days 3650 -keyout /etc/ssl/private/key.pem -out /etc/ssl/{{ apache_server_name }}.crt -extensions v3_ca creates=/etc/ssl/cert.pem
   notify: restart-apache
+  when: env != 'production'
+
+- letsencrypt:
+    account_key: /etc/ssl/private/key.pem
+    csr: /etc/ssl/{{ apache_server_name }}.csr
+    dest: /etc/ssl/{{ apache_server_name }}.crt
+  register: letsencrypt_challenge
+  when: env == 'production'
+
+ - copy:
+     dest: /var/www/{{ letsencrypt_challenge['challenge_data'][apache_server_name]['http-01']['resource'] }}
+     content: "{{ letsencrypt_challenge['challenge_data'][apache_server_name]['http-01']['resource_value'] }}"
+   when: env == 'production' and letsencrypt_challenge|changed
+
+- letsencrypt:
+    account_key: /etc/ssl/private/key.pem
+    csr: /etc/ssl/{{ apache_server_name }}.csr
+    dest: /etc/ssl/{{ apache_server_name }}.crt
+    data: "{{ letsencrypt_challenge }}"
+  notify: restart-apache
+  when: env == 'production'
 
 - name: enable SSL
   command: a2enmod ssl
