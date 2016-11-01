@@ -1,13 +1,22 @@
 <VirtualHost *:80>
         ServerName {{ apache_server_name }}
+        {% if env == 'production' %}
+        DocumentRoot /var/www
+        RewriteEngine on
+        RewriteCond %{HTTPS} off
+        RewriteCond %{SERVER_PORT} !^443$
+        RewriteCond %{REQUEST_URI} !^/?\.well-known.*$
+        RewriteRule ^ https://{{ apache_server_name }}%{REQUEST_URI} [L,R=301]
+        {% else %}
         ProxyPass / http://localhost:{{ app_port }}/
         ProxyPassReverse / http://localhost:{{ app_port }}/
+        {% endif %}
 </VirtualHost>
 <VirtualHost *:443>
         ServerName {{ apache_server_name }}
         SSLEngine On
-        SSLCertificateFile /etc/ssl/cert.pem
-        SSLCertificateKeyFile /etc/ssl/key.pem
+        SSLCertificateFile /etc/ssl/{{ apache_server_name }}.crt
+        SSLCertificateKeyFile /etc/ssl/private/key.pem
         ProxyPass / http://localhost:{{ app_port }}/
         ProxyPassReverse / http://localhost:{{ app_port }}/
 </VirtualHost>

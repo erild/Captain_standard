@@ -14,10 +14,9 @@ Vagrant.configure(2) do |config|
 
   config.vm.box = "debian/jessie64"
 
-  config.vm.network "forwarded_port", guest: vconfig['ports']['guest']['front'], host: vconfig['ports']['host']['front']
-  config.vm.network "forwarded_port", guest: vconfig['ports']['guest']['api'], host: vconfig['ports']['host']['api']
-  config.vm.network "forwarded_port", guest: vconfig['ports']['guest']['pg'], host: vconfig['ports']['host']['pg']
-
+  vconfig['ports']['guest'].each do |name, guestPort|
+    config.vm.network "forwarded_port", guest: guestPort, host: vconfig['ports']['host'][name]
+  end
 
   config.vm.network "private_network", ip: "192.168.33.10"
 
@@ -65,7 +64,7 @@ Vagrant.configure(2) do |config|
     hyperv.vmname= "captain"
   end
 
-  if Vagrant::Util::Platform.windows? then
+  if Vagrant::Util::Platform.windows?
     config.vm.provision :ansible_local do |ansible|
       ansible.install_mode = :pip
       ansible.version = :latest
