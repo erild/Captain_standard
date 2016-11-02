@@ -19,6 +19,11 @@
     - locate
     - acl
     - openssl
+    - iptables-persistent
 
 - name: configure zsh and vim
   script: ../files/vim_zsh.sh {{ ansible_user }} creates=/root/.zshrc
+
+- name: install iptables
+  copy: src=etc/iptables/rules.v4 dest=/etc/iptables/rules.v4
+  notify: restart-iptables

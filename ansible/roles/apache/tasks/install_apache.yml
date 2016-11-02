@@ -1,0 +1,11 @@
+---
+- name: install apache2
+  apt: name=apache2 state=latest update_cache=yes
+
+- name: enable rewrite
+  command: a2enmod rewrite
+  notify: restart-apache
+
+- name: enable proxy
+  command: a2enmod proxy_http
+  notify: restart-apache

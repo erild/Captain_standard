@@ -1,7 +1,7 @@
 <VirtualHost *:80>
         ServerName {{ apache_server_name }}
         {% if env == 'production' %}
-        DocumentRoot /var/www
+        DocumentRoot /var/www/html
         RewriteEngine on
         RewriteCond %{HTTPS} off
         RewriteCond %{SERVER_PORT} !^443$

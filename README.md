@@ -13,7 +13,7 @@ version: '2'
 services:
   lb:
     ports:
-      - 3000:3000
+      - 2000:2000
 ```
 
 (obviously, feel free to change the left port = the one on the host)
@@ -30,9 +30,7 @@ In dev, you should launch the react hot-reloaded dev server with `npm start` in 
 
 If you can't have a true docker install (for instance Windows < 10) or if you just don't like it, you may use vagrant.  If you are using a Windows host machine, you have to use a local account for the computer (instead of a connected Outlook account) to be able to use a password for the SMB sharing.
 
-If the ports in `vagrant-conf.yml.dist` don't fit your config, create a `vagrant-conf.yml` and change whatever you wanna change.
-
-Install vagrant, virtualbox and ansible (ansible not needed if you use a Windows host machine), then launch `vagrant up`. It should work out of the box, after vagrant is done with the provisioning.
+Install vagrant, virtualbox and ansible (ansible not needed if you use a Windows host machine; else, install using pip to get version > 2.2), then launch `vagrant up`. It should work out of the box, after vagrant is done with the provisioning. You can then access the VM using `captain.local` address in your browser (of course, launch the app with `node .` on the machine in `/vagrant` directory before).
 
 ##### Using Hyper-V instead of Virtualbox
 
@@ -57,12 +55,11 @@ main_prod ansible_host=1.2.3.4 ansible_user=ubuntu
 [production:vars]
 ansible_private_key_file=/home/yourname/.ssh/id_rsa.prod
 env=production
-pm_username=admin
-pm_password=passwordToChange
+apache_server_name=www.captain-standard.com
 ```
 
-Once this file is created, you can provision the server with `ansible-playbook -i /path/to/inventory.ini ansible/playbook.yml`.
+Once this file is created, you can provision the server with `ansible-playbook -i /path/to/inventory.ini ansible/playbook.yml -K`.
 
 This provisioning is needed only once but can be done as many times as you want (just beware of the use of different vars across developers, especially regarding the password for the process manager `pm_password`).
 
-Once the server is provisioned, you may deploy. We deploy using strongloop tool. Before deploying, you must create a new front-end build : `cd client && npm run build`. Then, `slc build --npm` to build a tgz to upload to the server, and `slc deploy -s main http://admin:passwordToChange@1.2.3.4:8701 ../Captain_standard-1.0.0.tgz`
+Once the server is provisioned, you may deploy. We deploy using strongloop tool. Before deploying, you must create a new front-end build : `cd client && npm run build`. Then, `cd .. && slc build --npm` to build a tgz to upload to the server, and `SSH_USER=userOfProdserver SSH_KEY=/path/to/key slc deploy -s main http+ssh://1.2.3.4:8701 ../Captain_standard-1.0.0.tgz`. You may control the deployment, restart etc using `STRONGLOOP_PM=http+ssh://1.2.3.4:8701 SSH_USER=userOfProdserver SSH_KEY=/path/to/key slc ctl [status|ls|soft-restart main]`

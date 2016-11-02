@@ -14,16 +14,13 @@ Vagrant.configure(2) do |config|
 
   config.vm.box = "debian/jessie64"
 
-  vconfig['ports']['guest'].each do |name, guestPort|
-    config.vm.network "forwarded_port", guest: guestPort, host: vconfig['ports']['host'][name]
-  end
-
-  config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network :private_network, type: :dhcp
+  config.vm.hostname = 'captain.local'
 
   if Vagrant::Util::Platform.windows?
-    required_plugins = %w( vagrant-vbguest )
+    required_plugins = %w( vagrant-vbguest vagrant-hostmanager )
   else
-    required_plugins = %w( vagrant-vbguest vagrant-bindfs)
+    required_plugins = %w( vagrant-vbguest vagrant-hostmanager vagrant-bindfs )
   end
   required_plugins.each do |plugin|
     exec "vagrant plugin install #{plugin};vagrant #{ARGV.join(" ")}" unless Vagrant.has_plugin? plugin || ARGV[0] == 'plugin'
@@ -32,6 +29,7 @@ Vagrant.configure(2) do |config|
   if Vagrant::Util::Platform.windows?
     config.vm.synced_folder ".", "/vagrant", type: "smb"
   else
+    config.vm.synced_folder ".", "/vagrant", disabled: true
     unless Vagrant.has_plugin?("vagrant-bindfs")
       raise "Plugin missing. Run : vagrant plugin install vagrant-bindfs"
     end
@@ -48,13 +46,20 @@ Vagrant.configure(2) do |config|
       "create-as-user" => true
   end
 
-  if Vagrant.has_plugin?("vagrant-hostmanager")
-    config.hostmanager.enabled = true
-    config.hostmanager.manage_host = true
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+  config.hostmanager.ignore_private_ip = false
+  config.hostmanager.ip_resolver = proc do |machine|
+    result = ""
+    machine.communicate.execute("/sbin/ifconfig eth1") do |type, data|
+      result << data if type == :stdout
+    end
+    (ip = /inet addr:(\d+\.\d+\.\d+\.\d+)/.match(result)) && ip[1]
   end
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "1024"
+    vb.name = "captain"
   end
   config.vm.provider "hyperv" do |hyperv, override|
     override.vm.box = "jessie-hyperv"
