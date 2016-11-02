@@ -1,5 +1,7 @@
 - name: install node repo
   shell: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  args:
+    creates: /etc/apt/sources.list.d/nodesource.list
 
 - name: Install nodejs
   apt:
@@ -10,6 +12,7 @@
   npm: name=yarn global=yes
 
 - name: install strongloop
+  when: env != 'production'
   npm: name=strongloop global=yes
 
 - name: install strong-pm
@@ -18,20 +21,26 @@
 
 - name: install strong-pm service
   when: env == 'production'
-  shell: sl-pm-install --systemd --http-auth {{ pm_username }}:{{ pm_password }} creates=/etc/systemd/system/strong-pm.service
+  shell: sl-pm-install --systemd creates=/etc/systemd/system/strong-pm.service
 
 - name: run strong-pm service
   when: env == 'production'
   shell: systemctl start strong-pm
 
-- name: create service
+- name: find service
   when: env == 'production'
-  shell: slc ctl create main
+  shell: slpmctl ls|grep " main "
+  register: serviceFound
+  ignore_errors: True
+
+- name: create service
+  when: env == 'production' and serviceFound|failed
+  shell: slpmctl create main
 
 - name: configure service size
   when: env == 'production'
-  shell: slc ctl set-size main 1
+  shell: slpmctl set-size main 1
 
 - name: configure service env
   when: env == 'production'
-  shell: slc ctl env-set main NODE_ENV=production PORT={{ app_port }}
+  shell: slpmctl env-set main NODE_ENV=production PORT={{ app_port }}

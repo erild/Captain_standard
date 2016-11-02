@@ -1,0 +1,89 @@
+---
+
+- name: create self-signed certificate
+  command: openssl req -new -nodes -x509 -subj "/C=FR/ST=Dtc/L=Dtc/O=I/CN={{ apache_server_name }}" -days 3650 -keyout /etc/ssl/private/key.pem -out /etc/ssl/{{ apache_server_name }}.crt -extensions v3_ca creates=/etc/ssl/cert.pem
+  notify: restart-apache
+  when: env != 'production'
+
+- name: create prod csr
+  command: openssl req -new -newkey rsa:2048 -sha256 -nodes -keyout /etc/ssl/private/key.pem -out /etc/ssl/{{ apache_server_name }}.csr -subj "/C=FR/ST=Paris/L=Paris/O={{ apache_server_name }}/emailAddress=root@{{ apache_server_name}}/CN={{ apache_server_name }}" creates=/etc/ssl/{{ apache_server_name }}.csr
+  when: env == 'production'
+  tags: letsencrypt
+
+- name: create account key
+  shell: openssl genrsa 4096 > /etc/ssl/account.key creates=/etc/ssl/account.key
+  when: env == 'production'
+  tags: letsencrypt
+
+- letsencrypt:
+    account_key: /etc/ssl/account.key
+    csr: /etc/ssl/{{ apache_server_name }}.csr
+    dest: /etc/ssl/{{ apache_server_name }}.crt
+    acme_directory: https://acme-v01.api.letsencrypt.org/directory
+  register: letsencrypt_challenge
+  environment:
+    LC_ALL: C # See https://github.com/ansible/ansible-modules-extras/issues/3155
+  when: env == 'production'
+  tags: letsencrypt
+
+# Should use a variable containing the directory of the resource. But this variable does not exist. And state=file does not imply creation of the containing directory
+- file: dest=/var/www/html/.well-known/acme-challenge state=directory
+  when: env == 'production'
+  tags: letsencrypt
+
+- copy:
+    dest: /var/www/html/{{ letsencrypt_challenge['challenge_data'][apache_server_name]['http-01']['resource'] }}
+    content: "{{ letsencrypt_challenge['challenge_data'][apache_server_name]['http-01']['resource_value'] }}"
+  when: env == 'production' and letsencrypt_challenge|changed
+  tags: letsencrypt
+
+- letsencrypt:
+    account_key: /etc/ssl/account.key
+    csr: /etc/ssl/{{ apache_server_name }}.csr
+    dest: /etc/ssl/{{ apache_server_name }}.crt
+    acme_directory: https://acme-v01.api.letsencrypt.org/directory
+    data: "{{ letsencrypt_challenge }}"
+  notify: restart-apache
+  when: env == 'production'
+  environment:
+    LC_ALL: C # See https://github.com/ansible/ansible-modules-extras/issues/3155
+  tags: letsencrypt
+
+- name: install pip
+  apt: name={{ item }}
+  with_items:
+    - python-pip
+    - python-dev
+  when: env == 'production'
+
+- name: install ansible
+  pip: name={{ item }}
+  with_items:
+    - ansible
+    - markupsafe
+  when: env == 'production'
+
+- name: create ansible-playbook dir
+  file: dest=/opt/ansible-playbook state=directory mode=0777
+  when: env == 'production'
+
+- name: copy playbook
+  synchronize: src=../../.. dest=/opt/ansible-playbook
+  become: no
+  when: env == 'production'
+
+- name: create ansible dir
+  file: dest=/etc/ansible state=directory
+  when: env == 'production'
+
+- name: copy local inventory
+  template: src=etc/ansible/hosts dest=/etc/ansible/hosts
+  when: env == 'production'
+
+- name: setup letsencrypt renewal job
+  cron: day=*/60 name=letsencrypt job="rm -f /etc/ssl/{{ apache_server_name }}* && ansible-playbook /opt/ansible-playbook/ansible/playbook.yml -t letsencrypt && service apache2 restart >> /dev/null"
+  when: env == 'production'
+
+- name: enable SSL
+  command: a2enmod ssl
+  notify: restart-apache

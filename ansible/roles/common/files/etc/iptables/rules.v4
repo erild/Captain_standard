@@ -1,0 +1,79 @@
+# /etc/iptables.up.rules
+# Script qui démarre les règles de filtrage IPv4
+# Formation Debian GNU/Linux par Alexis de Lattre
+# http://formation-debian.via.ecp.fr/
+
+# iptables-restore(8) remet implicitement à zéro toutes les règles
+
+# Les instructions qui suivent concernent la table « filter »,
+# c'est-à-dire… le filtrage.
+*filter
+
+#########################
+# Politiques par défaut #
+#########################
+# Les politiques par défaut déterminent le devenir d'un paquet auquel
+# aucune règle spécifique ne s'applique.
+
+# Les connexions entrantes sont bloquées par défaut
+-P INPUT DROP
+# Les connexions destinées à être routées sont acceptées par défaut
+-P FORWARD ACCEPT
+# Les connexions sortantes sont acceptées par défaut
+-P OUTPUT ACCEPT
+
+######################
+# Règles de filtrage #
+######################
+# Nous précisons ici des règles spécifiques pour les paquets vérifiant
+# certaines conditions.
+
+# Pas de filtrage sur l'interface de "loopback"
+-A INPUT -i lo -j ACCEPT
+
+# Accepter le protocole ICMP (notamment le ping)
+-A INPUT -p icmp -j ACCEPT
+
+# Accepter les packets entrants relatifs à des connexions déjà
+# établies : cela va plus vite que de devoir réexaminer toutes
+# les règles pour chaque paquet.
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Décommentez la ligne suivante pour que le serveur SSH éventuel
+# soit joignable de l'extérieur
+-A INPUT -p tcp --dport ssh -j ACCEPT
+
+# Décommentez la ligne suivante pour que le serveur de courrier éventuel soit
+# joignable de l'extérieur. Laissez bien smtps et submission si vous avez
+# activé les services SMTPS et soumission de messages… L'option --dports
+# permet de traiter plusieurs ports en une fois.
+#-A INPUT -p tcp --dports smtp,smtps,submission -j ACCEPT
+
+# Décommentez les deux lignes suivantes pour que le serveur de noms
+# éventuel soit joignable de l'extérieur.
+#-A INPUT -p tcp --dport domain -j ACCEPT
+#-A INPUT -p udp --dport domain -j ACCEPT
+
+# Décommentez la ligne suivante pour que le serveur Web éventuel
+# soit joignable de l'extérieur.
+-A INPUT -p tcp --dport http -j ACCEPT
+# Si vous avez activé le HTTPS…
+-A INPUT -p tcp --dport https -j ACCEPT
+
+# Pour le déploiement strong-pm, on préferera une connexion ssh+http
+# -A INPUT -p tcp --dport 8701 -j ACCEPT
+
+# -A INPUT -p tcp --dport 587 -j ACCEPT
+# -A INPUT -p tcp --dport 25 -j ACCEPT
+# -A INPUT -p tcp --dport 993 -j ACCEPT
+
+# La règle par défaut pour la chaine INPUT devient REJECT (contrairement
+# à DROP qui ignore les paquets, avec REJECT, l'expéditeur est averti
+# du refus). Il n'est pas possible de mettre REJECT comme politique par
+# défaut. Au passage, on note les paquets qui vont être jetés, ça peut
+# toujours servir.
+-A INPUT -j LOG --log-prefix "Unexpected IPV4 packet"
+-A INPUT -j REJECT
+
+COMMIT
+

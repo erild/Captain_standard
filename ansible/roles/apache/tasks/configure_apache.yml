@@ -1,0 +1,27 @@
+---
+
+- name: remove default vhost
+  file: dest=/etc/apache2/sites-enabled/000-default.conf state=absent
+
+- name: install vhost
+  template: src=etc/apache2/sites-available/vhost dest=/etc/apache2/sites-available/{{ app_name }}.conf owner=root group=root mode=0644
+
+- name: check src folder (dev)
+  when: env != 'production'
+  file: dest={{ app_path }} state=directory owner={{ ansible_user }} group={{ ansible_user }}
+
+- name: link vhost
+  file: src=/etc/apache2/sites-available/{{app_name}}.conf dest=/etc/apache2/sites-enabled/{{app_name}}.conf state=link force=yes
+  notify: restart-apache
+
+- name: host change
+  lineinfile: dest=/etc/hosts line='127.0.1.2 {{ apache_server_name }}'
+
+- name: change apache user
+  when: env != 'production'
+  replace: dest=/etc/apache2/envvars regexp='^export APACHE_RUN_USER=www-data$' replace='export APACHE_RUN_USER=vagrant'
+
+- name: change lock owner
+  when: env != 'production'
+  file: path=/run/lock/apache2/ owner=vagrant group=vagrant
+  notify: restart-apache

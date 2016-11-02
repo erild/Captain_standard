@@ -1,0 +1,6 @@
+[production]
+local ansible_host=127.0.0.1 ansible_user={{ ansible_user }} ansible_connection=local
+
+[production:vars]
+apache_server_name={{ apache_server_name }}
+env=production
