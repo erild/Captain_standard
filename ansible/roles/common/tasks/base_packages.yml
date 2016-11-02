@@ -27,3 +27,4 @@
 - name: install iptables
   copy: src=etc/iptables/rules.v4 dest=/etc/iptables/rules.v4
   notify: restart-iptables
+  when: env == 'production'

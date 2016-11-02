@@ -2,14 +2,6 @@
 # vi: set ft=ruby :
 
 
-require 'yaml'
-dir = File.dirname(File.expand_path(__FILE__))
-if File.exist?("#{dir}/vagrant-conf.yml")
-  vconfig = YAML::load_file("#{dir}/vagrant-conf.yml")
-else
-  vconfig = YAML::load_file("#{dir}/vagrant-conf.yml.dist")
-end
-
 Vagrant.configure(2) do |config|
 
   config.vm.box = "debian/jessie64"
