@@ -11,27 +11,19 @@ install:
   - yarn
 
 before_script:
-  - pwd
   - npm test
   - npm install -g strongloop --ignore-scripts
 
 script:
-  - pwd
   - npm run build
   - cd ..
   - slc build --npm
 
 after_success:
-  - pwd
   - echo "-----BEGIN RSA PRIVATE KEY-----" > key
   - echo "$SSH_KEY_RAW" |tr " " "\n" >> key
   - echo "-----END RSA PRIVATE KEY-----" >> key
   - export SSH_KEY=$PWD/key
-  - echo $SSH_KEY
-  - head -n 3 key
-  - wc -l key
-  - ls
-  - slc --version
   - test $TRAVIS_BRANCH = "testprod" && slc deploy -s main http+ssh://cs.ragg.fr:8701 ../Captain_standard-1.0.0.tgz
 
 after_failure:
