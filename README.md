@@ -1,4 +1,4 @@
-# Captain Standard
+# Captain Standard [![Build Status](https://travis-ci.org/erild/Captain_standard.svg?branch=master)](https://travis-ci.org/erild/Captain_standard)
 
 You can use either docker or vagrant to create a dev env.
 
