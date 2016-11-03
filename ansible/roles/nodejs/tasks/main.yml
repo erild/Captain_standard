@@ -15,17 +15,39 @@
   when: env != 'production'
   npm: name=strongloop global=yes
 
+- name: install requirements for docker
+  when: env == 'production'
+  apt: name={{ item }}
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+
+- name: add docker key
+  when: env == 'production'
+  apt_key: keyserver=hkp://p80.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D
+
+- name: add docker sources.list
+  when: env == 'production'
+  template: src=etc/apt/sources.list.d/docker.list dest=/etc/apt/sources.list.d/docker.list
+
+- name: install docker dependencies for ubuntu
+  when: env == 'production' and ansible_distribution == 'Ubuntu'
+  apt: name={{ item }}
+  with_items:
+    - linux-image-extra-{{ ansible_kernel }}
+    - linux-image-extra-virtual
+
+- name: install docker
+  when: env == 'production'
+  apt: name=docker-engine update_cache=yes
+
+- name: copy strong-pm script
+  when: env == 'production'
+  template: src=docker.sh dest=/root/docker.sh mode=0755
+
 - name: install strong-pm
   when: env == 'production'
-  npm: name=strong-pm global=yes
-
-- name: install strong-pm service
-  when: env == 'production'
-  shell: sl-pm-install --systemd creates=/etc/systemd/system/strong-pm.service
-
-- name: run strong-pm service
-  when: env == 'production'
-  shell: systemctl start strong-pm
+  shell: /root/docker.sh creates=/etc/systemd/system/strong-pm-container.service
 
 - name: find service
   when: env == 'production'
@@ -39,8 +61,8 @@
 
 - name: configure service size
   when: env == 'production'
-  shell: slpmctl set-size main 1
+  shell: slpmctl set-size main 3
 
 - name: configure service env
   when: env == 'production'
-  shell: slpmctl env-set main NODE_ENV=production PORT={{ app_port }}
+  shell: slpmctl env-set main NODE_ENV=production

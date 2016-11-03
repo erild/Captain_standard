@@ -62,4 +62,7 @@ Once this file is created, you can provision the server with `ansible-playbook -
 
 This provisioning is needed only once but can be done as many times as you want (just beware of the use of different vars across developers, especially regarding the password for the process manager `pm_password`).
 
-Once the server is provisioned, you may deploy. We deploy using strongloop tool. Before deploying, you must create a new front-end build : `cd client && npm run build`. Then, `cd .. && slc build --npm` to build a tgz to upload to the server, and `SSH_USER=userOfProdserver SSH_KEY=/path/to/key slc deploy -s main http+ssh://1.2.3.4:8701 ../Captain_standard-1.0.0.tgz`. You may control the deployment, restart etc using `STRONGLOOP_PM=http+ssh://1.2.3.4:8701 SSH_USER=userOfProdserver SSH_KEY=/path/to/key slc ctl [status|ls|soft-restart main]`
+Once the server is provisioned, you may deploy. We deploy by pushing on the 'production' git branch. Then Travis does the job. Nonetheless, you need to manually generate a ssh key and put the public key in the `~/.ssh/authorized_keys` on the production server. Travis needs also 3 environment variables set up:
+- SSH_USER: user of the server
+- SSH_KEY_RAW: ssh key you generated, without the first and the last line (`BEGIN RSA...` and `END RSA...`). Obviously needs to be private. You'll need to wrap it into double quotes as it has newlines.
+- PRODUCTION_SERVER: host of the production server.

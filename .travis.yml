@@ -1,0 +1,37 @@
+language: node_js
+node_js:
+  - "6"
+
+before_install:
+  - npm install -g yarn
+
+install:
+  - yarn
+  - cd client
+  - yarn
+
+before_script:
+  - npm test
+  - npm install -g strongloop --ignore-scripts
+
+script:
+  - npm run build
+  - cd ..
+  - slc build --npm
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: bash --login -c "source $HOME/.nvm/nvm.sh && nvm use $TRAVIS_NODE_VERSION && ./deploy.sh"
+  on:
+    branch: production
+
+after_failure:
+  - npm ls -g
+  - ls -la
+  - head -n1 key
+
+cache:
+  directories:
+  - $HOME/.yarn-cache
+
