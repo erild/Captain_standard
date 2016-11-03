@@ -13,7 +13,7 @@ install:
 before_script:
   - pwd
   - npm test
-  - npm install -g strongloop
+  - npm install -g strongloop --ignore-scripts
 
 script:
   - pwd
