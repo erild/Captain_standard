@@ -1,6 +1,7 @@
 ---
 - hosts: all
   become: true
+  gather_facts: no
   vars:
     app_path: /vagrant
     app_name: captain_standard
@@ -9,6 +10,9 @@
       user: default
       password: password
       database: password
+  pre_tasks:
+    - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+    - setup:
   roles:
     - common
     - apache
