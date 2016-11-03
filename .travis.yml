@@ -21,13 +21,19 @@ script:
   - cd ..
   - slc build --npm
 
-before_deploy:
-  - pwd
-  - echo $SSH_KEY_RAW > key
-
-deploy:
-  skip_cleanup: true
-  provider: script
-  script: ./deploy.sh
+after_success:
+  script:
+    - pwd
+    - echo $SSH_KEY_RAW > key
+    - ls
+    - slc --version
+    - SSH_KEY=$PWD/key slc deploy -s main http+ssh://cs.ragg.fr:8701 ../Captain_standard-1.0.0.tgz
   on:
     branch: testprod
+
+after_failure:
+  script:
+    - npm ls -g
+    - ls -la
+    - head -n1 key
+
