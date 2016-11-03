@@ -31,3 +31,7 @@ after_failure:
   - ls -la
   - head -n1 key
 
+cache:
+  directories:
+  - $HOME/.yarn-cache
+
