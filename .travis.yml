@@ -23,7 +23,9 @@ script:
 
 after_success:
   - pwd
-  - echo "$SSH_KEY_RAW" > key
+  - echo "-----BEGIN RSA PRIVATE KEY-----" > key
+  - echo "$SSH_KEY_RAW" |tr " " "\n" >> key
+  - echo "-----END RSA PRIVATE KEY-----" >> key
   - export SSH_KEY=$PWD/key
   - echo $SSH_KEY
   - head -n 3 key
