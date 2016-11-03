@@ -19,12 +19,9 @@ script:
   - cd ..
   - slc build --npm
 
-after_success:
-  - echo "-----BEGIN RSA PRIVATE KEY-----" > key
-  - echo "$SSH_KEY_RAW" |tr " " "\n" >> key
-  - echo "-----END RSA PRIVATE KEY-----" >> key
-  - export SSH_KEY=$PWD/key
-  - test $TRAVIS_BRANCH = "testprod" && slc deploy -s main http+ssh://cs.ragg.fr:8701 ../Captain_standard-1.0.0.tgz
+deploy:
+  provider: script
+  script: ./deploy.sh
 
 after_failure:
   - npm ls -g
