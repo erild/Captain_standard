@@ -25,7 +25,7 @@
   script: ../files/vim_zsh.sh {{ ansible_user }} creates=/root/.zshrc
 
 - name: set hostip variable
-  lineinfile: dest={{ item }} line="export HOSTIP=$(/sbin/ip route|awk '/default/ { print $3 }'"
+  lineinfile: dest={{ item }} line="export HOSTIP=$(/sbin/ip route|awk '/default/ { print $3 }')"
   with_items:
       - /etc/profile
       - /etc/zsh/zshenv
