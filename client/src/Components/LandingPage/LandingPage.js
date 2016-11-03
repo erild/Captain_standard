@@ -13,7 +13,7 @@ export default class LandingPage extends Component {
             <h1>Captain Standard</h1>
             <h4 className="subText"> Your key-partner to fight code style issues</h4>
             <br />
-            <Button bsStyle="success">Let's kick some code</Button>
+            <Button bsStyle="success"><i className="fa fa-github" /> Sign in with Github</Button>
           </div>
           <img src={logo} className="splash" alt="superhero drawing"/>
 
