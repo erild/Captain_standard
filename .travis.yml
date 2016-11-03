@@ -22,6 +22,8 @@ script:
 deploy:
   provider: script
   script: ./deploy.sh
+  on:
+    branch: testprod
 
 after_failure:
   - npm ls -g
