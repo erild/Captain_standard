@@ -23,10 +23,12 @@ script:
 
 after_success:
   - pwd
-  - echo $SSH_KEY_RAW > key
+  - echo "$SSH_KEY_RAW" > key
+  - export SSH_KEY=$PWD/key
+  - echo $SSH_KEY
   - ls
   - slc --version
-  - test $TRAVIS_BRANCH = "testprod" && SSH_KEY=$PWD/key slc deploy -s main http+ssh://cs.ragg.fr:8701 ../Captain_standard-1.0.0.tgz
+  - test $TRAVIS_BRANCH = "testprod" && slc deploy -s main http+ssh://cs.ragg.fr:8701 ../Captain_standard-1.0.0.tgz
 
 after_failure:
   - npm ls -g
