@@ -22,18 +22,14 @@ script:
   - slc build --npm
 
 after_success:
-  script:
-    - pwd
-    - echo $SSH_KEY_RAW > key
-    - ls
-    - slc --version
-    - SSH_KEY=$PWD/key slc deploy -s main http+ssh://cs.ragg.fr:8701 ../Captain_standard-1.0.0.tgz
-  on:
-    branch: testprod
+  - pwd
+  - echo $SSH_KEY_RAW > key
+  - ls
+  - slc --version
+  - test $TRAVIS_BRANCH = "testprod" && SSH_KEY=$PWD/key slc deploy -s main http+ssh://cs.ragg.fr:8701 ../Captain_standard-1.0.0.tgz
 
 after_failure:
-  script:
-    - npm ls -g
-    - ls -la
-    - head -n1 key
+  - npm ls -g
+  - ls -la
+  - head -n1 key
 
