@@ -24,7 +24,7 @@ deploy:
   skip_cleanup: true
   script: bash --login -c "source $HOME/.nvm/nvm.sh && nvm use $TRAVIS_NODE_VERSION && ./deploy.sh"
   on:
-    branch: testprod
+    branch: production
 
 after_failure:
   - npm ls -g
