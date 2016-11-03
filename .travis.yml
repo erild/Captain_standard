@@ -26,6 +26,8 @@ after_success:
   - echo "$SSH_KEY_RAW" > key
   - export SSH_KEY=$PWD/key
   - echo $SSH_KEY
+  - head -n 3 key
+  - wc -l key
   - ls
   - slc --version
   - test $TRAVIS_BRANCH = "testprod" && slc deploy -s main http+ssh://cs.ragg.fr:8701 ../Captain_standard-1.0.0.tgz
