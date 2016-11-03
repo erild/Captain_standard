@@ -5,6 +5,7 @@
   "scripts": {
     "lint": "eslint .",
     "start": "node .",
+    "test": "cd client && CI=true  npm test",
     "posttest": "npm run lint && nsp check"
   },
   "dependencies": {

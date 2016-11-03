@@ -1,0 +1,25 @@
+.jumbotron {
+  margin-bottom: 0!important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media all and (min-height: 400px){
+  .jumbotron {
+    height: 100vh;
+  }
+}
+
+
+.landing-page .splash {
+  transform: rotate(24deg);
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.landing-page button, .landing-page .subText {
+  margin-left: 30px;
+}
