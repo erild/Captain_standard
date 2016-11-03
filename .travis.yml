@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - "6"
+
+before_install:
+  - npm install -g yarn
+
+install:
+  - yarn
+  - cd client
+  - yarn
+
+before_script:
+  - pwd
+  - npm test
+  - npm install -g strongloop
+
+script:
+  - pwd
+  - npm run build
+  - cd ..
+  - slc build --npm
+
+before_deploy:
+  - pwd
+  - echo $SSH_KEY_RAW > key
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: SSH_KEY=$PWD/key slc deploy -s main http+ssh://cs.ragg.fr:8701 ../Captain_standard-1.0.0.tgz
+  on:
+    branch: testprod
