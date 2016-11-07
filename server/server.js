@@ -1,9 +1,10 @@
 'use strict';
-
+require('dotenv').config({silent: true});
 var loopback = require('loopback');
 var boot = require('loopback-boot');
 
 var app = module.exports = loopback();
+const PassportConfigurator = require('loopback-component-passport-c').PassportConfigurator;
 
 app.start = function() {
   // start the web server
@@ -21,9 +22,12 @@ app.start = function() {
 // Bootstrap the application, configure models, datasources and middleware.
 // Sub-apps like REST API are mounted via boot scripts.
 boot(app, __dirname, function(err) {
-  if (err) throw err;
+  if (err) {
+    throw err;
+  }
 
   // start the server if `$ node server.js`
-  if (require.main === module)
+  if (require.main === module) {
     app.start();
+  }
 });

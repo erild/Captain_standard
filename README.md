@@ -2,6 +2,14 @@
 
 You can use either docker or vagrant to create a dev env.
 
+#### Configuration
+
+Some things to configure :
+- the database : In a file `server/datasources.local.json` (on the production server, with environment variables following `datasources.production.json`)
+- the oauth credentials : With environment variables (which you can put in `server/.env`), GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET, which you can get by creating an app [here](https://github.com/settings/applications/new)
+- the port for the server app, if you want something else than 2000 : In a file `server/config.local.json`
+
+After having created the database in the psql command line (`psql -h localhost -p 5432 -U postgres -W` then `CREATE DATABASE captain_standard;`), update the schema with `node bin/autoupdate.js`;
 #### Docker
 
 You must have docker and docker-compose installed.
@@ -14,6 +22,10 @@ services:
   lb:
     ports:
       - 2000:2000
+      - 3000:3000
+  pg:
+    ports:
+      - 5432:5432
 ```
 
 (obviously, feel free to change the left port = the one on the host)
@@ -42,7 +54,7 @@ If you have Hyper-V (for instance if you use Docker For Windows Beta), you can't
 NB: With Hyper V, you have to use Vagrant in a CLI/GUI launched with administrator privileges.
 
 
-### Ansible
+### Provisioning with Ansible
 
 We use ansible to provision the vagrant machine (dev env) and the production server (production env).
 
