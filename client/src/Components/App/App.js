@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Router, Route, browserHistory, IndexRoute} from "react-router";
+import {Router, Route, hashHistory, IndexRoute} from "react-router";
 import LandingPage from "../LandingPage";
 import HomePage from "../HomePage";
 import store from "../../store";
@@ -12,14 +12,14 @@ const requireAuth = (nextState) => {
     agent.setToken(access_token);
     store.dispatch({type: 'REGISTER_TOKEN', payload: agent.Auth.current(), access_token});
   } else {
-    window.location = config.API_URL + '/auth/github?returnTo=' + encodeURIComponent(config.FRONT_URL + nextState.location.pathname);
+    window.location = config.API_URL + '/auth/github?returnTo=' + encodeURIComponent(config.FRONT_URL + '/#' + nextState.location.pathname);
   }
 }
 
 class App extends Component {
   render() {
     return (
-        <Router history={browserHistory}>
+        <Router history={hashHistory}>
           <Route path="/">
             <IndexRoute component={LandingPage}/>
           </Route>
