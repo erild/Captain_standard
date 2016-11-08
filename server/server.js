@@ -4,7 +4,7 @@ var loopback = require('loopback');
 var boot = require('loopback-boot');
 
 var app = module.exports = loopback();
-const PassportConfigurator = require('loopback-component-passport-c').PassportConfigurator;
+require('loopback-component-passport-c').PassportConfigurator;
 
 app.start = function() {
   // start the web server
@@ -18,6 +18,12 @@ app.start = function() {
     }
   });
 };
+
+
+app.use('/auth/github', (req, res, next) => {
+  req.session.returnTo = req.query.returnTo || req.session.returnTo;
+  next();
+});
 
 // Bootstrap the application, configure models, datasources and middleware.
 // Sub-apps like REST API are mounted via boot scripts.
