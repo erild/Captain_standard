@@ -4,7 +4,7 @@ import LandingPage from "../LandingPage";
 import HomePage from "../HomePage";
 import store from "../../store";
 import agent from "../../agent";
-import config from "../../config";
+import Template from "../Template";
 
 const requireAuth = (nextState) => {
   const access_token = nextState.location.query.access_token || localStorage.getItem('access_token');
@@ -12,7 +12,7 @@ const requireAuth = (nextState) => {
     agent.setToken(access_token);
     store.dispatch({type: 'REGISTER_TOKEN', payload: agent.Auth.current(), access_token});
   } else {
-    window.location = config.API_URL + '/auth/github?returnTo=' + encodeURIComponent(config.FRONT_URL + '/#' + nextState.location.pathname);
+    store.dispatch({type: 'REDIRECT_AUTH', payload: {nextPath: nextState.location.pathname}});
   }
 }
 
@@ -23,7 +23,7 @@ class App extends Component {
           <Route path="/">
             <IndexRoute component={LandingPage}/>
           </Route>
-          <Route path="/app" onEnter={requireAuth}>
+          <Route path="/app" onEnter={requireAuth} component={Template}>
             <IndexRoute component={HomePage}/>
           </Route>
         </Router>

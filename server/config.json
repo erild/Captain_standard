@@ -23,5 +23,6 @@
       "disableStackTrace": false
     }
   },
-  "legacyExplorer": false
+  "legacyExplorer": false,
+  "aclErrorStatus": 403
 }
