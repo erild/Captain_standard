@@ -1,5 +1,6 @@
-import React from "react";
+import React from 'react';
 import {connect} from "react-redux";
+import Button from 'react-bootstrap/lib/Button';
 
 const mapStateToProps = state => ({
   currentUser: state.auth.currentUser
@@ -9,7 +10,16 @@ const mapDispatchToProps = dispatch => ({});
 
 class HomePage extends React.Component {
   render() {
-    return this.props.currentUser ? <h1>Hey {this.props.currentUser && this.props.currentUser.username }</h1> : null;
+    if (this.props.currentUser) {
+        return (
+          <div>
+            <h1>Hey {this.props.currentUser && this.props.currentUser.username }</h1>
+            <Button bsStyle="success" href="/#/add"><i className="fa fa-plus"/> Add a project</Button>
+          </div>
+        );
+    } else {
+        return null;
+    }
   }
 }
 
