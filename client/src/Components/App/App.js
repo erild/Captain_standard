@@ -5,6 +5,7 @@ import HomePage from "../HomePage";
 import store from "../../store";
 import agent from "../../agent";
 import Template from "../Template";
+import ReposManager from "../ReposManager";
 
 const requireAuth = (nextState) => {
   const access_token = nextState.location.query.access_token || localStorage.getItem('access_token');
@@ -25,6 +26,7 @@ class App extends Component {
           </Route>
           <Route path="/app" onEnter={requireAuth} component={Template}>
             <IndexRoute component={HomePage}/>
+            <Route path="repos" component={ReposManager}/>
           </Route>
         </Router>
     );
