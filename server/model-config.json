@@ -40,10 +40,22 @@
   },
   "UserCredential": {
     "dataSource": "db",
-    "public": true
+    "public": false
   },
   "UserIdentity": {
     "dataSource": "db",
-    "public": true
+    "public": true,
+    "acls": [
+      {
+        "principalType": "ROLE",
+        "principalId": "$everyone",
+        "permission": "DENY"
+      },
+      {
+        "principalType": "ROLE",
+        "principalId": "$owner",
+        "permission": "ALLOW"
+      }
+    ]
   }
 }
