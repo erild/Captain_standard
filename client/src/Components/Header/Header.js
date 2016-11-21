@@ -13,7 +13,7 @@ class Header extends Component {
           </Navbar.Brand>
         </Navbar.Header>
         <Nav className="navbar-right">
-          <NavDropdown id="nav-dropdown" title={<span><i className="fa fa-user" /> {this.props.currentUser && this.props.currentUser.username.split('.').slice(1).join('.')}</span>}>
+          <NavDropdown id="nav-dropdown" title={<span><i className="fa fa-user" /> {this.props.currentUser && this.props.currentUser.username}</span>}>
             <MenuItem onClick={this.props.onLogout}>Logout</MenuItem>
           </NavDropdown>
         </Nav>
