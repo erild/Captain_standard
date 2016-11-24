@@ -1,0 +1,10 @@
+[
+  {
+    "name": "eslint",
+    "languages": [
+      "javascript"
+    ],
+    "install_cmd": "npm install -g eslint",
+    "run_cmd": "eslint ."
+  }
+]

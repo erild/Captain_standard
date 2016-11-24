@@ -29,11 +29,11 @@
       "property": "confirm"
     },
     {
+      "accessType": "EXECUTE",
       "principalType": "ROLE",
       "principalId": "$everyone",
       "permission": "DENY",
-      "property": "resetPassword",
-      "accessType": "EXECUTE"
+      "property": "resetPassword"
     },
     {
       "principalType": "ROLE",

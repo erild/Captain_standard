@@ -3,6 +3,7 @@
     "sources": [
       "loopback/common/models",
       "loopback/server/models",
+      "loopback/lib",
       "../common/models",
       "./models",
       "./node_modules/loopback-component-passport/lib/models"
@@ -19,6 +20,10 @@
     "public": true
   },
   "User": {
+    "dataSource": "db",
+    "public": false
+  },
+  "PersistedModel": {
     "dataSource": "db",
     "public": false
   },
@@ -45,5 +50,9 @@
   "UserIdentity": {
     "dataSource": "db",
     "public": false
+  },
+  "Linter": {
+    "dataSource": "db",
+    "public": true
   }
 }

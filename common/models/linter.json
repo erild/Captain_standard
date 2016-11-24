@@ -1,0 +1,57 @@
+{
+  "name": "Linter",
+  "plural": "Linters",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "addedOn": {
+      "type": "date",
+      "required": true
+    },
+    "languages": {
+      "type": [
+        "string"
+      ],
+      "required": true,
+      "default": [
+        "['javascript']"
+      ]
+    },
+    "install_cmd": {
+      "type": "string",
+      "required": true
+    },
+    "run_cmd": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "creator": {
+      "type": "hasOne",
+      "model": "Customer"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW"
+    },
+    {
+      "principalType": "ROLE",
+      "property": "__get__creator",
+      "principalId": "$authenticated",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}
