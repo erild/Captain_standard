@@ -38,8 +38,8 @@ const Auth = {
     requests.get('/Customers/me')
 };
 
-
 export default {
   Auth,
-  setToken: _token => { token = _token; }
+  setToken: _token => { token = _token; },
+  getAllProjects: () => requests.get("/Customers/me/repos")
 };
