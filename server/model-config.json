@@ -44,18 +44,6 @@
   },
   "UserIdentity": {
     "dataSource": "db",
-    "public": true,
-    "acls": [
-      {
-        "principalType": "ROLE",
-        "principalId": "$everyone",
-        "permission": "DENY"
-      },
-      {
-        "principalType": "ROLE",
-        "principalId": "$owner",
-        "permission": "ALLOW"
-      }
-    ]
+    "public": false
   }
 }
