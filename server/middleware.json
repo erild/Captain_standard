@@ -30,7 +30,8 @@
     "helmet#noSniff": {},
     "helmet#noCache": {
       "enabled": false
-    }
+    },
+    "loopback-context#per-request": {}
   },
   "session:before": {
     "cookie-parser": { "params": "false secret" }
