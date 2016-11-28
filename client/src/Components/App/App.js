@@ -12,7 +12,7 @@ const requireAuth = (nextState) => {
   const access_token = nextState.location.query.access_token || localStorage.getItem('access_token');
   if (access_token && access_token !== 'undefined') {
     agent.setToken(access_token);
-    store.dispatch({type: 'REGISTER_TOKEN', payload: agent.Auth.current(), access_token});
+    store.dispatch({type: 'REGISTER_TOKEN', payload: agent.Customers.current(), access_token});
   } else {
     store.dispatch({type: 'REDIRECT_AUTH', payload: {nextPath: nextState.location.pathname}});
   }

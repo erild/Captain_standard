@@ -1,4 +1,4 @@
-import {applyMiddleware, createStore} from "redux";
+import {applyMiddleware, createStore, compose} from "redux";
 import createLogger from "redux-logger";
 import reducer from "./reducer";
 
@@ -15,11 +15,11 @@ const promiseMiddleware = store => next => action => {
   }
   return next(action);
 }
-
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(reducer,
   process.env.NODE_ENV !== 'production' ?
-    applyMiddleware(promiseMiddleware, createLogger()) :
-    applyMiddleware(promiseMiddleware)
+    composeEnhancers(applyMiddleware(promiseMiddleware, createLogger())) :
+    composeEnhancers(applyMiddleware(promiseMiddleware))
 );
 
 export default store;
