@@ -1,4 +1,4 @@
-module.exports = function (app) {
+module.exports = function (app, cb) {
   const pg = require('pg');
   const session = require('express-session');
   const pgSession = require('connect-pg-simple')(session);
@@ -10,6 +10,17 @@ module.exports = function (app) {
     password: process.env.DATABASE_PASSWORD
   };
   const client = new pg.Client(conString);
+  const endCallback = (err) => {
+    if (err) {
+      throw err;
+    }
+    client.end(function (err) {
+      if (err) {
+        throw err;
+      }
+      cb();
+    });
+  };
 
   client.connect(err => {
     if (err) {
@@ -27,17 +38,11 @@ SELECT 1 FROM pg_constraint WHERE conname = 'session_pkey';`, (err, res) => {
       }
 
       if (res.rowCount === 0) {
-        client.query(`ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE`);
-        console.log('Sucessfully created table session and its index');
+        client.query(`ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE`, endCallback);
       } else {
         console.log('Table session already exists');
+        endCallback();
       }
-
-      client.end(function (err) {
-        if (err) {
-          throw err;
-        }
-      });
     })
   });
 
@@ -45,10 +50,11 @@ SELECT 1 FROM pg_constraint WHERE conname = 'session_pkey';`, (err, res) => {
     "store": new pgSession({
       pg : pg,
       conString: conString,
-      secret: process.env.SESSION_SECRET
+      secret: process.env.SESSION_SECRET,
+      pruneSessionInterval: process.env.KILL_CONNECTIONS ? false : 60
     }),
     "saveUninitialized": true,
     "resave": true,
-    "secret": "keyboard cat"
+    "secret": process.env.SESSION_SECRET
   }));
 };
