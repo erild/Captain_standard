@@ -33,13 +33,20 @@ const requests = {
     superagent.post(`${API_ROOT}${url}`, body).use(tokenPlugin).then(responseBody).catch(redirectUnauthenticated)
 };
 
-const Auth = {
+const Customers = {
   current: () =>
-    requests.get('/Customers/me')
+    requests.get('/Customers/me'),
+  repos: () =>
+    requests.get('/Customers/me/repos').then(res => res, err => requests.get('/Customers/me/repos'))
+};
+
+const Linters = {
+  all: () =>
+    requests.get('/Linters')
 };
 
 export default {
-  Auth,
-  setToken: _token => { token = _token; },
-  getAllProjects: () => requests.get("/Customers/me/repos")
+  Customers,
+  Linters,
+  setToken: _token => { token = _token; }
 };
