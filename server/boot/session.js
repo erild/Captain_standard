@@ -1,0 +1,54 @@
+module.exports = function (app) {
+  const pg = require('pg');
+  const session = require('express-session');
+  const pgSession = require('connect-pg-simple')(session);
+  const conString = {
+    user: process.env.DATABASE_USER,
+    database: process.env.DATABASE_NAME,
+    port: process.env.DATABASE_PORT,
+    host: process.env.DATABASE_HOST,
+    password: process.env.DATABASE_PASSWORD
+  };
+  const client = new pg.Client(conString);
+
+  client.connect(err => {
+    if (err) {
+      throw err;
+    }
+    client.query(`
+CREATE TABLE IF NOT EXISTS "session" (
+  "sid" varchar NOT NULL COLLATE "default",
+	"sess" json NOT NULL,
+	"expire" timestamp(6) NOT NULL
+);
+SELECT 1 FROM pg_constraint WHERE conname = 'session_pkey';`, (err, res) => {
+      if (err) {
+        throw err;
+      }
+
+      if (res.rowCount === 0) {
+        client.query(`ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE`);
+        console.log('Sucessfully created table session and its index');
+      } else {
+        console.log('Table session already exists');
+      }
+
+      client.end(function (err) {
+        if (err) {
+          throw err;
+        }
+      });
+    })
+  });
+
+  app.middleware('session', session({
+    "store": new pgSession({
+      pg : pg,
+      conString: conString,
+      secret: process.env.SESSION_SECRET
+    }),
+    "saveUninitialized": true,
+    "resave": true,
+    "secret": "keyboard cat"
+  }));
+};
