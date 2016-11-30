@@ -38,6 +38,11 @@
     "creator": {
       "type": "hasOne",
       "model": "Customer"
+    },
+    "projects": {
+      "type": "hasAndBelongsToMany",
+      "model": "Project",
+      "foreignKey": "linterId"
     }
   },
   "acls": [
@@ -48,9 +53,9 @@
     },
     {
       "principalType": "ROLE",
-      "property": "__get__creator",
       "principalId": "$authenticated",
-      "permission": "ALLOW"
+      "permission": "ALLOW",
+      "property": "__get__creator"
     }
   ],
   "methods": {}
