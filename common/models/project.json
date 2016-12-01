@@ -8,7 +8,7 @@
   },
   "mixins": {
     "TimeStamp": {
-      "required" : false,
+      "required": false,
       "validateUpsert": true,
       "silenceWarnings": false
     }
@@ -26,9 +26,10 @@
   "validations": [],
   "relations": {
     "linters": {
-      "type": "hasAndBelongsToMany",
+      "type": "hasMany",
       "model": "Linter",
-      "foreignKey": "projectId"
+      "foreignKey": "projectId",
+      "through": "ProjectLinter"
     }
   },
   "acls": [

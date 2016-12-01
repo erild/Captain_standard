@@ -1,0 +1,40 @@
+{
+  "name": "ProjectLinter",
+  "plural": "ProjectLinters",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": {
+      "required": false,
+      "validateUpsert": true,
+      "silenceWarnings": false
+    }
+  },
+  "properties": {
+    "Directory": {
+      "type": "string",
+      "required": true
+    },
+    "Arguments": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "project": {
+      "type": "belongsTo",
+      "model": "Project",
+      "foreignKey": "projectId"
+    },
+    "linter": {
+      "type": "belongsTo",
+      "model": "Linter",
+      "foreignKey": "linterId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

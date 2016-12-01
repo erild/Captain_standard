@@ -59,5 +59,9 @@
   "Project": {
     "dataSource": "db",
     "public": true
+  },
+  "ProjectLinter": {
+    "dataSource": "db",
+    "public": true
   }
 }

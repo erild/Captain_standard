@@ -6,13 +6,16 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "TimeStamp": {
+      "required": false,
+      "validateUpsert": true,
+      "silenceWarnings": false
+    }
+  },
   "properties": {
     "name": {
       "type": "string",
-      "required": true
-    },
-    "addedOn": {
-      "type": "date",
       "required": true
     },
     "languages": {
@@ -40,9 +43,10 @@
       "model": "Customer"
     },
     "projects": {
-      "type": "hasAndBelongsToMany",
+      "type": "hasMany",
       "model": "Project",
-      "foreignKey": "linterId"
+      "foreignKey": "linterId",
+      "through": "ProjectLinter"
     }
   },
   "acls": [
