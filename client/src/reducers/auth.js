@@ -1,22 +1,28 @@
 import config from '../config';
+import {persistStore} from 'redux-persist';
+import store from '../store';
+import agent from '../agent';
+
 export default (state = {}, action) => {
   switch (action.type) {
     case 'REGISTER_TOKEN':
-      window.localStorage.setItem('access_token', action.access_token);
+      agent.setToken(action.access_token);
       return {
         ...state,
-        access_token: action.access_token || '',
-        currentUser: action.payload ? action.payload : null
+        access_token: action.access_token || ''
       };
       break;
     case 'LOGOUT':
-      window.localStorage.removeItem('access_token');
       window.location = config.FRONT_URL;
+      persistStore(store).purge();
       return {};
       break;
-    case 'REDIRECT_AUTH':
-      window.location = config.API_URL + '/auth/github?returnTo=' + encodeURIComponent(config.FRONT_URL + '/#' + ((action.payload && action.payload.nextPath) || '/app'));
-      return {redirecting: true};
+    case 'FETCH_USER':
+      return {
+        ...state,
+        currentUser: action.payload
+      };
+      break;
     default:
       return state;
   }

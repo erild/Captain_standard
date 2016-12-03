@@ -1,27 +1,26 @@
-import React from 'react';
-import {connect} from 'react-redux';
-import {Link} from 'react-router';
-import Well from 'react-bootstrap/lib/Well';
+import React from "react";
+import {connect} from "react-redux";
+import {Link} from "react-router";
+import Well from "react-bootstrap/lib/Well";
+import "./ReposManager.css";
+import agent from "../../agent";
 
-import './ReposManager.css';
-import agent from '../../agent';
+const mapStateToProps = state => ({...state.repos});
 
-const mapStateToProps = state => ({});
-
-const mapDispatchToProps = dispatch => ({});
+const mapDispatchToProps = dispatch => ({
+  onLoad: () => dispatch({type: 'FETCH_REPOS', meta: {ifNeeded: true, key: 'repos.projects'}, payload: agent.Customers.repos})
+});
 
 
 class ReposManager extends React.Component {
-  constructor() {
-    super();
-    this.state = { projects: null };
-    agent.Customers.repos().then(res => this.setState({ projects: res.repos }));
+  componentWillMount() {
+    this.props.onLoad();
   }
 
   render() {
-    if (this.state.projects) {
+    if (this.props.projects) {
       return (
-        <ul>{this.state.projects.map((project) => (
+        <ul>{this.props.projects.map((project) => (
           <Well key={project.id}>
             <Link to={`${this.props.location.pathname}/${project.id}/edit`}>{project.full_name}</Link>
             <span>(Projet non configuré)</span>
