@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import Header from '../Header';
 import {connect} from 'react-redux';
 
-const mapStateToProps = state => ({...state.auth});
+const mapStateToProps = state => ({redirecting: state.notPersisted.redirecting, currentUser: state.auth.currentUser});
 
 const mapDispatchToProps = dispatch => ({
   onLogout: () => dispatch({type: 'LOGOUT'})

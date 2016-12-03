@@ -48,5 +48,6 @@ const Linters = {
 export default {
   Customers,
   Linters,
-  setToken: _token => { token = _token; }
+  setToken: _token => { token = _token; },
+  getToken: () => token
 };
