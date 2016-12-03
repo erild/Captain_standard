@@ -1,9 +1,9 @@
-import React from "react";
-import {connect} from "react-redux";
-import {Link} from "react-router";
-import Well from "react-bootstrap/lib/Well";
-import "./ReposManager.css";
-import agent from "../../agent";
+import React from 'react';
+import {connect} from 'react-redux';
+import {Link} from 'react-router';
+import Well from 'react-bootstrap/lib/Well';
+import './ReposManager.css';
+import agent from '../../agent';
 
 const mapStateToProps = state => ({...state.repos});
 

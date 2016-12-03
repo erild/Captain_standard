@@ -1,8 +1,8 @@
-import {applyMiddleware, createStore, compose} from "redux";
-import {persistStore, autoRehydrate} from "redux-persist";
-import createLogger from "redux-logger";
-import reducer from "./reducer";
-import agent from "./agent";
+import {applyMiddleware, createStore, compose} from 'redux';
+import {persistStore, autoRehydrate} from 'redux-persist';
+import createLogger from 'redux-logger';
+import reducer from './reducer';
+import agent from './agent';
 
 const isPromise = val => val && typeof val.then === 'function';
 

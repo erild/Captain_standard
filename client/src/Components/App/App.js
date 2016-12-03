@@ -1,12 +1,12 @@
-import React, {Component} from "react";
-import {Router, Route, hashHistory, IndexRoute} from "react-router";
-import {connect} from "react-redux";
-import LandingPage from "../LandingPage";
-import HomePage from "../HomePage";
-import agent from "../../agent";
-import Template from "../Template";
-import ReposManager from "../ReposManager";
-import ReposConfig from "../ReposConfig";
+import React, {Component} from 'react';
+import {Router, Route, hashHistory, IndexRoute} from 'react-router';
+import {connect} from 'react-redux';
+import LandingPage from '../LandingPage';
+import HomePage from '../HomePage';
+import agent from '../../agent';
+import Template from '../Template';
+import ReposManager from '../ReposManager';
+import ReposConfig from '../ReposConfig';
 
 const mapStateToProps = state => ({rehydrated: state.notPersisted.rehydrated});
 
