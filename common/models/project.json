@@ -30,6 +30,11 @@
       "model": "Linter",
       "foreignKey": "projectId",
       "through": "ProjectLinter"
+    },
+    "customer": {
+      "type": "belongsTo",
+      "model": "Customer",
+      "foreignKey": ""
     }
   },
   "acls": [
