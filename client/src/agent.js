@@ -37,7 +37,13 @@ const Customers = {
   current: () =>
     requests.get('/Customers/me'),
   repos: () =>
-    requests.get('/Customers/me/repos').then(res => res, err => requests.get('/Customers/me/repos'))
+    requests.get('/Customers/me/repos').then(res => res, err => requests.get('/Customers/me/repos')),
+  projects: () =>
+    // requests.get('/Customers/me/projects')
+    requests.get('/Customers/me/repos').then(res => {
+      res.repos.forEach(project => project.configured = true);
+      return res.repos;
+    })
 };
 
 const Linters = {
