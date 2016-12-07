@@ -45,9 +45,15 @@ const Linters = {
     requests.get('/Linters')
 };
 
+const Project = {
+  post: (project_name, project_remote_id, owner_id) =>
+    requests.post('/Projects',{ name: project_name, remoteId: project_remote_id, customerId: owner_id})
+};
+
 export default {
   Customers,
   Linters,
+  Project,
   setToken: _token => { token = _token; },
   getToken: () => token
 };

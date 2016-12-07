@@ -62,8 +62,9 @@ class ReposConfig extends React.Component {
   }
 
   handleSubmit(event) {
-    // console.log(this.state);
-    // console.log(this.state.project);
+    agent.Customers.current().then(function(user){
+      agent.Project.post(this.state.project.name, this.state.project.id, user.id);
+    });
     event.preventDefault();
   }
 
