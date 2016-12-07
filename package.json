@@ -9,6 +9,7 @@
     "posttest": "npm run lint && nsp check"
   },
   "dependencies": {
+    "async": "^2.1.4",
     "compression": "^1.0.3",
     "cookie-parser": "^1.4.3",
     "cors": "^2.5.2",
