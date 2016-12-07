@@ -31,8 +31,8 @@
       "foreignKey": "projectId",
       "through": "ProjectLinter"
     },
-    "customer": {
-      "type": "belongsTo",
+    "customers": {
+      "type": "hasAndBelongsToMany",
       "model": "Customer",
       "foreignKey": ""
     }

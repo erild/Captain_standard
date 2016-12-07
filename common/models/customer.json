@@ -10,7 +10,7 @@
   "validations": [],
   "relations": {
     "projects": {
-      "type": "hasMany",
+      "type": "hasAndBelongsToMany",
       "model": "Project",
       "foreignKey": ""
     }
