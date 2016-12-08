@@ -7,7 +7,7 @@ import agent from '../../agent';
 const mapStateToProps = state => ({...state.repos});
 
 const mapDispatchToProps = dispatch => ({
-  onLoad: () => dispatch({type: 'FETCH_REPOS', meta: {ifNeeded: true, key: 'repos.projects'}, payload: agent.Customers.repos})
+  onLoad: () => dispatch({type: 'FETCH_REPOS', payload: agent.Customers.repos})
 });
 
 
@@ -18,7 +18,7 @@ class ReposManager extends React.Component {
 
   render() {
     if (this.props.projects) {
-      return <ProjectsList projects={this.props.projects} location={this.props.location} />;
+      return <ProjectsList projects={this.props.projects} />;
     }
     return <span>Loading projects...</span>;
   }

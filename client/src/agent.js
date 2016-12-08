@@ -39,11 +39,7 @@ const Customers = {
   repos: () =>
     requests.get('/Customers/me/repos').then(res => res, err => requests.get('/Customers/me/repos')),
   projects: () =>
-    // requests.get('/Customers/me/projects')
-    requests.get('/Customers/me/repos').then(res => {
-      res.repos.forEach(project => project.configured = true);
-      return res.repos;
-    })
+    requests.get('/Customers/me/projects')
 };
 
 const Linters = {
