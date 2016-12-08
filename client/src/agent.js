@@ -45,9 +45,18 @@ const Linters = {
     requests.get('/Linters')
 };
 
+const Project = {
+  put: (project_name, project_id, customer_id) => {
+      requests.put('/Projects',{ name: project_name, id: project_id });
+      requests.put('/Projects/'+project_id+'/customers/rel/'+customer_id,{});
+    },
+  putLinter: (project_id, linter_id, directory, argument) => requests.put('/Projects/'+project_id+'/linters/rel/'+linter_id, { Directory: directory, Arguments: argument })
+};
+
 export default {
   Customers,
   Linters,
+  Project,
   setToken: _token => { token = _token; },
   getToken: () => token
 };

@@ -8,7 +8,13 @@
   },
   "properties": {},
   "validations": [],
-  "relations": {},
+  "relations": {
+    "projects": {
+      "type": "hasAndBelongsToMany",
+      "model": "Project",
+      "foreignKey": ""
+    }
+  },
   "acls": [
     {
       "accessType": "*",
