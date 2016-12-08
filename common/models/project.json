@@ -2,7 +2,7 @@
   "name": "Project",
   "plural": "Projects",
   "base": "PersistedModel",
-  "idInjection": true,
+  "idInjection": false,
   "options": {
     "validateUpsert": true
   },
@@ -14,12 +14,13 @@
     }
   },
   "properties": {
-    "name": {
-      "type": "string",
-      "required": true
-    },
     "remoteId": {
       "type": "number",
+      "id": true,
+      "generated": false
+    },
+    "name": {
+      "type": "string",
       "required": true
     }
   },
@@ -52,9 +53,15 @@
       "property": "create"
     },
     {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW"
+    },
+    {
       "accessType": "WRITE",
       "principalType": "ROLE",
-      "principalId": "$owner",
+      "principalId": "$authenticated",
       "permission": "ALLOW"
     }
   ],

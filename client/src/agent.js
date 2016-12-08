@@ -46,8 +46,11 @@ const Linters = {
 };
 
 const Project = {
-  post: (project_name, project_remote_id, owner_id) =>
-    requests.post('/Projects',{ name: project_name, remoteId: project_remote_id, customerId: owner_id})
+  put: (project_name, project_remote_id, customer_id) => {
+      requests.put('/Projects',{ name: project_name, remoteId: project_remote_id });
+      requests.put('/Projects/'+project_remote_id+'/customers/rel/'+customer_id,{});
+    },
+  putLinter: (project_remote_id, linter_id, directory, argument) => requests.put('/Projects/'+project_remote_id+'/linters/rel/'+linter_id, { Directory: directory, Arguments: argument })
 };
 
 export default {

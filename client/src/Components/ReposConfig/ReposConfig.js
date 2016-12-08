@@ -62,8 +62,11 @@ class ReposConfig extends React.Component {
   }
 
   handleSubmit(event) {
-    agent.Customers.current().then(function(user){
-      agent.Project.post(this.state.project.name, this.state.project.id, user.id);
+    agent.Customers.current().then(user => agent.Project.put(this.state.project.name, this.state.project.id, user.id));
+    this.state.linters.forEach(linter => {
+      if(linter.arg.enable) {
+        agent.Project.putLinter(this.state.project.id, linter.id, linter.arg.directory, linter.arg.arg);
+      }
     });
     event.preventDefault();
   }
@@ -79,8 +82,8 @@ class ReposConfig extends React.Component {
             let linterForm = [];
             linterForm.push(<Checkbox onClick={() => this.handleSelectLinter(key)} key={linter.name+"checkbox"}>{linter.name}</Checkbox>);
             if (linter.arg.enable) {
-              linterForm.push(<FormControl type="text" placeholder="Directory" value={this.state.linters[key].arg.directory} onChange={() => this.handleLinterDirChange(event, key)} key={key+"_dir"} />);
-              linterForm.push(<FormControl type="text" placeholder="Argument" value={this.state.linters[key].arg.arg} onChange={() => this.handleLinterArgChange(event, key)} key={linter.name+"_arg"} />);
+              linterForm.push(<FormControl type="text" placeholder="Directory" value={this.state.linters[key].arg.directory} onChange={event => this.handleLinterDirChange(event, key)} key={key+"_dir"} />);
+              linterForm.push(<FormControl type="text" placeholder="Argument" value={this.state.linters[key].arg.arg} onChange={event => this.handleLinterArgChange(event, key)} key={linter.name+"_arg"} />);
             }
             return linterForm
           }, this)}
