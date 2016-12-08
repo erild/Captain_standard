@@ -1,5 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import { browserHistory } from 'react-router'
 import Button from 'react-bootstrap/lib/Button';
 import Checkbox from 'react-bootstrap/lib/Checkbox';
 import FormControl from 'react-bootstrap/lib/FormControl';
@@ -62,11 +63,15 @@ class ReposConfig extends React.Component {
   }
 
   handleSubmit(event) {
-    agent.Customers.current().then(user => agent.Project.put(this.state.project.name, this.state.project.id, user.id));
-    this.state.linters.forEach(linter => {
-      if(linter.arg.enable) {
-        agent.Project.putLinter(this.state.project.id, linter.id, linter.arg.directory, linter.arg.arg);
-      }
+    agent.Customers.current().then(user => {
+      agent.Project.put(this.state.project.name, this.state.project.id, user.id);
+      this.state.linters.forEach(linter => {
+        if(linter.arg.enable) {
+          agent.Project.putLinter(this.state.project.id, linter.id, linter.arg.directory, linter.arg.arg);
+        }
+      });
+      browserHistory.push('/#/app');
+      window.location.reload();
     });
     event.preventDefault();
   }

@@ -46,11 +46,11 @@ const Linters = {
 };
 
 const Project = {
-  put: (project_name, project_remote_id, customer_id) => {
-      requests.put('/Projects',{ name: project_name, remoteId: project_remote_id });
-      requests.put('/Projects/'+project_remote_id+'/customers/rel/'+customer_id,{});
+  put: (project_name, project_id, customer_id) => {
+      requests.put('/Projects',{ name: project_name, id: project_id });
+      requests.put('/Projects/'+project_id+'/customers/rel/'+customer_id,{});
     },
-  putLinter: (project_remote_id, linter_id, directory, argument) => requests.put('/Projects/'+project_remote_id+'/linters/rel/'+linter_id, { Directory: directory, Arguments: argument })
+  putLinter: (project_id, linter_id, directory, argument) => requests.put('/Projects/'+project_id+'/linters/rel/'+linter_id, { Directory: directory, Arguments: argument })
 };
 
 export default {
