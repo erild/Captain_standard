@@ -48,7 +48,8 @@ const Linters = {
 const Project = {
   put: (project_name, project_id, customer_id) => requests.put('/Projects',{ name: project_name, id: project_id }).then(() => requests.put(`/Projects/${project_id}/customers/rel/${customer_id}`,{})),
   putLinter: (project_id, linter_id, directory, argument) => requests.put(`/Projects/${project_id}/linters/rel/${linter_id}`, { directory: directory, arguments: argument }),
-  deleteLinters: (project_id) => requests.del(`/Projects/${project_id}/linters/delAllRel`)
+  deleteLinters: (project_id) => requests.del(`/Projects/${project_id}/linters/delAllRel`),
+  getProjectLinters: (project_id) => requests.get('/ProjectLinters', {filter: {'where': {'projectId': project_id}}})
 };
 
 export default {

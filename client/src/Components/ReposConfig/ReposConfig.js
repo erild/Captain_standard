@@ -18,13 +18,9 @@ const mapDispatchToProps = dispatch => ({
 class ReposConfig extends React.Component {
   constructor() {
     super();
-    let projectLinters = [];
-    //TODO Add call to get Project linters if they exist
-    if(projectLinters.length == 0) {
-      projectLinters.push({linterId: 0, directory: "", arg: ""});
-    }
-    this.state = { project: null, linters: null, projectLinters: projectLinters };
+    this.state = { project: null, linters: null, projectLinters: null };
     agent.Linters.all().then(res => this.setState({linters: res}));
+    agent.Project.getProjectLinters().then(res => this.setState({projectLinters: res}));
     this.AddLinter = this.AddLinter.bind(this);
     this.handleLinterChange = this.handleLinterChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -58,23 +54,23 @@ class ReposConfig extends React.Component {
           this.state.projectLinters.forEach(linter => {
             agent.Project.putLinter(this.state.project.id, linter.linterId, linter.directory, linter.arg);
           });
+          browserHistory.push('/#/app');
+          window.location.reload();
         });
       });
-      browserHistory.push('/#/app');
-      window.location.reload();
     });
     event.preventDefault();
   }
 
   AddLinter() {
     let projectLinters = this.state.projectLinters;
-    projectLinters.push({linterId: 0, directory: "", arg: ""});
+    projectLinters.push({linterId: 1, directory: "", arg: ""});
     this.setState({projectLinters: projectLinters});
   }
 
   render() {
 
-    return this.state.project && this.state.linters ? (
+    return this.state.project && this.state.linters && this.state.projectLinters ? (
       <div>
         <h2>Configuring {this.state.project.full_name}</h2>
         <form onSubmit={this.handleSubmit}>
