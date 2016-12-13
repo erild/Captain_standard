@@ -27,11 +27,11 @@
         "['javascript']"
       ]
     },
-    "install_cmd": {
+    "installCmd": {
       "type": "string",
       "required": true
     },
-    "run_cmd": {
+    "runCmd": {
       "type": "string",
       "required": true
     }

@@ -4,7 +4,7 @@
     "languages": [
       "javascript"
     ],
-    "install_cmd": "npm install -g eslint",
-    "run_cmd": "eslint ."
+    "installCmd": "npm install -g eslint",
+    "runCmd": "eslint ."
   }
 ]
