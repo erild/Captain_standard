@@ -9,6 +9,7 @@
     "posttest": "npm run lint && nsp check"
   },
   "dependencies": {
+    "async": "^2.1.4",
     "compression": "^1.0.3",
     "cookie-parser": "^1.4.3",
     "cors": "^2.5.2",
@@ -22,6 +23,7 @@
     "loopback-connector-postgresql": "^2.7.0",
     "loopback-context": "^1.0.0",
     "loopback-datasource-juggler": "^2.39.0",
+    "loopback-ds-timestamp-mixin": "^3.4.0",
     "passport-github2": "^0.1.10",
     "serve-favicon": "^2.0.1",
     "strong-error-handler": "^1.0.1",

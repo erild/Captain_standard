@@ -37,7 +37,9 @@ const Customers = {
   current: () =>
     requests.get('/Customers/me'),
   repos: () =>
-    requests.get('/Customers/me/repos').then(res => res, err => requests.get('/Customers/me/repos'))
+    requests.get('/Customers/me/repos').then(res => res, err => requests.get('/Customers/me/repos')),
+  projects: () =>
+    requests.get('/Customers/me/projects')
 };
 
 const Linters = {
@@ -45,8 +47,20 @@ const Linters = {
     requests.get('/Linters')
 };
 
+const Project = {
+  put: (projectName, projectId, cloneUrl, configCmd, customerId) =>
+      requests.put('/Projects',{ name: projectName, id: projectId, cloneUrl: cloneUrl, configCmd: configCmd})
+      .then(() => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}))
+    ,
+  putLinter: (projectId, linterId, directory, argument) => requests.put(`/Projects/${projectId}/linters/rel/${linterId}`, { directory: directory, arguments: argument }),
+  deleteLinters: (projectId) => requests.del(`/Projects/${projectId}/linters/delAllRel`),
+  getProjectLinters: (projectId) => requests.get('/ProjectLinters', {filter: {'where': {'projectId': projectId}}})
+};
+
 export default {
   Customers,
   Linters,
-  setToken: _token => { token = _token; }
+  Project,
+  setToken: _token => { token = _token; },
+  getToken: () => token
 };

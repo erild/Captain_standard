@@ -8,7 +8,13 @@
   },
   "properties": {},
   "validations": [],
-  "relations": {},
+  "relations": {
+    "projects": {
+      "type": "hasAndBelongsToMany",
+      "model": "Project",
+      "foreignKey": ""
+    }
+  },
   "acls": [
     {
       "accessType": "*",
@@ -46,6 +52,12 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__get__identities"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__projects"
     }
   ],
   "methods": {}

@@ -6,13 +6,16 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "TimeStamp": {
+      "required": false,
+      "validateUpsert": true,
+      "silenceWarnings": false
+    }
+  },
   "properties": {
     "name": {
       "type": "string",
-      "required": true
-    },
-    "addedOn": {
-      "type": "date",
       "required": true
     },
     "languages": {
@@ -24,11 +27,11 @@
         "['javascript']"
       ]
     },
-    "install_cmd": {
+    "installCmd": {
       "type": "string",
       "required": true
     },
-    "run_cmd": {
+    "runCmd": {
       "type": "string",
       "required": true
     }
@@ -38,6 +41,12 @@
     "creator": {
       "type": "hasOne",
       "model": "Customer"
+    },
+    "projects": {
+      "type": "hasMany",
+      "model": "Project",
+      "foreignKey": "linterId",
+      "through": "ProjectLinter"
     }
   },
   "acls": [
@@ -48,9 +57,9 @@
     },
     {
       "principalType": "ROLE",
-      "property": "__get__creator",
       "principalId": "$authenticated",
-      "permission": "ALLOW"
+      "permission": "ALLOW",
+      "property": "__get__creator"
     }
   ],
   "methods": {}

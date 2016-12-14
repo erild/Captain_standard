@@ -1,33 +1,24 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {Link} from 'react-router';
-import Well from 'react-bootstrap/lib/Well';
-
 import './ReposManager.css';
+import ProjectsList from '../ProjectsList';
 import agent from '../../agent';
 
-const mapStateToProps = state => ({});
+const mapStateToProps = state => ({...state.repos});
 
-const mapDispatchToProps = dispatch => ({});
+const mapDispatchToProps = dispatch => ({
+  onLoad: () => dispatch({type: 'FETCH_REPOS', payload: agent.Customers.repos})
+});
 
 
 class ReposManager extends React.Component {
-  constructor() {
-    super();
-    this.state = { projects: null };
-    agent.Customers.repos().then(res => this.setState({ projects: res.repos }));
+  componentWillMount() {
+    this.props.onLoad();
   }
 
   render() {
-    if (this.state.projects) {
-      return (
-        <ul>{this.state.projects.map((project) => (
-          <Well key={project.id}>
-            <Link to={`${this.props.location.pathname}/${project.id}/edit`}>{project.full_name}</Link>
-            <span>(Projet non configuré)</span>
-          </Well>
-        ))}</ul>
-      );
+    if (this.props.projects) {
+      return <ProjectsList projects={this.props.projects} />;
     }
     return <span>Loading projects...</span>;
   }
