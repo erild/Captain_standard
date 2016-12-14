@@ -24,7 +24,7 @@ module.exports = function (Project) {
           reject(err);
         } else {
           project = result;
-          folderName = project.name + Math.random()
+          folderName = project.name.replace('/', '-') + Math.random()
           resolve(project);
         }
       });
