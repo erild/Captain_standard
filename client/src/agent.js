@@ -48,10 +48,10 @@ const Linters = {
 };
 
 const Project = {
-  put: (projectName, projectId, cloneUrl, runCmd, customerId) => {
+  put: (projectName, projectId, cloneUrl, runCmd, customerId) =>
       requests.put('/Projects',{ name: projectName, id: projectId, cloneUrl: cloneUrl, runCmd: runCmd})
-      .then(() => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}));
-    },
+      .then(() => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}))
+    ,
   putLinter: (projectId, linterId, directory, argument) => requests.put(`/Projects/${projectId}/linters/rel/${linterId}`, { directory: directory, arguments: argument }),
   deleteLinters: (projectId) => requests.del(`/Projects/${projectId}/linters/delAllRel`),
   getProjectLinters: (projectId) => requests.get('/ProjectLinters', {filter: {'where': {'projectId': projectId}}})

@@ -25,7 +25,7 @@ class HomePage extends React.Component {
             <h1>Hey {this.props.currentUser && this.props.currentUser.username }</h1>
             <Button bsStyle="success" href="/#/app/repos"><i className="fa fa-plus"/> Add a project</Button>
             <br />
-            <ProjectsList projects={this.props.projects} />
+            <ProjectsList projects={this.props.projects} configured={true} />
           </div>
         );
     } else {
