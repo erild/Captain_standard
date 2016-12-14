@@ -14,11 +14,11 @@
     }
   },
   "properties": {
-    "Directory": {
+    "directory": {
       "type": "string",
       "required": true
     },
-    "Arguments": {
+    "arguments": {
       "type": "string"
     }
   },
