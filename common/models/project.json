@@ -22,6 +22,15 @@
     "name": {
       "type": "string",
       "required": true
+    },
+    "cloneUrl": {
+      "type": "string",
+      "required": true
+    },
+    "configCmd": {
+      "type": "string",
+      "default": "",
+      "required": false
     }
   },
   "validations": [],
@@ -63,6 +72,12 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "linters-exec"
     },
     {
       "accessType": "EXECUTE",

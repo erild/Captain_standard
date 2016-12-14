@@ -49,7 +49,7 @@ class ReposConfig extends React.Component {
 
   handleSubmit(event) {
     agent.Customers.current().then(user => {
-      agent.Project.put(this.state.project.full_name, this.state.project.id, user.id).then(() => {
+      agent.Project.put(this.state.project.full_name, this.state.project.id, this.state.project.clone_url, this.state.configCmds, user.id).then(() => {
         agent.Project.deleteLinters(this.state.project.id).then(() => {
           this.state.projectLinters.forEach(linter => {
             agent.Project.putLinter(this.state.project.id, linter.linterId, linter.directory, linter.arg);
@@ -73,6 +73,11 @@ class ReposConfig extends React.Component {
     return this.state.project && this.state.linters && this.state.projectLinters ? (
       <div>
         <h2>Configuring {this.state.project.full_name}</h2>
+        <div>
+          <span>Commands to initialize the project and install linter dependencies:</span>
+          <FormControl componentClass="textarea" style={{ height: 150, "maxWidth": 500 }} placeholder="npm install --only=dev"/>
+        </div>
+        <p>Please choose a linter : </p>
         <form onSubmit={this.handleSubmit}>
         <ul>
           {this.state.projectLinters.map((projectLinter, key) => {
