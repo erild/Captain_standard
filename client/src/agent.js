@@ -48,8 +48,8 @@ const Linters = {
 };
 
 const Project = {
-  put: (projectName, projectId, cloneUrl, runCmd, customerId) =>
-      requests.put('/Projects',{ name: projectName, id: projectId, cloneUrl: cloneUrl, runCmd: runCmd})
+  put: (projectName, projectId, cloneUrl, configCmd, customerId) =>
+      requests.put('/Projects',{ name: projectName, id: projectId, cloneUrl: cloneUrl, configCmd: configCmd})
       .then(() => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}))
     ,
   putLinter: (projectId, linterId, directory, argument) => requests.put(`/Projects/${projectId}/linters/rel/${linterId}`, { directory: directory, arguments: argument }),
