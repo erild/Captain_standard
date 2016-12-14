@@ -52,7 +52,7 @@ class ReposConfig extends React.Component {
       agent.Project.put(this.state.project.full_name, this.state.project.id, this.state.project.clone_url, this.state.configCmds, user.id).then(() => {
         agent.Project.deleteLinters(this.state.project.id).then(() => {
           this.state.projectLinters.forEach(linter => {
-            agent.Project.putLinter(this.state.project.id, linter.linterId, linter.directory, linter.arg);
+            agent.Project.putLinter(this.state.project.id, linter.linterId, linter.directory, linter.arguments);
           });
           browserHistory.push('/#/app');
           window.location.reload();
@@ -64,7 +64,7 @@ class ReposConfig extends React.Component {
 
   AddLinter() {
     let projectLinters = this.state.projectLinters;
-    projectLinters.push({linterId: 1, directory: "", arg: ""});
+    projectLinters.push({linterId: 1, directory: "", arguments: ""});
     this.setState({projectLinters: projectLinters});
   }
 
@@ -82,7 +82,7 @@ class ReposConfig extends React.Component {
         <ul>
           {this.state.projectLinters.map((projectLinter, key) => {
             return (
-              <LinterConfig linters={this.state.linters} selectedLinter={projectLinter.linterId} directory={projectLinter.directory} arg={projectLinter.arg} key={key} onChange={event => this.handleLinterChange(event, key)}/>
+              <LinterConfig linters={this.state.linters} selectedLinter={projectLinter.linterId} directory={projectLinter.directory} arguments={projectLinter.arguments} key={key} onChange={event => this.handleLinterChange(event, key)}/>
               )
             })}
           <Button bsStyle="primary" onClick={this.AddLinter}>Add another linter</Button>
