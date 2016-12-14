@@ -107,4 +107,15 @@ module.exports = function (Project) {
     isStatic: false,
     returns: null
   });
+
+  /**
+   * Delete the project's Linter relations
+   * @param {Function(Error, number)} callback
+   */
+
+  Project.prototype.delProjectLinters = function(callback) {
+    var count;
+      Project.app.models.ProjectLinter.deleteAll().then(res => callback(null, res.count));
+  };
+
 };

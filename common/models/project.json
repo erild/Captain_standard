@@ -78,7 +78,34 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "linters-exec"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "delProjectLinters"
     }
   ],
-  "methods": {}
+  "methods": {
+    "delProjectLinters": {
+      "isStatic": false,
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "root": false,
+          "description": "Number of row deleted"
+        }
+      ],
+      "description": "Delete the project's Linter relations",
+      "http": [
+        {
+          "path": "/linters/delAllRel",
+          "verb": "delete"
+        }
+      ]
+    }
+  }
 }

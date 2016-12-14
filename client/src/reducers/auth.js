@@ -4,10 +4,11 @@ import store from '../store';
 import agent from '../agent';
 
 export default (state = {}, action) => {
+  let newState;
   switch (action.type) {
     case 'REGISTER_TOKEN':
       agent.setToken(action.access_token);
-      return {
+      newState = {
         ...state,
         access_token: action.access_token || ''
       };
@@ -15,15 +16,16 @@ export default (state = {}, action) => {
     case 'LOGOUT':
       window.location = config.FRONT_URL;
       persistStore(store).purge();
-      return {};
+      newState = {};
       break;
     case 'FETCH_USER':
-      return {
+      newState = {
         ...state,
         currentUser: action.payload
       };
       break;
     default:
-      return state;
+      newState = state;
   }
+  return newState;
 };

@@ -2,9 +2,9 @@ import React from 'react';
 import {connect} from 'react-redux';
 import { browserHistory } from 'react-router'
 import Button from 'react-bootstrap/lib/Button';
-import Checkbox from 'react-bootstrap/lib/Checkbox';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import agent from '../../agent';
+import LinterConfig from '../LinterConfig';
 
 
 const mapStateToProps = state => ({...state.repos});
@@ -18,14 +18,11 @@ const mapDispatchToProps = dispatch => ({
 class ReposConfig extends React.Component {
   constructor() {
     super();
-    this.state = { project: null, linters: null };
-    agent.Linters.all().then(res => {
-      res.map(linter => linter.arg = {enable:false, directory:"", arg:""})
-      this.setState({linters: res});
-    });
-    this.handleSelectLinter = this.handleSelectLinter.bind(this);
-    this.handleLinterDirChange = this.handleLinterDirChange.bind(this);
-    this.handleLinterArgChange = this.handleLinterArgChange.bind(this);
+    this.state = { project: null, linters: null, projectLinters: null };
+    agent.Linters.all().then(res => this.setState({linters: res}));
+    agent.Project.getProjectLinters().then(res => this.setState({projectLinters: res}));
+    this.AddLinter = this.AddLinter.bind(this);
+    this.handleLinterChange = this.handleLinterChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -44,42 +41,36 @@ class ReposConfig extends React.Component {
     }
   }
 
-  handleSelectLinter(linterKey) {
-    let lintersState = this.state.linters;
-    lintersState[linterKey].arg.enable = !lintersState[linterKey].arg.enable;
-    this.setState({linters: lintersState });
-  }
-
-  handleLinterDirChange(event, linterKey) {
-    let lintersState = this.state.linters;
-    lintersState[linterKey].arg.directory = event.target.value;
-    this.setState({linters: lintersState });
-  }
-
-  handleLinterArgChange(event, linterKey) {
-    let lintersState = this.state.linters;
-    lintersState[linterKey].arg.arg = event.target.value;
-    this.setState({linters: lintersState });
+  handleLinterChange(linterInfo, key) {
+    let projectLinters = this.state.projectLinters;
+    linterInfo === 'delete' ? projectLinters.splice(key, 1) : projectLinters[key] = linterInfo;
+    this.setState({projectLinters: projectLinters});
   }
 
   handleSubmit(event) {
     agent.Customers.current().then(user => {
-      agent.Project.put(this.state.project.name, this.state.project.id,
-        this.state.project.clone_url, this.state.configCmds, user.id);
-
-      this.state.linters.forEach(linter => {
-        if(linter.arg.enable) {
-          agent.Project.putLinter(this.state.project.id, linter.id, linter.arg.directory, linter.arg.arg);
-        }
+      agent.Project.put(this.state.project.full_name, this.state.project.id, this.state.project.clone_url, this.state.configCmds, user.id).then(() => {
+        agent.Project.deleteLinters(this.state.project.id).then(() => {
+          this.state.projectLinters.forEach(linter => {
+            agent.Project.putLinter(this.state.project.id, linter.linterId, linter.directory, linter.arg);
+          });
+          browserHistory.push('/#/app');
+          window.location.reload();
+        });
       });
-      browserHistory.push('/#/app');
-      window.location.reload();
     });
     event.preventDefault();
   }
 
+  AddLinter() {
+    let projectLinters = this.state.projectLinters;
+    projectLinters.push({linterId: 1, directory: "", arg: ""});
+    this.setState({projectLinters: projectLinters});
+  }
+
   render() {
-    return this.state.project && this.state.linters ? (
+
+    return this.state.project && this.state.linters && this.state.projectLinters ? (
       <div>
         <h2>Configuring {this.state.project.full_name}</h2>
         <div>
@@ -89,15 +80,12 @@ class ReposConfig extends React.Component {
         <p>Please choose a linter : </p>
         <form onSubmit={this.handleSubmit}>
         <ul>
-          {this.state.linters.map(function(linter, key) {
-            let linterForm = [];
-            linterForm.push(<Checkbox onClick={() => this.handleSelectLinter(key)} key={linter.name+"checkbox"}>{linter.name}</Checkbox>);
-            if (linter.arg.enable) {
-              linterForm.push(<FormControl type="text" placeholder="Directory" value={this.state.linters[key].arg.directory} onChange={event => this.handleLinterDirChange(event, key)} key={key+"_dir"} />);
-              linterForm.push(<FormControl type="text" placeholder="Argument" value={this.state.linters[key].arg.arg} onChange={event => this.handleLinterArgChange(event, key)} key={linter.name+"_arg"} />);
-            }
-            return linterForm
-          }, this)}
+          {this.state.projectLinters.map((projectLinter, key) => {
+            return (
+              <LinterConfig linters={this.state.linters} selectedLinter={projectLinter.linterId} directory={projectLinter.directory} arg={projectLinter.arg} key={key} onChange={event => this.handleLinterChange(event, key)}/>
+              )
+            })}
+          <Button bsStyle="primary" onClick={this.AddLinter}>Add another linter</Button>
         </ul>
         <Button type="submit" bsStyle="success">Save</Button>
         </form>

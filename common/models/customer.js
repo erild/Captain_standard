@@ -12,8 +12,22 @@ module.exports = function (Customer) {
   });
 
   Customer.prototype.repos = (callback) => {
+    const createPromise = repo => {
+      return new Promise((resolve) => {
+        Customer.app.models.Project
+          .findOne({where: {id: repo.id}})
+          .then(exists => {
+            if (exists) {
+              repo.configured = true;
+            }
+            resolve(repo);
+          })
+      });
+    }
+
     agent
       .get('/user/repos')
+      .then(res => Promise.all(res.map(repo => createPromise(repo))))
       .then(res => callback(null, res))
       .catch(err => callback(err));
   };
