@@ -2,21 +2,23 @@ import { REHYDRATE } from 'redux-persist/constants';
 import config from '../config';
 
 export default (state = {}, action) => {
+  let newState;
   switch (action.type) {
     case REHYDRATE:
-      return {
+      newState = {
         ...state,
         rehydrated: true
       };
       break;
     case 'REDIRECT_AUTH':
       window.location = config.API_URL + '/auth/github?returnTo=' + encodeURIComponent(config.FRONT_URL + '/#' + ((action.payload && action.payload.nextPath) || '/app'));
-      return {
+      newState = {
         ...state,
         redirecting: true
       };
       break;
     default:
-      return state;
+      newState = state;
   }
+  return newState;
 };

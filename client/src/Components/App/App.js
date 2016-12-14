@@ -28,10 +28,8 @@ class App extends Component {
           </Route>
           <Route path="/app" onEnter={this.props.requireAuth} component={Template}>
             <IndexRoute component={HomePage}/>
-            <Route path="repos">
-              <IndexRoute component={ReposManager}/>
-              <Route path=":projectId/edit" component={ReposConfig}/>
-            </Route>
+            <Route path="repos" component={ReposManager} />
+            <Route path="projects/:projectId/edit" component={ReposConfig}/>
           </Route>
         </Router>
     );

@@ -1,18 +1,20 @@
 export default (state = {}, action) => {
+  let newState;
   switch (action.type) {
     case 'FETCH_REPOS':
-      return {
+      newState = {
         ...state,
         projects: action.payload.repos
       }
       break;
     case 'FETCH_REPO':
-      return {
+      newState = {
         ...state,
         project: state.repos.filter(project => project.id === Number.parseInt(action.payload.id, 10))[0]
       };
       break;
     default:
-      return state;
+      newState = state;
   }
+  return newState;
 };
