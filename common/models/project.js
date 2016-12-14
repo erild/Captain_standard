@@ -10,10 +10,12 @@ const agent = require('../../server/agent');
 
 module.exports = function (Project) {
 
-  Project.prototype["linters-exec"] = (projectId, callback) => {
+  Project["linters-exec"] = (data, callback) => {
+    const projectId = data.repository.id;
     var projectsDirectory = process.env.PROJECTS_DIRECTORY;
     var project, folderName;
     var lintResults = [];
+    callback();
     return new Promise((resolve, reject) => {
       Project.findById(projectId, {
         include: [{
@@ -50,7 +52,7 @@ module.exports = function (Project) {
         `cd ${projectsDirectory} && git clone ${project.cloneUrl} ${folderName} 2>&1`
       ];
 
-      project.configCmd
+      project.configCmd && project.configCmd
       .split("\n")
       .forEach((command) => {
         initCommands.push(`cd ${projectsDirectory}/${folderName} && ${command}`);
@@ -100,11 +102,10 @@ module.exports = function (Project) {
 
   Project.remoteMethod('linters-exec', {
     description: 'Execute linters on this project.',
-    accepts: {arg: "id", type: "number" },
+    accepts: {arg: "data", type: "object", http: {source: 'body'}},
     http: {
       verb: 'post'
     },
-    isStatic: false,
     returns: null
   });
 
