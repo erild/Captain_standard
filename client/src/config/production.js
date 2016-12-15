@@ -1,4 +1,4 @@
 export default {
-  API_URL: 'http://cs.ragg.fr',
-  FRONT_URL: 'http://cs.ragg.fr'
+  API_URL: 'https://cs.ragg.fr',
+  FRONT_URL: 'https://cs.ragg.fr'
 };
