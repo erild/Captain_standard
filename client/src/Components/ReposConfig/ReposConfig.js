@@ -31,6 +31,7 @@ class ReposConfig extends React.Component {
       const repo = this.props.projects.filter(project => project.id === Number.parseInt(this.props.params.projectId, 10))[0];
       this.setState({project: repo });
       agent.Project.getProjectLinters(repo.id).then(res => this.setState({projectLinters: res}));
+      agent.Project.get(repo.id).then(res => this.setState({configCmd: res.configCmd}));
     }
   }
 
@@ -38,6 +39,8 @@ class ReposConfig extends React.Component {
     if (nextProps.projects) {
       const repo = nextProps.projects.filter(project => project.id === Number.parseInt(this.props.params.projectId, 10))[0];
       this.setState({project: repo });
+      agent.Project.getProjectLinters(repo.id).then(res => this.setState({projectLinters: res}));
+      agent.Project.get(repo.id).then(res => this.setState({configCmd: res.configCmd}));
     }
   }
 
@@ -72,7 +75,7 @@ class ReposConfig extends React.Component {
         <h2>Configuring {this.state.project.full_name}</h2>
         <div>
           <span>Commands to initialize the project and install linter dependencies:</span>
-          <FormControl componentClass="textarea" style={{ height: 150, "maxWidth": 500 }} placeholder="npm install --only=dev" onChange={event => this.setState({"configCmd": event.target.value})}/>
+          <FormControl componentClass="textarea" style={{ height: 150, "maxWidth": 500 }} placeholder="npm install --only=dev" value={this.state.configCmd} onChange={event => this.setState({"configCmd": event.target.value})}/>
         </div>
         <p>Please choose a linter : </p>
         <form onSubmit={this.handleSubmit}>

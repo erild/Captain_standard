@@ -48,6 +48,7 @@ const Linters = {
 };
 
 const Project = {
+  get:(projectId) => requests.get(`/Projects/${projectId}`),
   put: (projectName, projectId, cloneUrl, configCmd, customerId) =>
       requests.put('/Projects',{ name: projectName, id: projectId, cloneUrl: cloneUrl, configCmd: configCmd})
       .then(() => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}))
