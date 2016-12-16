@@ -35,18 +35,8 @@ class ReposConfig extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.projects) {
-      const repo = nextProps.projects.filter(project => project.id === Number.parseInt(this.props.params.projectId, 10))[0];
-      this.setState({project: repo });
-      agent.Project.getProjectLinters(repo.id).then(res => this.setState({projectLinters: res}));
-      agent.Project.get(repo.id).then(res => this.setState({configCmd: res.configCmd}));
-    }
-  }
-
   handleLinterChange(linterInfo, key) {
     let projectLinters = this.state.projectLinters;
-    console.log(projectLinters);
     linterInfo === 'delete' ? projectLinters.splice(key, 1) : projectLinters[key] = Object.assign(projectLinters[key], linterInfo);
     this.setState({projectLinters: projectLinters});
   }

@@ -29,8 +29,8 @@
     },
     "configCmd": {
       "type": "string",
-      "required": false,
-      "default": ""
+      "default": "",
+      "required": false
     }
   },
   "validations": [],

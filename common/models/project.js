@@ -116,6 +116,15 @@ module.exports = function (Project) {
    */
 
   Project.prototype.updateAllRel = function(listRel, callback) {
+    listRel.forEach(rel => {
+      if(rel.hasOwnProperty('projectId') == false ||
+        rel.hasOwnProperty('linterId') == false ||
+        rel.hasOwnProperty('directory') == false ||
+        rel.hasOwnProperty('arguments') == false) {
+        callback(new Error("Invalid projectLinter parameters"));
+        next();
+      }
+    });
     new Promise((resolve, reject) => {
       Project.app.models.ProjectLinter.find({
           fields:['id'],
@@ -137,7 +146,7 @@ module.exports = function (Project) {
       listRel.forEach(rel => {
         Project.app.models.ProjectLinter.upsert(rel)
       });
-      //Project.app.models.ProjectLinter.upsert(listRel, callback(null))
+      callback();
     })
   };
 
