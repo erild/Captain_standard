@@ -29,8 +29,8 @@
     },
     "configCmd": {
       "type": "string",
-      "default": "",
-      "required": false
+      "required": false,
+      "default": ""
     }
   },
   "validations": [],
@@ -85,6 +85,13 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "delProjectLinters"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "updateAllRel"
     }
   ],
   "methods": {
@@ -104,6 +111,28 @@
         {
           "path": "/linters/delAllRel",
           "verb": "delete"
+        }
+      ]
+    },
+    "updateAllRel": {
+      "isStatic": false,
+      "accepts": [
+        {
+          "arg": "listRel",
+          "type": "array",
+          "required": true,
+          "description": "array of all the linter relation",
+          "http": {
+            "source": "body"
+          }
+        }
+      ],
+      "returns": [],
+      "description": "Update all the linter relation of the project",
+      "http": [
+        {
+          "path": "/updateAllRel",
+          "verb": "post"
         }
       ]
     }

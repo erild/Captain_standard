@@ -20,7 +20,6 @@ class ReposConfig extends React.Component {
     super();
     this.state = { project: null, linters: null, projectLinters: null };
     agent.Linters.all().then(res => this.setState({linters: res}));
-    agent.Project.getProjectLinters().then(res => this.setState({projectLinters: res}));
     this.AddLinter = this.AddLinter.bind(this);
     this.handleLinterChange = this.handleLinterChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -31,6 +30,7 @@ class ReposConfig extends React.Component {
     if (this.props.projects) {
       const repo = this.props.projects.filter(project => project.id === Number.parseInt(this.props.params.projectId, 10))[0];
       this.setState({project: repo });
+      agent.Project.getProjectLinters(repo.id).then(res => this.setState({projectLinters: res}));
     }
   }
 
@@ -43,20 +43,17 @@ class ReposConfig extends React.Component {
 
   handleLinterChange(linterInfo, key) {
     let projectLinters = this.state.projectLinters;
-    linterInfo === 'delete' ? projectLinters.splice(key, 1) : projectLinters[key] = linterInfo;
+    console.log(projectLinters);
+    linterInfo === 'delete' ? projectLinters.splice(key, 1) : projectLinters[key] = Object.assign(projectLinters[key], linterInfo);
     this.setState({projectLinters: projectLinters});
   }
 
   handleSubmit(event) {
     agent.Customers.current().then(user => {
       agent.Project.put(this.state.project.full_name, this.state.project.id, this.state.project.clone_url, this.state.configCmd, user.id).then(() => {
-        agent.Project.deleteLinters(this.state.project.id).then(() => {
-          this.state.projectLinters.forEach(linter => {
-            agent.Project.putLinter(this.state.project.id, linter.linterId, linter.directory, linter.arguments);
-          });
-          browserHistory.push('/#/app');
-          window.location.reload();
-        });
+        agent.Project.updateAllLinterRel(this.state.project.id, this.state.projectLinters);
+        browserHistory.push('/#/app');
+        window.location.reload();
       });
     });
     event.preventDefault();
@@ -64,7 +61,7 @@ class ReposConfig extends React.Component {
 
   AddLinter() {
     let projectLinters = this.state.projectLinters;
-    projectLinters.push({linterId: 1, directory: "", arguments: ""});
+    projectLinters.push({projectId: this.state.project.id, linterId: 1, directory: "", arguments: ""});
     this.setState({projectLinters: projectLinters});
   }
 

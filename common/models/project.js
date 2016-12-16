@@ -119,4 +119,36 @@ module.exports = function (Project) {
       Project.app.models.ProjectLinter.deleteAll().then(res => callback(null, res.count));
   };
 
+  /**
+   * Update all the linter relation of the project
+   * @param {array} listRel array of all the linter relation
+   * @param {Function(Error)} callback
+   */
+
+  Project.prototype.updateAllRel = function(listRel, callback) {
+    new Promise((resolve, reject) => {
+      Project.app.models.ProjectLinter.find({
+          fields:['id'],
+          where: {'projectId': this.id}
+        }, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          let projectLinters = result;
+          resolve(projectLinters);
+        }
+      });
+    }).then(projectLinters => {
+      projectLinters.forEach(projectLinter => {
+          if(listRel.find(rel => rel.id === projectLinter.id) === undefined) {
+            Project.app.models.ProjectLinter.destroyById(projectLinter.id);
+          }
+      });
+      listRel.forEach(rel => {
+        Project.app.models.ProjectLinter.upsert(rel)
+      });
+      //Project.app.models.ProjectLinter.upsert(listRel, callback(null))
+    })
+  };
+
 };
