@@ -95,25 +95,6 @@
     }
   ],
   "methods": {
-    "delProjectLinters": {
-      "isStatic": false,
-      "accepts": [],
-      "returns": [
-        {
-          "arg": "count",
-          "type": "number",
-          "root": false,
-          "description": "Number of row deleted"
-        }
-      ],
-      "description": "Delete the project's Linter relations",
-      "http": [
-        {
-          "path": "/linters/delAllRel",
-          "verb": "delete"
-        }
-      ]
-    },
     "updateAllRel": {
       "isStatic": false,
       "accepts": [
