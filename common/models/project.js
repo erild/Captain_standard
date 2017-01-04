@@ -110,13 +110,44 @@ module.exports = function (Project) {
   });
 
   /**
-   * Delete the project's Linter relations
-   * @param {Function(Error, number)} callback
+   * Update all the linter relation of the project
+   * @param {array} listRel array of all the linter relation
+   * @param {Function(Error)} callback
    */
 
-  Project.prototype.delProjectLinters = function(callback) {
-    var count;
-      Project.app.models.ProjectLinter.deleteAll().then(res => callback(null, res.count));
+  Project.prototype.updateAllRel = function(listRel, callback) {
+    listRel.forEach(rel => {
+      if(rel.hasOwnProperty('projectId') == false ||
+        rel.hasOwnProperty('linterId') == false ||
+        rel.hasOwnProperty('directory') == false ||
+        rel.hasOwnProperty('arguments') == false) {
+        callback(new Error("Invalid projectLinter parameters"));
+        next();
+      }
+    });
+    new Promise((resolve, reject) => {
+      Project.app.models.ProjectLinter.find({
+          fields:['id'],
+          where: {'projectId': this.id}
+        }, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          let projectLinters = result;
+          resolve(projectLinters);
+        }
+      });
+    }).then(projectLinters => {
+      projectLinters.forEach(projectLinter => {
+          if(listRel.find(rel => rel.id === projectLinter.id) === undefined) {
+            Project.app.models.ProjectLinter.destroyById(projectLinter.id);
+          }
+      });
+      listRel.forEach(rel => {
+        Project.app.models.ProjectLinter.upsert(rel)
+      });
+      callback();
+    })
   };
 
 };

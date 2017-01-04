@@ -48,13 +48,13 @@ const Linters = {
 };
 
 const Project = {
+  get:(projectId) => requests.get(`/Projects/${projectId}`),
   put: (projectName, projectId, cloneUrl, configCmd, customerId) =>
       requests.put('/Projects',{ name: projectName, id: projectId, cloneUrl: cloneUrl, configCmd: configCmd})
       .then(() => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}))
     ,
-  putLinter: (projectId, linterId, directory, argument) => requests.put(`/Projects/${projectId}/linters/rel/${linterId}`, { directory: directory, arguments: argument }),
-  deleteLinters: (projectId) => requests.del(`/Projects/${projectId}/linters/delAllRel`),
-  getProjectLinters: (projectId) => requests.get('/ProjectLinters', {filter: {'where': {'projectId': projectId}}})
+  getProjectLinters: (projectId) => requests.get(`/ProjectLinters?filter[where][projectId]=${projectId}`),
+  updateAllLinterRel: (projectId, listLinter) => requests.post(`/Projects/${projectId}/updateAllRel`, listLinter)
 };
 
 export default {
