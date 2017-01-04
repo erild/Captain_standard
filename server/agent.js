@@ -20,8 +20,10 @@ const getToken = () => new Promise((resolve, reject) => {
 });
 
 const requests = {
-  get: url =>
-    getToken().then(token => superagent.get(GITHUB_API + url).set('authorization','token ' + token)).then(res => res.body)
+  get: (url, raw) =>
+    getToken().then(token => superagent.get((raw ? '' : GITHUB_API) + url).set('authorization','token ' + token)).then(res => res.body),
+  post: (url, data, raw) =>
+    getToken().then(token => superagent.post((raw ? '' : GITHUB_API) + url, data).set('authorization','token ' + token)).then(res => res.body),
 }
 
 module.exports = requests;

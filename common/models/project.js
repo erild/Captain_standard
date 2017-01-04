@@ -11,10 +11,13 @@ const agent = require('../../server/agent');
 module.exports = function (Project) {
 
   Project["linters-exec"] = (data, callback) => {
+    if (!data.pull_request || ['opened', 'reopened', 'edited'].indexOf(data.action) < 0) {
+      return callback();
+    }
     const projectId = data.repository.id;
-    var projectsDirectory = process.env.PROJECTS_DIRECTORY;
-    var project, folderName;
-    var lintResults = [];
+    let projectsDirectory = process.env.PROJECTS_DIRECTORY;
+    let project, folderName;
+    let lintResults = [];
     callback();
     return new Promise((resolve, reject) => {
       Project.findById(projectId, {
@@ -30,7 +33,8 @@ module.exports = function (Project) {
           resolve(project);
         }
       });
-    }).then(project => {
+    })
+    .then(project => {
       return new Promise((resolve, reject) => {
         app.models.ProjectLinter.find({
           where: { projectId: project.id }
@@ -42,13 +46,14 @@ module.exports = function (Project) {
           }
         });
       });
-    }).then((projectLinters) => {
-      var linters = {};
+    })
+    .then((projectLinters) => {
+      let linters = {};
       project.linters().forEach((linter) => {
         linters[linter.id] = linter;
       });
 
-      var initCommands = [
+      let initCommands = [
         `cd ${projectsDirectory} && git clone ${project.cloneUrl} ${folderName} 2>&1`
       ];
 
@@ -58,7 +63,7 @@ module.exports = function (Project) {
         initCommands.push(`cd ${projectsDirectory}/${folderName} && ${command}`);
       });
 
-      var promiseChain = Promise.resolve();
+      let promiseChain = Promise.resolve();
       initCommands.forEach(cmd => {
         promiseChain = promiseChain.then(() => {
           return new Promise((resolve, reject) => {
@@ -77,19 +82,24 @@ module.exports = function (Project) {
         promiseChain = promiseChain.then(() => {
           return new Promise((resolve) => {
             exec(`cd ${projectsDirectory}/${folderName}${scan.directory} && ${linters[scan.linterId].runCmd} ${scan.arguments}`, (error, stdout, stderr) => {
-              if (stdout) lintResults.push(stdout);
+              if (stdout) {
+                lintResults.push(stdout);
+              }
               resolve();
             });
           });
         });
       });
-      promiseChain = promiseChain.then((results) => {console.log("results:", lintResults)});
+      promiseChain = promiseChain.then(() => {
+        agent.post(`${data.pull_request.review_comments_url}`, JSON.stringify(lintResults), true);
+      });
       return promiseChain;
-    }).catch((error) => console.log(error)
-    ).then(() => {
-      var cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
+    })
+    .catch((error) => console.log(error))
+    .then(() => {
+      let cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
       async.until(() => {
-        var projectCleaned = false;
+        let projectCleaned = false;
         try {
           fs.accessSync(`${projectsDirectory}/${folderName}`, fs.F_OK);
         } catch (e) {
