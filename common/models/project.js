@@ -15,15 +15,18 @@ module.exports = function (Project) {
       return callback();
     }
     const projectId = data.repository.id;
-    let projectsDirectory = process.env.PROJECTS_DIRECTORY;
+    const projectsDirectory = process.env.PROJECTS_DIRECTORY;
     let project, folderName;
     let lintResults = [];
     callback();
-    return new Promise((resolve, reject) => {
+    new Promise((resolve, reject) => {
       Project.findById(projectId, {
-        include: [{
-          relation: 'linters',
-        }]
+        include: [
+          {
+            relation: 'linters'
+          }, {
+            relation: 'customers'
+          }]
       }, (err, result) => {
         if (err) {
           reject(err);
@@ -45,10 +48,11 @@ module.exports = function (Project) {
             resolve(projectLinters);
           }
         });
-      });
+      })
     })
     .then((projectLinters) => {
       let linters = {};
+      let customers = project.customers();
       project.linters().forEach((linter) => {
         linters[linter.id] = linter;
       });
@@ -91,13 +95,14 @@ module.exports = function (Project) {
         });
       });
       promiseChain = promiseChain.then(() => {
-        agent.post(`${data.pull_request.review_comments_url}`, JSON.stringify(lintResults), true);
+        console.log(lintResults);
+        agent.post({user: customers[0], url: `${data.pull_request.comments_url}`, data: lintResults.join('\n'),raw: true});
       });
       return promiseChain;
     })
     .catch((error) => console.log(error))
     .then(() => {
-      let cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
+      const cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
       async.until(() => {
         let projectCleaned = false;
         try {
@@ -112,7 +117,7 @@ module.exports = function (Project) {
 
   Project.remoteMethod('linters-exec', {
     description: 'Execute linters on this project.',
-    accepts: {arg: "data", type: "object", http: {source: 'body'}},
+    accepts: {arg: "data", type: "object", http: {source: 'body'}, required: true},
     http: {
       verb: 'post'
     },

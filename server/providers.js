@@ -9,6 +9,6 @@ module.exports = {
     "authPath": "/auth/github",
     "callbackPath": "/auth/github/callback",
     "successRedirect": "/api/Customers/me",
-    "scope": ["user:email", "admin:repo_hook"]
+    "scope": ["user:email", "admin:repo_hook", "repo"]
   }
 };
