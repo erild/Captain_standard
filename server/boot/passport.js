@@ -27,8 +27,7 @@ module.exports = function (app) {
         const successRedirect = function (req) {
           let url;
           if (!!req && req.session && req.session.returnTo) {
-            var returnTo = req.session.returnTo;
-            console.log(returnTo);
+            const returnTo = req.session.returnTo;
             delete req.session.returnTo;
             url = returnTo;
           } else {
@@ -36,7 +35,6 @@ module.exports = function (app) {
           }
           return `${url}?access_token=${info.accessToken.id}&user_id=${user.id.toString()}`;
         }
-        console.dir(info.accessToken);
         return res.redirect(successRedirect(req));
       }
     )(req, res, next);
