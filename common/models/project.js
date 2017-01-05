@@ -150,4 +150,37 @@ module.exports = function (Project) {
     })
   };
 
+  Project.observe('after save', (ctx, next) => {
+    if (ctx.instance && ctx.isNewInstance) {
+      const baseUrl = app.get('url').replace(/\/$/, '')
+      const webhookConf = {
+        'name': 'web',
+        'active': true,
+        'events': ['pull_request'],
+        'config': {'url': baseUrl + '/api/Projects/linters-exec', 'content_type': 'json'}
+      };
+      agent.post(`/repos/${ctx.instance.full_name}/hooks`, webhookConf);
+    }
+    next();
+  });
+
+  Project.observe('before delete', (ctx, next) => {
+    if (ctx.where.hasOwnProperty('id')) {
+      Project.findById(ctx.where.id, (err, project) => {
+        if (!err) {
+          if (project) {
+            agent.get(`/repos/${project.full_name}/hooks`).then(res => {
+              const hookUrl = app.get('url').replace(/\/$/, '') + '/api/Projects/linters-exec';
+              res.forEach(hook => {
+                if (hook.name === 'web' && hook.config.url === hookUrl) {
+                  agent.delete(`/repos/${project.full_name}/hooks/${hook.id}`);
+                }
+              });
+            });
+          }
+        }
+        next();
+      });
+    }
+  });
 };
