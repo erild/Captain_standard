@@ -58,7 +58,7 @@ module.exports = function (Project) {
       });
 
       let initCommands = [
-        `cd ${projectsDirectory} && git clone ${project.cloneUrl} ${folderName} 2>&1`
+        `cd ${projectsDirectory} && git clone ${project.cloneUrl} ${folderName} && cd ${projectsDirectory}/${folderName} && git checkout ${data.pull_request.head.sha} 2>&1`
       ];
 
       project.configCmd && project.configCmd
@@ -89,9 +89,13 @@ module.exports = function (Project) {
               if (stderr) {
                 return reject(stderr);
               }
-              if (stdout) {
-                lintResults.push(stdout);
+              let result;
+              if (error) {
+                result = 'Oh no, it failed :cry:\n' + stdout;
+              } else {
+                result = 'Yeah ! Well done ! :fireworks:\n';
               }
+              lintResults.push(result);
               resolve();
             });
           });
