@@ -31,6 +31,7 @@ const requests = {
     getToken(options.user)
       .then(token => superagent.post((options.raw ? '' : GITHUB_API) + options.url, {body: options.data}).set('authorization','token ' + token))
       .then(res => res.body),
+  getToken
 }
 
 module.exports = requests;
