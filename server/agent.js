@@ -6,9 +6,12 @@ const superagent = superagentPromise(_superagent, Promise);
 
 const GITHUB_API = 'https://api.github.com';
 
-const getToken = () => new Promise((resolve, reject) => {
+const getToken = (providedUser) => new Promise((resolve, reject) => {
   const ctx = LoopBackContext.getCurrentContext();
-  const user = ctx && ctx.get('currentUser');
+  const user = providedUser || (ctx && ctx.get('currentUser'));
+  if (!user) {
+    return reject('No user was found');
+  }
   user.identities((err, result) => {
     if (err) {
       reject(err);
@@ -20,12 +23,19 @@ const getToken = () => new Promise((resolve, reject) => {
 });
 
 const requests = {
-  get: url =>
-    getToken().then(token => superagent.get(GITHUB_API + url).set('authorization','token ' + token)).then(res => res.body),
-  post: (url, data) =>
-    getToken().then(token => superagent.post(GITHUB_API + url, data).set('authorization','token ' + token)).then(res => res.body),
-  delete: (url) =>
-    getToken().then(token => superagent.del(GITHUB_API + url).set('authorization','token ' + token)).then(res => res.body)
+  get: (options) =>
+    getToken(options.user)
+      .then(token => superagent.get((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token))
+      .then(res => res.body),
+  post: (options) =>
+    getToken(options.user)
+      .then(token => superagent.post((options.raw ? '' : GITHUB_API) + options.url, {body: options.data}).set('authorization','token ' + token))
+      .then(res => res.body),
+  delete: (options) =>
+    getToken(options.user)
+      .then(token => superagent.del((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token))
+      .then(res => res.body),
+  getToken
 }
 
 module.exports = requests;

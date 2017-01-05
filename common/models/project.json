@@ -21,7 +21,8 @@
     },
     "full_name": {
       "type": "string",
-      "required": true
+      "required": true,
+      "default": ""
     },
     "cloneUrl": {
       "type": "string",

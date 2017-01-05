@@ -11,16 +11,22 @@ const agent = require('../../server/agent');
 module.exports = function (Project) {
 
   Project["linters-exec"] = (data, callback) => {
+    if (!data.pull_request || ['opened', 'reopened', 'edited'].indexOf(data.action) < 0) {
+      return callback();
+    }
     const projectId = data.repository.id;
-    var projectsDirectory = process.env.PROJECTS_DIRECTORY;
-    var project, folderName;
-    var lintResults = [];
+    const projectsDirectory = process.env.PROJECTS_DIRECTORY;
+    let project, folderName;
+    let lintResults = [];
     callback();
-    return new Promise((resolve, reject) => {
+    new Promise((resolve, reject) => {
       Project.findById(projectId, {
-        include: [{
-          relation: 'linters',
-        }]
+        include: [
+          {
+            relation: 'linters'
+          }, {
+            relation: 'customers'
+          }]
       }, (err, result) => {
         if (err) {
           reject(err);
@@ -30,26 +36,34 @@ module.exports = function (Project) {
           resolve(project);
         }
       });
-    }).then(project => {
-      return new Promise((resolve, reject) => {
-        app.models.ProjectLinter.find({
-          where: { projectId: project.id }
-        }, (err, projectLinters) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(projectLinters);
-          }
-        });
-      });
-    }).then((projectLinters) => {
-      var linters = {};
+    })
+    .then(project => {
+      return Promise.all([
+        new Promise((resolve, reject) => {
+          app.models.ProjectLinter.find({
+            where: {projectId: project.id}
+          }, (err, projectLinters) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(projectLinters);
+            }
+          });
+        }),
+        agent.getToken(project.customers()[0])
+      ])
+    })
+    .then((results) => {
+      const projectLinters = results[0];
+      const token = results[1];
+      let linters = {};
+      const customers = project.customers();
       project.linters().forEach((linter) => {
         linters[linter.id] = linter;
       });
 
-      var initCommands = [
-        `cd ${projectsDirectory} && git clone ${project.cloneUrl} ${folderName} 2>&1`
+      let initCommands = [
+        `cd ${projectsDirectory} && git clone https://${token}@github.com/${data.repository.full_name}.git ${folderName} && cd ${projectsDirectory}/${folderName} && git checkout ${data.pull_request.head.sha} 2>&1`
       ];
 
       project.configCmd && project.configCmd
@@ -58,7 +72,7 @@ module.exports = function (Project) {
         initCommands.push(`cd ${projectsDirectory}/${folderName} && ${command}`);
       });
 
-      var promiseChain = Promise.resolve();
+      let promiseChain = Promise.resolve();
       initCommands.forEach(cmd => {
         promiseChain = promiseChain.then(() => {
           return new Promise((resolve, reject) => {
@@ -77,19 +91,32 @@ module.exports = function (Project) {
         promiseChain = promiseChain.then(() => {
           return new Promise((resolve) => {
             exec(`cd ${projectsDirectory}/${folderName}${scan.directory} && ${linters[scan.linterId].runCmd} ${scan.arguments}`, (error, stdout, stderr) => {
-              if (stdout) lintResults.push(stdout);
+              if (stderr) {
+                return reject(stderr);
+              }
+              let result;
+              if (error) {
+                result = 'Oh no, it failed :cry:\n' + stdout;
+              } else {
+                result = 'Yeah ! Well done ! :fireworks:\n';
+              }
+              lintResults.push(result);
               resolve();
             });
           });
         });
       });
-      promiseChain = promiseChain.then((results) => {console.log("results:", lintResults)});
+      promiseChain = promiseChain.then(() => {
+        console.log(lintResults);
+        agent.post({user: customers[0], url: `${data.pull_request.comments_url}`, data: lintResults.join('\n'),raw: true});
+      });
       return promiseChain;
-    }).catch((error) => console.log(error)
-    ).then(() => {
-      var cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
+    })
+    .catch((error) => console.log(error))
+    .then(() => {
+      const cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
       async.until(() => {
-        var projectCleaned = false;
+        let projectCleaned = false;
         try {
           fs.accessSync(`${projectsDirectory}/${folderName}`, fs.F_OK);
         } catch (e) {
@@ -102,7 +129,7 @@ module.exports = function (Project) {
 
   Project.remoteMethod('linters-exec', {
     description: 'Execute linters on this project.',
-    accepts: {arg: "data", type: "object", http: {source: 'body'}},
+    accepts: {arg: "data", type: "object", http: {source: 'body'}, required: true},
     http: {
       verb: 'post'
     },
@@ -152,14 +179,14 @@ module.exports = function (Project) {
 
   Project.observe('after save', (ctx, next) => {
     if (ctx.instance && ctx.isNewInstance) {
-      const baseUrl = app.get('url').replace(/\/$/, '')
+      const baseUrl = process.env.GITHUB_BACKEND_URL.replace(/\/$/, '')
       const webhookConf = {
         'name': 'web',
         'active': true,
         'events': ['pull_request'],
         'config': {'url': baseUrl + '/api/Projects/linters-exec', 'content_type': 'json'}
       };
-      agent.post(`/repos/${ctx.instance.full_name}/hooks`, webhookConf);
+      agent.post({url: `/repos/${ctx.instance.full_name}/hooks`}, webhookConf);
     }
     next();
   });
@@ -169,11 +196,11 @@ module.exports = function (Project) {
       Project.findById(ctx.where.id, (err, project) => {
         if (!err) {
           if (project) {
-            agent.get(`/repos/${project.full_name}/hooks`).then(res => {
-              const hookUrl = app.get('url').replace(/\/$/, '') + '/api/Projects/linters-exec';
+            agent.get({url: `/repos/${project.full_name}/hooks`}).then(res => {
+              const hookUrl = process.env.GITHUB_BACKEND_URL.replace(/\/$/, '') + '/api/Projects/linters-exec';
               res.forEach(hook => {
                 if (hook.name === 'web' && hook.config.url === hookUrl) {
-                  agent.delete(`/repos/${project.full_name}/hooks/${hook.id}`);
+                  agent.delete({url: `/repos/${project.full_name}/hooks/${hook.id}`});
                 }
               });
             });
