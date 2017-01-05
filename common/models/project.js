@@ -86,6 +86,9 @@ module.exports = function (Project) {
         promiseChain = promiseChain.then(() => {
           return new Promise((resolve) => {
             exec(`cd ${projectsDirectory}/${folderName}${scan.directory} && ${linters[scan.linterId].runCmd} ${scan.arguments}`, (error, stdout, stderr) => {
+              if (stderr) {
+                return reject(stderr);
+              }
               if (stdout) {
                 lintResults.push(stdout);
               }
