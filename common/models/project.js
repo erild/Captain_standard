@@ -163,4 +163,25 @@ module.exports = function (Project) {
     }
     next();
   });
+
+  Project.observe('before delete', function(ctx, next) {
+    if(ctx.where.hasOwnProperty('id')){
+      Project.findById(ctx.where.id, (err, result) => {
+        if (!err) {
+          let project = result;
+          if(project) {
+            agent.get('/repos/'+project.full_name+'/hooks').then(res => {
+              let hookUrl = app.get('url').replace(/\/$/, '')+'/api/Projects/linters-exec';
+              res.forEach(hook => {
+                if(hook.name =='web' && hook.config.url == hookUrl) {
+                  agent.delete('/repos/'+project.full_name+'/hooks/'+hook.id);
+                }
+              })
+            })
+          }
+        }
+        next();
+      });
+    }
+  });
 };
