@@ -150,4 +150,17 @@ module.exports = function (Project) {
     })
   };
 
+  Project.observe('after save', function(ctx, next) {
+    if (ctx.instance && ctx.isNewInstance) {
+      let baseUrl = app.get('url').replace(/\/$/, '')
+      let webhookConf = {
+        'name': 'web',
+        'active':true,
+        'events': ['pull_request'],
+        'config': {'url':baseUrl+'/api/Projects/linters-exec','content_type': 'json'}
+      };
+      agent.post('/repos/'+ctx.instance.full_name+'/hooks', webhookConf);
+    }
+    next();
+  });
 };
