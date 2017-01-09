@@ -38,26 +38,31 @@ module.exports = function (Project) {
       });
     })
     .then(project => {
-      return new Promise((resolve, reject) => {
-        app.models.ProjectLinter.find({
-          where: { projectId: project.id }
-        }, (err, projectLinters) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(projectLinters);
-          }
-        });
-      })
+      return Promise.all([
+        new Promise((resolve, reject) => {
+          app.models.ProjectLinter.find({
+            where: {projectId: project.id}
+          }, (err, projectLinters) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(projectLinters);
+            }
+          });
+        }),
+        agent.getToken(project.customers()[0])
+      ])
     })
-    .then((projectLinters) => {
+    .then((results) => {
+      const projectLinters = results[0];
+      const token = results[1];
       let linters = {};
       project.linters().forEach((linter) => {
         linters[linter.id] = linter;
       });
 
       let initCommands = [
-        `cd ${projectsDirectory} && git clone ${project.cloneUrl} ${folderName} && cd ${projectsDirectory}/${folderName} && git checkout ${data.pull_request.head.sha} 2>&1`
+        `cd ${projectsDirectory} && git clone https://${token}@github.com/${data.repository.full_name}.git ${folderName} && cd ${projectsDirectory}/${folderName} && git checkout ${data.pull_request.head.sha} 2>&1`
       ];
 
       project.configCmd && project.configCmd

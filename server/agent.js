@@ -35,6 +35,7 @@ const requests = {
         .set('accept', 'application/vnd.github.black-cat-preview+json')
       )
       .then(res => res.body),
+  getToken
 }
 
 module.exports = requests;
