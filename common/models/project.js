@@ -52,7 +52,6 @@ module.exports = function (Project) {
     })
     .then((projectLinters) => {
       let linters = {};
-      let customers = project.customers();
       project.linters().forEach((linter) => {
         linters[linter.id] = linter;
       });
@@ -84,28 +83,54 @@ module.exports = function (Project) {
 
       projectLinters.forEach((scan) => {
         promiseChain = promiseChain.then(() => {
-          return new Promise((resolve) => {
+          return new Promise((resolve, reject) => {
             exec(`cd ${projectsDirectory}/${folderName}${scan.directory} && ${linters[scan.linterId].runCmd} ${scan.arguments}`, (error, stdout, stderr) => {
               if (stderr) {
                 return reject(stderr);
               }
-              let result;
-              if (error) {
-                result = 'Oh no, it failed :cry:\n' + stdout;
-              } else {
-                result = 'Yeah ! Well done ! :fireworks:\n';
-              }
-              lintResults.push(result);
+              lintResults.push(stdout);
               resolve();
             });
           });
         });
       });
-      promiseChain = promiseChain.then(() => {
-        console.log(lintResults);
-        agent.post({user: customers[0], url: `${data.pull_request.comments_url}`, data: lintResults.join('\n'),raw: true});
-      });
       return promiseChain;
+    })
+    .then(() => {
+      return agent.get({user: project.customers()[0], url: data.pull_request.diff_url, raw: true})
+    })
+    .then((diff) => {
+      const regex = /\+\+\+ b\/(.+)\n@@ -\d+,?\d* \+(\d+),?(\d*) @@/g;
+      let filesChanged = [];
+      let matched;
+      while ((matched = regex.exec(diff)) !== null) {
+        let linesChanged = Number.parseInt(matched[3]) || 1;
+        filesChanged[matched[1]] = [];
+        for (let i = 0; i < linesChanged; i++) {
+          filesChanged[matched[1]].push(Number.parseInt(matched[2]) + i);
+        }
+      }
+      return filesChanged
+    })
+    .then((filesChanged) => {
+      // Flatten array of arrays
+      lintResults = JSON.parse([].concat.apply([], lintResults));
+
+      let comments = [];
+      let allLintPassed = true;
+      lintResults.forEach(file => {
+        file.filePath = file.filePath.replace('\\', '/').slice(`${projectsDirectory}/${folderName}/`.length);
+        file.messages.forEach(message => {
+          if (file.filePath in filesChanged && filesChanged[file.filePath].indexOf(message.line) > -1) {
+            let commentBody = `${message.severity === 2 ? "(Error)" : "(Warning)"} Line ${message.line}: ${message.message} - ${message.ruleId}`;
+            comments.push({body: commentBody, path: file.filePath, position: message.line});
+            allLintPassed = false;
+          }
+        });
+      });
+
+      let body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
+      agent.post({user: project.customers()[0], url: `${data.pull_request.url}/reviews`, data: {body: body, event: allLintPassed ? "APPROVE" : "REQUEST_CHANGES", comments: comments}, raw: true});
     })
     .catch((error) => console.log(error))
     .then(() => {
