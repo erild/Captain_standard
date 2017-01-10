@@ -29,7 +29,7 @@ const requests = {
       .then(res => res.body),
   post: (options) =>
     getToken(options.user)
-      .then(token => superagent.post((options.raw ? '' : GITHUB_API) + options.url, {body: options.data}).set('authorization','token ' + token))
+      .then(token => superagent.post((options.raw ? '' : GITHUB_API) + options.url, options.data).set('authorization','token ' + token))
       .then(res => res.body),
   delete: (options) =>
     getToken(options.user)
