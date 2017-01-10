@@ -5,6 +5,7 @@ import Button from 'react-bootstrap/lib/Button';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import agent from '../../agent';
 import LinterConfig from '../LinterConfig';
+import WebHookModal from '../WebHookModal';
 
 
 const mapStateToProps = state => ({...state.repos});
@@ -18,7 +19,7 @@ const mapDispatchToProps = dispatch => ({
 class ReposConfig extends React.Component {
   constructor() {
     super();
-    this.state = { project: null, linters: null, projectLinters: null, submitting: false };
+    this.state = { project: null, linters: null, projectLinters: null, submitting: false, webhookModal: false };
     agent.Linters.all().then(res => this.setState({linters: res}));
     this.AddLinter = this.AddLinter.bind(this);
     this.handleLinterChange = this.handleLinterChange.bind(this);
@@ -41,6 +42,13 @@ class ReposConfig extends React.Component {
     this.setState({projectLinters: projectLinters});
   }
 
+  handleWebHookModal(event) {
+    if(event == 'close') {
+      browserHistory.push('/#/app');
+      window.location.reload();
+    }
+  }
+
   handleSubmit(event) {
     this.setState({submitting: true});
     agent.Customers.current().then(user => {
@@ -48,10 +56,11 @@ class ReposConfig extends React.Component {
         agent.Project.linkCustomer(this.state.project.id, user.id);
         agent.Project.updateAllLinterRel(this.state.project.id, this.state.projectLinters);
         if(res.webhook_secret == "") {
-          alert(`Please contact the project owner to add a webhook on pull request with the following payload  "${agent.API_ROOT}/Projects/linters-exec"`);
+          this.setState({webhookModal: true});
+        } else {
+          browserHistory.push('/#/app');
+          window.location.reload();
         }
-        browserHistory.push('/#/app');
-        window.location.reload();
       });
     });
     event.preventDefault();
@@ -84,6 +93,7 @@ class ReposConfig extends React.Component {
         </ul>
         <Button type="submit" bsStyle="success" disabled={this.state.submitting}>Save</Button>
         </form>
+        <WebHookModal display={this.state.webhookModal} API_ROOT={agent.API_ROOT} onChange={this.handleWebHookModal}/>
       </div>
     ) : null;
   }
