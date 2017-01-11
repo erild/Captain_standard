@@ -26,7 +26,7 @@ module.exports = function (Customer) {
     }
 
     agent
-      .get('/user/repos')
+      .get({url: '/user/repos'})
       .then(res => Promise.all(res.map(repo => createPromise(repo))))
       .then(res => callback(null, res))
       .catch(err => callback(err));
