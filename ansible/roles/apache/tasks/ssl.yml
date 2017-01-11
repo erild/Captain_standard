@@ -15,6 +15,17 @@
   when: env == 'production'
   tags: letsencrypt
 
+- name: download letsencrypt chain
+  get_url: url=https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem dest=/etc/ssl/chain.pem
+  when: env == 'production'
+  tags: letsencrypt
+
+- name: register chain
+  shell: cat /etc/ssl/chain.pem
+  register: letsencrypt_chain
+  when: env == 'production'
+  tags: letsencrypt
+
 - letsencrypt:
     account_key: /etc/ssl/account.key
     csr: /etc/ssl/{{ apache_server_name }}.csr
@@ -43,10 +54,19 @@
     dest: /etc/ssl/{{ apache_server_name }}.crt
     acme_directory: https://acme-v01.api.letsencrypt.org/directory
     data: "{{ letsencrypt_challenge }}"
-  notify: restart-apache
   when: env == 'production'
   environment:
     LC_ALL: C # See https://github.com/ansible/ansible-modules-extras/issues/3155
+  tags: letsencrypt
+
+- name: concatenate certs
+  blockinfile:
+    dest: /etc/ssl/{{ apache_server_name }}.crt
+    insertafter: "-----END CERTIFICATE-----"
+    block: |
+      {{ letsencrypt_chain.stdout }}
+  when: env == 'production'
+  notify: restart-apache
   tags: letsencrypt
 
 - name: install pip
@@ -81,7 +101,7 @@
   when: env == 'production'
 
 - name: setup letsencrypt renewal job
-  cron: day=*/60 name=letsencrypt job="rm -f /etc/ssl/{{ apache_server_name }}* && ansible-playbook /opt/ansible-playbook/ansible/playbook.yml -t letsencrypt && service apache2 restart >> /dev/null"
+  cron: day=*/60 name=letsencrypt job="rm -f /etc/ssl/{{ apache_server_name }}* && ansible-playbook /opt/ansible-playbook/ansible/playbook.yml -t letsencrypt >> /dev/null"
   when: env == 'production'
 
 - name: enable SSL
