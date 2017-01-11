@@ -39,13 +39,6 @@
     }
   },
   "session": {
-    "express-session": {
-      "params": {
-        "secret": "other false secret",
-        "saveUninitialized": true,
-        "resave": true
-      }
-    }
   },
   "auth": {},
   "parse": {},

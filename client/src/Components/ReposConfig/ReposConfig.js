@@ -5,6 +5,7 @@ import Button from 'react-bootstrap/lib/Button';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import agent from '../../agent';
 import LinterConfig from '../LinterConfig';
+import WebHookModal from '../WebHookModal';
 
 
 const mapStateToProps = state => ({...state.repos});
@@ -18,11 +19,12 @@ const mapDispatchToProps = dispatch => ({
 class ReposConfig extends React.Component {
   constructor() {
     super();
-    this.state = { project: null, linters: null, projectLinters: null };
+    this.state = { project: null, linters: null, projectLinters: null, submitting: false, webhookModal: false };
     agent.Linters.all().then(res => this.setState({linters: res}));
     this.AddLinter = this.AddLinter.bind(this);
     this.handleLinterChange = this.handleLinterChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleWebHookModal = this.handleWebHookModal.bind(this);
   }
 
   componentWillMount() {
@@ -41,12 +43,26 @@ class ReposConfig extends React.Component {
     this.setState({projectLinters: projectLinters});
   }
 
+  handleWebHookModal(event) {
+    if (event.hasOwnProperty('secret')) {
+      agent.Project.putWebHookSecret(this.state.project.id, event.secret);
+    }
+    browserHistory.push('/#/app');
+    window.location.reload();
+  }
+
   handleSubmit(event) {
+    this.setState({submitting: true});
     agent.Customers.current().then(user => {
-      agent.Project.put(this.state.project.full_name, this.state.project.id, this.state.project.clone_url, this.state.configCmd, user.id).then(() => {
+      agent.Project.put(this.state.project.full_name, this.state.project.id, this.state.project.clone_url, this.state.configCmd).then((res) => {
+        agent.Project.linkCustomer(this.state.project.id, user.id);
         agent.Project.updateAllLinterRel(this.state.project.id, this.state.projectLinters);
-        browserHistory.push('/#/app');
-        window.location.reload();
+        if (res.webhook_secret == "") {
+          this.setState({webhookModal: true});
+        } else {
+          browserHistory.push('/#/app');
+          window.location.reload();
+        }
       });
     });
     event.preventDefault();
@@ -77,8 +93,9 @@ class ReposConfig extends React.Component {
             })}
           <Button bsStyle="primary" onClick={this.AddLinter}>Add another linter</Button>
         </ul>
-        <Button type="submit" bsStyle="success">Save</Button>
+        <Button type="submit" bsStyle="success" disabled={this.state.submitting}>Save</Button>
         </form>
+        <WebHookModal display={this.state.webhookModal} API_ROOT={agent.API_ROOT} onChange={this.handleWebHookModal}/>
       </div>
     ) : null;
   }
