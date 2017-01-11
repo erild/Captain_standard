@@ -24,6 +24,7 @@ class ReposConfig extends React.Component {
     this.AddLinter = this.AddLinter.bind(this);
     this.handleLinterChange = this.handleLinterChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleWebHookModal = this.handleWebHookModal.bind(this);
   }
 
   componentWillMount() {
@@ -43,10 +44,11 @@ class ReposConfig extends React.Component {
   }
 
   handleWebHookModal(event) {
-    if(event == 'close') {
-      browserHistory.push('/#/app');
-      window.location.reload();
+    if (event.hasOwnProperty('secret')) {
+      agent.Project.putWebHookSecret(this.state.project.id, event.secret);
     }
+    browserHistory.push('/#/app');
+    window.location.reload();
   }
 
   handleSubmit(event) {
@@ -55,7 +57,7 @@ class ReposConfig extends React.Component {
       agent.Project.put(this.state.project.full_name, this.state.project.id, this.state.project.clone_url, this.state.configCmd).then((res) => {
         agent.Project.linkCustomer(this.state.project.id, user.id);
         agent.Project.updateAllLinterRel(this.state.project.id, this.state.projectLinters);
-        if(res.webhook_secret == "") {
+        if (res.webhook_secret == "") {
           this.setState({webhookModal: true});
         } else {
           browserHistory.push('/#/app');
