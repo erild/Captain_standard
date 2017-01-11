@@ -32,6 +32,11 @@
       "type": "string",
       "default": "",
       "required": false
+    },
+    "webhook_secret": {
+      "type": "string",
+      "default": "",
+      "required": false
     }
   },
   "validations": [],

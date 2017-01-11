@@ -3,6 +3,7 @@ const util = require('util');
 const exec = require('child_process').exec;
 const async = require('async');
 const fs = require('fs');
+const crypto = require('crypto');
 const process = require('process');
 
 const app = require('../../server/server');
@@ -205,22 +206,33 @@ module.exports = function (Project) {
   Project.observe('after save', (ctx, next) => {
     if (ctx.instance && ctx.isNewInstance) {
       const baseUrl = process.env.GITHUB_BACKEND_URL.replace(/\/$/, '')
+      const secret =  crypto.randomBytes(16).toString('hex');
       const webhookConf = {
         'name': 'web',
         'active': true,
         'events': ['pull_request'],
-        'config': {'url': baseUrl + '/api/Projects/linters-exec', 'content_type': 'json'}
+        'config': {
+          'url': baseUrl + '/api/Projects/linters-exec',
+          'content_type': 'json',
+          'secret': secret
+        }
       };
-      agent.post({url: `/repos/${ctx.instance.full_name}/hooks`}, webhookConf);
+      agent.post({url: `/repos/${ctx.instance.full_name}/hooks`,data: webhookConf}).then(res => {
+        ctx.instance.webhook_secret = secret;
+        Project.upsert(ctx.instance);
+        next();
+      }).catch(err => {
+        next();
+      });
+    } else {
+      next();
     }
-    next();
   });
 
   Project.observe('before delete', (ctx, next) => {
     if (ctx.where.hasOwnProperty('id')) {
       Project.findById(ctx.where.id, (err, project) => {
-        if (!err) {
-          if (project) {
+        if (!err && project) {
             agent.get({url: `/repos/${project.full_name}/hooks`}).then(res => {
               const hookUrl = process.env.GITHUB_BACKEND_URL.replace(/\/$/, '') + '/api/Projects/linters-exec';
               res.forEach(hook => {
@@ -228,11 +240,14 @@ module.exports = function (Project) {
                   agent.delete({url: `/repos/${project.full_name}/hooks/${hook.id}`});
                 }
               });
+              next();
             });
-          }
+        } else {
+          next();
         }
-        next();
       });
+    } else {
+      next();
     }
   });
 };
