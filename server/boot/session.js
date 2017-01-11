@@ -18,8 +18,8 @@ module.exports = function (app, cb) {
       if (err) {
         throw err;
       }
-      cb();
     });
+    cb();
   };
 
   client.connect(err => {
