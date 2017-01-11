@@ -1,14 +1,5 @@
 {
   "session:before": {
     "cookie-parser": { "params": "${COOKIE_SECRET}" }
-  },
-  "session": {
-    "express-session": {
-      "params": {
-        "secret": "${SESSION_SECRET}",
-        "saveUninitialized": true,
-        "resave": true
-      }
-    }
   }
 }

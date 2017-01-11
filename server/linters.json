@@ -5,6 +5,6 @@
       "javascript"
     ],
     "installCmd": "npm install -g eslint",
-    "runCmd": "eslint"
+    "runCmd": "eslint -f json"
   }
 ]
