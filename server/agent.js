@@ -26,10 +26,14 @@ const requests = {
   get: (options) =>
     getToken(options.user)
       .then(token => superagent.get((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token))
-      .then(res => res.body),
+      .then(res => Object.keys(res.body).length ? res.body : res.text),
   post: (options) =>
     getToken(options.user)
-      .then(token => superagent.post((options.raw ? '' : GITHUB_API) + options.url, {body: options.data}).set('authorization','token ' + token))
+      .then(token => superagent
+        .post((options.raw ? '' : GITHUB_API) + options.url, options.data)
+        .set('authorization','token ' + token)
+        .set('accept', 'application/vnd.github.black-cat-preview+json')
+      )
       .then(res => res.body),
   delete: (options) =>
     getToken(options.user)
