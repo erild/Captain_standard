@@ -11,7 +11,9 @@ const agent = require('../../server/agent');
 
 module.exports = function (Project) {
 
-  Project["linters-exec"] = (data, callback) => {
+  Project["linters-exec"] = (req, callback) => {
+    let data = req.body;
+    let headers = req.headers;
     if (!data.pull_request || ['opened', 'reopened', 'edited'].indexOf(data.action) < 0) {
       return callback();
     }
@@ -19,7 +21,6 @@ module.exports = function (Project) {
     const projectsDirectory = process.env.PROJECTS_DIRECTORY;
     let project, folderName;
     let lintResults = [];
-    callback();
     new Promise((resolve, reject) => {
       Project.findById(projectId, {
         include: [
@@ -33,8 +34,27 @@ module.exports = function (Project) {
           reject(err);
         } else {
           project = result;
-          folderName = project.full_name.replace('/', '-') + Math.random()
-          resolve(project);
+          if (project.webhook_secret == '') {
+            let error = new Error("Please add a secret and save it to Captain Standard");
+            error.status = 401;
+            callback(error);
+            reject(error);
+          } else {
+            let hmac = crypto.createHmac('sha1', '8ae23a0c7bb3d673eda5cb582b153982').setEncoding('hex');
+            hmac.end(JSON.stringify(data), function () {
+              let hash = hmac.read();
+              if (`sha1=${hash}` != headers['x-hub-signature']) {
+                let error = new Error("Invalid secret");
+                error.status = 401;
+                callback(error);
+                reject(error);
+              } else {
+                callback();
+                folderName = project.full_name.replace('/', '-') + Math.random()
+                resolve(project);
+              }
+            });
+          }
         }
       });
     })
@@ -155,7 +175,7 @@ module.exports = function (Project) {
 
   Project.remoteMethod('linters-exec', {
     description: 'Execute linters on this project.',
-    accepts: {arg: "data", type: "object", http: {source: 'body'}, required: true},
+    accepts: {arg: "req", type: "object", http: {source: 'req'}, required: true},
     http: {
       verb: 'post'
     },
