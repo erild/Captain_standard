@@ -42,7 +42,7 @@ module.exports = function (Project) {
           } else {
             let hmac = crypto.createHmac('sha1', '8ae23a0c7bb3d673eda5cb582b153982').setEncoding('hex');
             hmac.end(JSON.stringify(data), function () {
-              let hash = hmac.read();
+              const hash = hmac.read();
               if (`sha1=${hash}` != headers['x-hub-signature']) {
                 let error = new Error("Invalid secret");
                 error.status = 401;
