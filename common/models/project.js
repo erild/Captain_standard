@@ -40,7 +40,7 @@ module.exports = function (Project) {
             callback(error);
             reject(error);
           } else {
-            let hmac = crypto.createHmac('sha1', '8ae23a0c7bb3d673eda5cb582b153982').setEncoding('hex');
+            let hmac = crypto.createHmac('sha1', project.webhook_secret).setEncoding('hex');
             hmac.end(JSON.stringify(data), function () {
               const hash = hmac.read();
               if (`sha1=${hash}` != headers['x-hub-signature']) {
