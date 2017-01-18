@@ -2,6 +2,7 @@ import React from 'react';
 import Modal from 'react-bootstrap/lib/Modal';
 import Button from 'react-bootstrap/lib/Button';
 import FormControl from 'react-bootstrap/lib/FormControl';
+import Alert from 'react-bootstrap/lib/Alert';
 
 class WebHookModal extends React.Component {
   constructor(props) {
@@ -39,8 +40,13 @@ class WebHookModal extends React.Component {
             <li>A secret of your chosing</li>
           </ul>
 
-          <p>When you have added the webhook, please save the configuration again and enter the secret here</p>
+          <br />
+          <p>When you have added the webhook, please save the configuration again and enter the secret here.</p>
           <FormControl type="text" placeholder="Secret" onChange={this.handleSecretChange} value={this.state.secret}/>
+          <br />
+          <Alert bsStyle="danger">
+            <p>The webhook will not work as long as you have not added the secret here</p>
+          </Alert>
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={this.saveSecret}>Save Webhook secret</Button>
