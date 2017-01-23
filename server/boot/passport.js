@@ -1,3 +1,4 @@
+'use strict';
 // Make sure to also put this in `server/server.js`
 const PassportConfigurator = require('loopback-component-passport-c')
   .PassportConfigurator;
