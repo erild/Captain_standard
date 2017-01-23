@@ -33,7 +33,7 @@
       "default": "",
       "required": false
     },
-    "webhook_secret": {
+    "webhookSecret": {
       "type": "string",
       "default": "",
       "required": false

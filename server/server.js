@@ -1,12 +1,12 @@
 'use strict';
 require('dotenv').config({silent: true});
-var Raven = require('raven');
-var loopback = require('loopback');
-var boot = require('loopback-boot');
-var LoopBackContext = require('loopback-context');
+const Raven = require('raven');
+const loopback = require('loopback');
+const boot = require('loopback-boot');
+const LoopBackContext = require('loopback-context');
 
-var app = module.exports = loopback();
-require('loopback-component-passport-c').PassportConfigurator;
+const app = module.exports = loopback();
+require('loopback-component-passport-c').PassportConfigurator; //eslint-disable-line no-unused-expressions
 
 if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') {
   Raven.config(process.env.DSN).install();
@@ -15,35 +15,35 @@ if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') 
 
 app.start = function() {
   // start the web server
-  return app.listen(function() {
+  return app.listen(() => {
     app.emit('started');
-    var baseUrl = app.get('url').replace(/\/$/, '');
+    const baseUrl = app.get('url').replace(/\/$/, '');
     console.log('Web server listening at: %s', baseUrl);
     if (app.get('loopback-component-explorer')) {
-      var explorerPath = app.get('loopback-component-explorer').mountPath;
+      const explorerPath = app.get('loopback-component-explorer').mountPath;
       console.log('Browse your REST API at %s%s', baseUrl, explorerPath);
     }
   });
 };
-
 
 app.use('/auth/github', (req, res, next) => {
   req.session.returnTo = req.query.returnTo || req.session.returnTo;
   next();
 });
 
-app.use(function setCurrentUser(req, res, next) {
+//Set current user
+app.use((req, res, next) => {
   if (!req.accessToken) {
     return next();
   }
-  app.models.Customer.findById(req.accessToken.userId, function(err, user) {
+  app.models.Customer.findById(req.accessToken.userId, (err, user) => {
     if (err) {
       return next(err);
     }
     if (!user) {
       return next(new Error('No user with this access token was found.'));
     }
-    var loopbackContext = LoopBackContext.getCurrentContext();
+    let loopbackContext = LoopBackContext.getCurrentContext();
     if (loopbackContext) {
       loopbackContext.set('currentUser', user);
     }
@@ -51,10 +51,9 @@ app.use(function setCurrentUser(req, res, next) {
   });
 });
 
-
 // Bootstrap the application, configure models, datasources and middleware.
 // Sub-apps like REST API are mounted via boot scripts.
-boot(app, __dirname, function(err) {
+boot(app, __dirname, (err) => {
   if (err) {
     throw err;
   }

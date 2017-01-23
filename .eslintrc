@@ -2,5 +2,11 @@
   "extends": "loopback",
   "parserOptions": {
     "ecmaVersion": 6
+  },
+  "rules": {
+    "space-before-function-paren": ["error", {"anonymous": "always", "named": "never"}],
+    "strict": "off",
+    "no-var": "error",
+    "prefer-arrow-callback": "error"
   }
 }

@@ -1,11 +1,11 @@
-import React from "react";
-import {connect} from "react-redux";
-import {browserHistory} from "react-router";
-import Button from "react-bootstrap/lib/Button";
-import FormControl from "react-bootstrap/lib/FormControl";
-import agent from "../../agent";
-import LinterConfig from "../LinterConfig";
-import WebHookModal from "../WebHookModal";
+import React from 'react';
+import {connect} from 'react-redux';
+import { browserHistory } from 'react-router'
+import Button from 'react-bootstrap/lib/Button';
+import FormControl from 'react-bootstrap/lib/FormControl';
+import agent from '../../agent';
+import LinterConfig from '../LinterConfig';
+import WebHookModal from '../WebHookModal';
 
 
 const mapStateToProps = state => ({...state.projects});
@@ -54,7 +54,7 @@ class ReposConfig extends React.Component {
       agent.Project.put(this.props.project.full_name, this.props.project.id, this.props.project.cloneUrl, this.state.configCmd).then((res) => {
         agent.Project.linkCustomer(this.props.project.id, user.id);
         agent.Project.updateAllLinterRel(this.props.project.id, this.state.projectLinters);
-        if (res.webhook_secret == "") {
+        if (res.webhook_secret === '') {
           this.setState({webhookModal: true});
         } else {
           browserHistory.push('/#/app');

@@ -26,7 +26,9 @@ const requests = {
   get: (options) =>
     getToken(options.user)
       .then(token => {
-        let request = superagent.get((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token);
+        let request = superagent
+          .get((options.raw ? '' : GITHUB_API) + options.url)
+          .set('authorization','token ' + token);
         for (let header in (options.headers || {})) {
           request = request.set(header, options.headers[header]);
         }
@@ -48,15 +50,17 @@ const requests = {
     getToken(options.user)
       .then(token => superagent
         .post((options.raw ? '' : GITHUB_API) + options.url, options.data)
-        .set('authorization','token ' + token)
+        .set('authorization', 'token ' + token)
         .set('accept', 'application/vnd.github.black-cat-preview+json')
       )
       .then(res => res.body),
   delete: (options) =>
     getToken(options.user)
-      .then(token => superagent.del((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token))
+      .then(token => superagent
+        .del((options.raw ? '' : GITHUB_API) + options.url)
+        .set('authorization', 'token ' + token))
       .then(res => res.body),
-  getToken
-}
+  getToken,
+};
 
 module.exports = requests;

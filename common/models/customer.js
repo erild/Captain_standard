@@ -3,9 +3,11 @@ const agent = require('../../server/agent');
 module.exports = function (Customer) {
   Customer.observe('before save', (context, callback) => {
     if (context.instance && context.instance.__data) {
-      const regexResult = /^github\.(.*)/.exec(context.instance.__data.username);
+      const regexResult = /^github\.(.*)/
+        .exec(context.instance.__data.username);
       if (regexResult) {
-        context.instance.__data.username = /^github\.(.*)/.exec(context.instance.__data.username)[1];
+        context.instance.__data.username = /^github\.(.*)/
+          .exec(context.instance.__data.username)[1];
       }
     }
     callback();
@@ -21,9 +23,9 @@ module.exports = function (Customer) {
               repo.configured = true;
             }
             resolve(repo);
-          })
+          });
       });
-    }
+    };
     const url = page ? `/user/repos?page=${page}` : '/user/repos';
     agent
       .get({url: url, fullResponse: true})
@@ -45,13 +47,13 @@ module.exports = function (Customer) {
   Customer.remoteMethod('repos', {
     description: 'Fetch all repositories on Github that user has access to.',
     http: {
-      verb: 'get'
+      verb: 'get',
     },
     accepts: {arg: 'page', type: 'number'},
     isStatic: false,
     returns: {
       arg: 'repos',
-      type: 'any'
-    }
+      type: 'any',
+    },
   });
 };

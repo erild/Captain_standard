@@ -7,14 +7,14 @@ module.exports = function (app, cb) {
     database: process.env.DATABASE_NAME,
     port: process.env.DATABASE_PORT,
     host: process.env.DATABASE_HOST,
-    password: process.env.DATABASE_PASSWORD
+    password: process.env.DATABASE_PASSWORD,
   };
   const client = new pg.Client(conString);
-  const endCallback = (err) => {
+  const endCallback = function (err) {
     if (err) {
       throw err;
     }
-    client.end(function (err) {
+    client.end(err => {
       if (err) {
         throw err;
       }
@@ -38,23 +38,27 @@ SELECT 1 FROM pg_constraint WHERE conname = 'session_pkey';`, (err, res) => {
       }
 
       if (res.rowCount === 0) {
-        client.query(`ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE`, endCallback);
+        client.query(`
+ALTER TABLE "session"
+ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid")
+NOT DEFERRABLE INITIALLY IMMEDIATE`,
+          endCallback);
       } else {
         console.log('Table session already exists');
         endCallback();
       }
-    })
+    });
   });
 
   app.middleware('session', session({
-    "store": new pgSession({
-      pg : pg,
+    'store': new pgSession({
+      pg: pg,
       conString: conString,
       secret: process.env.SESSION_SECRET,
-      pruneSessionInterval: process.env.KILL_CONNECTIONS ? false : 60
+      pruneSessionInterval: process.env.KILL_CONNECTIONS ? false : 60,
     }),
-    "saveUninitialized": true,
-    "resave": true,
-    "secret": process.env.SESSION_SECRET
+    'saveUninitialized': true,
+    'resave': true,
+    'secret': process.env.SESSION_SECRET,
   }));
 };
