@@ -21,6 +21,7 @@
       "disableStackTrace": false
     }
   },
+  "logoutSessionsOnSensitiveChanges": true,
   "legacyExplorer": false,
   "aclErrorStatus": 403
 }

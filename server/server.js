@@ -1,11 +1,17 @@
 'use strict';
 require('dotenv').config({silent: true});
+var Raven = require('raven');
 var loopback = require('loopback');
 var boot = require('loopback-boot');
 var LoopBackContext = require('loopback-context');
 
 var app = module.exports = loopback();
 require('loopback-component-passport-c').PassportConfigurator;
+
+if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') {
+  Raven.config(process.env.DSN).install();
+  app.use(Raven.requestHandler());
+}
 
 app.start = function() {
   // start the web server
@@ -58,3 +64,9 @@ boot(app, __dirname, function(err) {
     app.start();
   }
 });
+
+if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') {
+  app.get('remoting').errorHandler = {
+    handler: Raven.errorHandler()
+  };
+}
