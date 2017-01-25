@@ -27,6 +27,9 @@ const requests = {
     getToken(options.user)
       .then(token => superagent.get((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token))
       .then(res => Object.keys(res.body).length ? res.body : res.text),
+  getWithResponse: (options) =>
+    getToken(options.user)
+      .then(token => superagent.get((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token)),
   post: (options) =>
     getToken(options.user)
       .then(token => superagent
