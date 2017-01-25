@@ -25,7 +25,16 @@ const getToken = (providedUser) => new Promise((resolve, reject) => {
 const requests = {
   get: (options) =>
     getToken(options.user)
-      .then(token => superagent.get((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token))
+      .then(token => {
+        let request = superagent.get((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token);
+        for (let header in (options.headers || {})) {
+          request = request.set(header, options.headers[header]);
+        }
+        if (options.buffer) {
+          request = request.buffer();
+        }
+        return request;
+      })
       .then(res => {
         if (options.fullResponse) {
           return res;

@@ -5,9 +5,10 @@ const async = require('async');
 const fs = require('fs');
 const crypto = require('crypto');
 const process = require('process');
-
+const parse = require('parse-diff');
 const app = require('../../server/server');
 const agent = require('../../server/agent');
+const _ = require('lodash');
 
 module.exports = function (Project) {
 
@@ -122,41 +123,54 @@ module.exports = function (Project) {
       });
       return promiseChain;
     })
-    .then(() => {
-      return agent.get({user: project.customers()[0], url: data.pull_request.diff_url, raw: true})
-    })
+    .then(() => agent.get({
+        user: project.customers()[0],
+        url: data.pull_request.url,
+        raw: true,
+        headers: {'accept': 'application/vnd.github.v3.diff'},
+        buffer: true
+      })
+    )
     .then((diff) => {
-      const regex = /\+\+\+ b\/(.+)\n@@ -\d+,?\d* \+(\d+),?(\d*) @@/g;
-      let filesChanged = [];
-      let matched;
-      while ((matched = regex.exec(diff)) !== null) {
-        let linesChanged = Number.parseInt(matched[3]) || 1;
-        filesChanged[matched[1]] = [];
-        for (let i = 0; i < linesChanged; i++) {
-          filesChanged[matched[1]].push(Number.parseInt(matched[2]) + i);
-        }
-      }
-      return filesChanged
-    })
-    .then((filesChanged) => {
+      const filesChanged = parse(diff);
       // Flatten array of arrays
       lintResults = JSON.parse([].concat.apply([], lintResults));
-
       let comments = [];
       let allLintPassed = true;
       lintResults.forEach(file => {
         file.filePath = file.filePath.replace('\\', '/').slice(`${projectsDirectory}/${folderName}/`.length);
         file.messages.forEach(message => {
-          if (file.filePath in filesChanged && filesChanged[file.filePath].indexOf(message.line) > -1) {
-            let commentBody = `${message.severity === 2 ? "(Error)" : "(Warning)"} Line ${message.line}: ${message.message} - ${message.ruleId}`;
-            comments.push({body: commentBody, path: file.filePath, position: message.line});
+          const fileDiff = _.find(filesChanged, {to: file.filePath});
+          if (!fileDiff) {
+            // file concerned with the message not in the diff => we do not comment
+            return;
+          }
+          const chunkIndex = _.findIndex(fileDiff.chunks, o => message.line >= o.newStart && message.line <= (o.newStart + o.newLines));
+          if (fileDiff && chunkIndex > -1) {
+            const chunk = fileDiff.chunks[chunkIndex];
+            // position in current chunk
+            let position = 1 + _.findIndex(chunk.changes, {ln: message.line, add: true});
+            if (position === 0) {
+              // line concerned with the message not in the diff => we do not comment
+              return;
+            }
+            // position in the diff if current chunk is not the first
+            if (chunkIndex > 0) {
+              let count = 0;
+              for (let i = 0; i < chunkIndex; i++) {
+                count += fileDiff.chunks[i].changes.length + 1;
+              }
+              position += count;
+            }
+            const commentBody = `${message.severity === 2 ? "(Error)" : "(Warning)"} Line ${message.line}: ${message.message} - ${message.ruleId}`;
+            comments.push({body: commentBody, path: file.filePath, position: position});
             allLintPassed = false;
           }
         });
       });
 
       let body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
-      agent.post({user: project.customers()[0], url: `${data.pull_request.url}/reviews`, data: {body: body, event: allLintPassed ? "APPROVE" : "REQUEST_CHANGES", comments: comments}, raw: true});
+      return agent.post({user: project.customers()[0], url: `${data.pull_request.url}/reviews`, data: {body: body, event: allLintPassed ? "APPROVE" : "REQUEST_CHANGES", comments: comments}, raw: true});
     })
     .catch((error) => console.log(error))
     .then(() => {
