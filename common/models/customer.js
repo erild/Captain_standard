@@ -29,7 +29,11 @@ module.exports = function (Customer) {
       .getWithResponse({url: url})
       .then(res => {
         const regex_last = /.*<https:\/\/api\.github\.com\/user\/repos\?page=(\d)>; rel=\"last\"/;
-        let last_page = res.header.hasOwnProperty('link') ? regex_last.exec(res.header.link)[1] : 1;
+        let last_page = 1;
+        let matched;
+        if (res.header.hasOwnProperty('link')) {
+          last_page = (matched = regex_last.exec(res.header.link)) ? Number.parseInt(matched[1]) : page;
+        }
         let repos = Promise.all(res.body.map(repo => createPromise(repo))).then(repos_res => {
           let current_page = page ? page : 1;
           callback(null, {pageCurrent: current_page , pageTotal: last_page, repos: repos_res});
