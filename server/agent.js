@@ -26,10 +26,15 @@ const requests = {
   get: (options) =>
     getToken(options.user)
       .then(token => superagent.get((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token))
-      .then(res => Object.keys(res.body).length ? res.body : res.text),
-  getWithResponse: (options) =>
-    getToken(options.user)
-      .then(token => superagent.get((options.raw ? '' : GITHUB_API) + options.url).set('authorization','token ' + token)),
+      .then(res => {
+        if (options.fullResponse) {
+          return res;
+        } else if (Object.keys(res.body).length) {
+          return res.body;
+        } else {
+          return res.text;
+        }
+      }),
   post: (options) =>
     getToken(options.user)
       .then(token => superagent

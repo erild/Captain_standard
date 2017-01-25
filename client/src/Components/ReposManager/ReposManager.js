@@ -22,6 +22,7 @@ class ReposManager extends React.Component {
 
   handleSelect(eventKey) {
     this.props.onSetPage(eventKey);
+    window.scrollTo(0, 0);
   }
 
   render() {
