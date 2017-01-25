@@ -36,8 +36,8 @@ const requests = {
 const Customers = {
   current: () =>
     requests.get('/Customers/me'),
-  repos: () =>
-    requests.get('/Customers/me/repos').then(res => res, err => requests.get('/Customers/me/repos')),
+  repos: (page) =>
+    requests.get(`/Customers/me/repos?page=${page}`).then(res => res, err => requests.get(`/Customers/me/repos?page=${page}`)),
   projects: () =>
     requests.get('/Customers/me/projects')
 };
