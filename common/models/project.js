@@ -60,6 +60,12 @@ module.exports = function (Project) {
       });
     })
     .then(project => {
+      agent.post({
+        url: data.pull_request._links.statuses.href,
+        raw: true,
+        user: project.customers()[0],
+        data: {state: 'pending', context: 'ci/captain-standard'}
+      })
       return Promise.all([
         new Promise((resolve, reject) => {
           app.models.ProjectLinter.find({
@@ -170,9 +176,29 @@ module.exports = function (Project) {
       });
 
       let body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
+      agent.post({
+        url: data.pull_request._links.statuses.href,
+        raw: true,
+        user: project.customers()[0],
+        data: {
+          state: allLintPassed ? 'success' : 'failure',
+          context: 'ci/captain-standard'
+        }
+      });
       return agent.post({user: project.customers()[0], url: `${data.pull_request.url}/reviews`, data: {body: body, event: allLintPassed ? "APPROVE" : "REQUEST_CHANGES", comments: comments}, raw: true});
     })
-    .catch((error) => console.log(error))
+    .catch((error) => {
+      console.log(error);
+      agent.post({
+        url: data.pull_request._links.statuses.href,
+        raw: true,
+        user: project.customers()[0],
+        data: {
+          state: 'error',
+          context: 'ci/captain-standard'
+        }
+      });
+    })
     .then(() => {
       const cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
       async.until(() => {
