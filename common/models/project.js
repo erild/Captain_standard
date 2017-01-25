@@ -41,20 +41,18 @@ module.exports = function (Project) {
             callback(error);
             reject(error);
           } else {
-            let hmac = crypto.createHmac('sha1', project.webhook_secret).setEncoding('hex');
-            hmac.end(JSON.stringify(data), function () {
-              const hash = hmac.read();
-              if (`sha1=${hash}` != headers['x-hub-signature']) {
-                let error = new Error("Invalid secret");
-                error.status = 401;
-                callback(error);
-                reject(error);
-              } else {
-                callback();
-                folderName = project.full_name.replace('/', '-') + Math.random()
-                resolve(project);
-              }
-            });
+            const computed = new Buffer(`sha1=${crypto.createHmac('sha1', project.webhook_secret).update(JSON.stringify(data)).digest('hex')}`);
+            const received = new Buffer(headers['x-hub-signature']);
+            if (!crypto.timingSafeEqual(computed, received)) {
+              let error = new Error("Invalid secret");
+              error.status = 401;
+              callback(error);
+              reject(error);
+            } else {
+              callback();
+              folderName = project.full_name.replace('/', '-') + Math.random()
+              resolve(project);
+            }
           }
         }
       });
