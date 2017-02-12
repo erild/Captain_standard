@@ -7,6 +7,12 @@ export default (state = {}, action) => {
         projects: action.payload
       };
       break;
+    case 'FETCH_PROJECT':
+      newState = {
+        ...state,
+        project: action.payload
+      };
+      break;
     default:
       newState = state;
   }

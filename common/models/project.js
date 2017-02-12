@@ -12,6 +12,26 @@ const _ = require('lodash');
 
 module.exports = function (Project) {
 
+  Project.afterRemote('findById', function (ctx, output, next) {
+    if (!output) {
+      agent
+        .get({url: `/repositories/${ctx.req.params.id}`})
+        .then(res => {
+          ctx.result = new Project();
+          Object.assign(ctx.result, {
+            id: res.id,
+            full_name: res.full_name,
+            cloneUrl: res.clone_url,
+            from_github: true
+          });
+          next();
+        }, err => next());
+    } else {
+      ctx.result.from_github = false;
+      next();
+    }
+  })
+
   Project["linters-exec"] = (req, callback) => {
     let data = req.body;
     let headers = req.headers;
