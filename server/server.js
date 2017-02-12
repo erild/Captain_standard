@@ -1,4 +1,5 @@
 'use strict';
+require('cls-hooked');
 require('dotenv').config({silent: true});
 var Raven = require('raven');
 var loopback = require('loopback');
@@ -9,7 +10,9 @@ var app = module.exports = loopback();
 require('loopback-component-passport-c').PassportConfigurator;
 
 if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') {
-  Raven.config(process.env.DSN).install();
+  Raven.config(process.env.DSN).install({
+    captureUnhandledRejections: true
+  });
   app.use(Raven.requestHandler());
 }
 
@@ -32,24 +35,6 @@ app.use('/auth/github', (req, res, next) => {
   next();
 });
 
-app.use(function setCurrentUser(req, res, next) {
-  if (!req.accessToken) {
-    return next();
-  }
-  app.models.Customer.findById(req.accessToken.userId, function(err, user) {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return next(new Error('No user with this access token was found.'));
-    }
-    var loopbackContext = LoopBackContext.getCurrentContext();
-    if (loopbackContext) {
-      loopbackContext.set('currentUser', user);
-    }
-    next();
-  });
-});
 
 
 // Bootstrap the application, configure models, datasources and middleware.
@@ -69,4 +54,7 @@ if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') 
   app.get('remoting').errorHandler = {
     handler: Raven.errorHandler()
   };
+  process.on('unhandledRejection', function (reason) {
+    Raven.captureException(reason);
+  });
 }

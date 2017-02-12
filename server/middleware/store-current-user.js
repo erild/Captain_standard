@@ -1,10 +1,10 @@
 const LoopBackContext = require('loopback-context');
-module.exports = function (app) {
+module.exports = function () {
   return function setCurrentUser(req, res, next) {
     if (!req.accessToken) {
       return next();
     }
-    app.models.Customer.findById(req.accessToken.userId, function(err, user) {
+    req.app.models.Customer.findById(req.accessToken.userId, function(err, user) {
       if (err) {
         return next(err);
       }
@@ -14,6 +14,7 @@ module.exports = function (app) {
       const loopbackContext = LoopBackContext.getCurrentContext();
       if (loopbackContext) {
         loopbackContext.set('currentUser', user);
+        req.currentUser = user;
       }
       next();
     });

@@ -23,7 +23,7 @@
     "loopback-component-explorer": "^2.4.0",
     "loopback-component-passport-c": "^1.6.8",
     "loopback-connector-postgresql": "^2.7.0",
-    "loopback-context": "^1.0.0",
+    "loopback-context": "^3.0.0",
     "loopback-datasource-juggler": "^2.39.0",
     "loopback-ds-timestamp-mixin": "^3.4.0",
     "parse-diff": "^0.4.0",
