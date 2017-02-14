@@ -28,7 +28,7 @@ const requests = {
       .then(token => {
         let request = superagent
           .get((options.raw ? '' : GITHUB_API) + options.url)
-          .set('authorization','token ' + token);
+          .set('authorization', 'token ' + token);
         for (let header in (options.headers || {})) {
           request = request.set(header, options.headers[header]);
         }

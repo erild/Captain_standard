@@ -11,8 +11,7 @@ const agent = require('../../server/agent');
 const _ = require('lodash');
 
 module.exports = function (Project) {
-
-  Project.afterRemote('findById', function (ctx, output, next) {
+  Project.afterRemote('findById', (ctx, output, next) => {
     if (!output) {
       agent
         .get({url: `/repositories/${ctx.req.params.id}`})
@@ -20,19 +19,22 @@ module.exports = function (Project) {
           ctx.result = new Project();
           Object.assign(ctx.result, {
             id: res.id,
+            // eslint-disable-next-line camelcase
             full_name: res.full_name,
             cloneUrl: res.clone_url,
-            from_github: true
+            // eslint-disable-next-line camelcase
+            from_github: true,
           });
           next();
         }, err => next());
     } else {
+      // eslint-disable-next-line camelcase
       ctx.result.from_github = false;
       next();
     }
   });
 
-  Project["linters-exec"] = (req, callback) => {
+  Project['linters-exec'] = (req, callback) => {
     let data = req.body;
     let headers = req.headers;
 
@@ -58,9 +60,7 @@ module.exports = function (Project) {
         } else {
           project = result;
           if (project.webhookSecret === '') {
-            let error = new Error(
-              'Please add a secret and save it to Captain Standard'
-            );
+            let error = new Error('Please add a secret and save it to Captain Standard');
             error.status = 401;
             callback(error);
             reject(error);
@@ -79,7 +79,7 @@ module.exports = function (Project) {
               reject(error);
             } else {
               callback();
-              folderName = project.full_name.replace('/', '-') + Math.random()
+              folderName = project.full_name.replace('/', '-') + Math.random();
               resolve(project);
             }
           }
@@ -91,8 +91,8 @@ module.exports = function (Project) {
         url: data.pull_request._links.statuses.href,
         raw: true,
         user: project.customers()[0],
-        data: {state: 'pending', context: 'ci/captain-standard'}
-      })
+        data: {state: 'pending', context: 'ci/captain-standard'},
+      });
       return Promise.all([
         new Promise((resolve, reject) => {
           app.models.ProjectLinter.find({
@@ -166,12 +166,12 @@ module.exports = function (Project) {
       return promiseChain;
     })
     .then(() => agent.get({
-        user: project.customers()[0],
-        url: data.pull_request.url,
-        raw: true,
-        headers: {'accept': 'application/vnd.github.v3.diff'},
-        buffer: true
-      })
+      user: project.customers()[0],
+      url: data.pull_request.url,
+      raw: true,
+      headers: {'accept': 'application/vnd.github.v3.diff'},
+      buffer: true,
+    })
     )
     .then((diff) => {
       const filesChanged = parse(diff);
@@ -189,11 +189,17 @@ module.exports = function (Project) {
             // file concerned with the message not in the diff => we do not comment
             return;
           }
-          const chunkIndex = _.findIndex(fileDiff.chunks, o => message.line >= o.newStart && message.line <= (o.newStart + o.newLines));
+          const chunkIndex = _.findIndex(
+            fileDiff.chunks,
+            o => message.line >= o.newStart && message.line <= (o.newStart + o.newLines)
+          );
           if (fileDiff && chunkIndex > -1) {
             const chunk = fileDiff.chunks[chunkIndex];
             // position in current chunk
-            let position = 1 + _.findIndex(chunk.changes, {ln: message.line, add: true});
+            let position = 1 + _.findIndex(chunk.changes, {
+              ln: message.line,
+              add: true,
+            });
             if (position === 0) {
               // line concerned with the message not in the diff => we do not comment
               return;
@@ -206,7 +212,7 @@ module.exports = function (Project) {
               }
               position += count;
             }
-            const commentBody = `${message.severity === 2 ? "(Error)" : "(Warning)"} Line ${message.line}: ${message.message} - ${message.ruleId}`;
+            const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'} Line ${message.line}: ${message.message} - ${message.ruleId}`;
             comments.push({body: commentBody, path: file.filePath, position: position});
             allLintPassed = false;
           }
@@ -221,10 +227,19 @@ module.exports = function (Project) {
         user: project.customers()[0],
         data: {
           state: allLintPassed ? 'success' : 'failure',
-          context: 'ci/captain-standard'
-        }
+          context: 'ci/captain-standard',
+        },
       });
-      return agent.post({user: project.customers()[0], url: `${data.pull_request.url}/reviews`, data: {body: body, event: allLintPassed ? "APPROVE" : "REQUEST_CHANGES", comments: comments}, raw: true});
+      return agent.post({
+        user: project.customers()[0],
+        url: `${data.pull_request.url}/reviews`,
+        data: {
+          body: body,
+          event: allLintPassed ? 'APPROVE' : 'REQUEST_CHANGES',
+          comments: comments
+        },
+        raw: true
+      });
     })
     .catch((error) => {
       agent.post({
@@ -233,8 +248,8 @@ module.exports = function (Project) {
         user: project.customers()[0],
         data: {
           state: 'error',
-          context: 'ci/captain-standard'
-        }
+          context: 'ci/captain-standard',
+        },
       });
     })
     .then(() => {
@@ -272,7 +287,7 @@ module.exports = function (Project) {
    * @param {Array} listRel array of all the linter relation
    * @param {function(Error)} callback
    */
-  Project.prototype.updateAllRel = function(listRel, callback) {
+  Project.prototype.updateAllRel = function (listRel, callback) {
     listRel.forEach(rel => {
       if (rel.hasOwnProperty('projectId') == false ||
         rel.hasOwnProperty('linterId') == false ||

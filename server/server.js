@@ -6,14 +6,15 @@ const boot = require('loopback-boot');
 const LoopBackContext = require('loopback-context');
 
 const app = module.exports = loopback();
-require('loopback-component-passport-c').PassportConfigurator; //eslint-disable-line no-unused-expressions
+//eslint-disable-next-line no-unused-expressions
+require('loopback-component-passport-c').PassportConfigurator;
 
 if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') {
   Raven.config(process.env.DSN).install();
   app.use(Raven.requestHandler());
 }
 
-app.start = function() {
+app.start = function () {
   // start the web server
   return app.listen(() => {
     app.emit('started');
@@ -66,6 +67,6 @@ boot(app, __dirname, (err) => {
 
 if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') {
   app.get('remoting').errorHandler = {
-    handler: Raven.errorHandler()
+    handler: Raven.errorHandler(),
   };
 }
