@@ -19,10 +19,8 @@ module.exports = function (Project) {
           ctx.result = new Project();
           Object.assign(ctx.result, {
             id: res.id,
-            // eslint-disable-next-line camelcase
             fullName: res.full_name,
             cloneUrl: res.clone_url,
-            // eslint-disable-next-line camelcase
             fromGithub: true,
           });
           next();
