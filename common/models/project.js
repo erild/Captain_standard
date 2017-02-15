@@ -424,8 +424,8 @@ module.exports = function (Project) {
         .update(JSON.stringify(data))
         .digest('hex')
       }`);
-    const received = new Buffer(headers['x-hub-signature']);
-    if (!crypto.timingSafeEqual(computed, received)) {
+    if (!headers['x-hub-signature'] ||
+      !crypto.timingSafeEqual(computed, new Buffer(headers['x-hub-signature']))) {
       let error = new Error('Invalid secret');
       error.status = 401;
       return callback(error);
