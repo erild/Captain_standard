@@ -57,6 +57,12 @@ module.exports = function (Project) {
           reject(err);
         } else {
           project = result;
+          if (!project) {
+            let error = new Error('Project is not configured');
+            error.status = 404;
+            reject(error);
+            return callback(error);
+          }
           if (project.webhookSecret === '') {
             let error = new Error('Please add a secret and save it to Captain Standard');
             error.status = 401;
@@ -103,7 +109,7 @@ module.exports = function (Project) {
             }
           });
         }),
-        agent.getToken(project.customers()[0]),
+        agent.getToken({user: project.customers()[0]}),
       ]);
     })
     .then((results) => {
@@ -229,7 +235,7 @@ module.exports = function (Project) {
         },
       });
       return agent.post({
-        user: project.customers()[0],
+        installationId: project.installationId,
         url: `${data.pull_request.url}/reviews`,
         data: {
           body: body,
@@ -319,6 +325,29 @@ module.exports = function (Project) {
     });
   };
 
+  Project.remoteMethod('updateAllRel', {
+    isStatic: false,
+    accepts: [
+      {
+        arg: 'listRel',
+        type: 'array',
+        required: true,
+        description: 'array of all the linter relation',
+        http: {
+          source: 'body'
+        }
+      }
+    ],
+    returns: [],
+    description: 'Update all the linter relation of the project',
+    http: [
+      {
+        path: '/updateAllRel',
+        verb: 'post'
+      }
+    ]
+  });
+
   Project.observe('after save', (ctx, next) => {
     if (ctx.instance && ctx.isNewInstance) {
       const baseUrl = process.env.GITHUB_BACKEND_URL.replace(/\/$/, '');
@@ -373,5 +402,65 @@ module.exports = function (Project) {
     } else {
       next();
     }
+  });
+
+  Project['integration-hook'] = (data, callback) => {
+    if (data.action === 'created') {
+      const installationId = data.installation.id;
+      const url = data.installation.repositories_url;
+      getRepos(url, installationId);
+    }
+    callback();
+  };
+
+  function getRepos(url, installationId) {
+    agent
+      .get({
+        url: url,
+        raw: true,
+        headers: {
+          accept: 'application/vnd.github.machine-man-preview'
+        },
+        fullResponse: true,
+        installationId,
+      })
+      .then(res => {
+        let promises = [];
+        res.body.repositories.forEach(repo =>
+          promises.push(new Promise((resolve, reject) =>
+            Project.findById(repo.id, (err, foundRepo) => {
+              if (!err && foundRepo) {
+                foundRepo.updateAttribute('installationId', installationId, resolve);
+              } else {
+                resolve();
+              }
+            })
+          ))
+        );
+        return Promise.all(promises).then(() => {
+          const nextPage = /<([^>]+)>; rel="next"/.exec(res.header.link);
+          if (nextPage) {
+             return getRepos(nextPage[1], installationId);
+          } else {
+            return Promise.resolve('over');
+          }
+        });
+      });
+  }
+
+  Project.remoteMethod('integration-hook', {
+    description: 'Hook for Github integration',
+    accepts: {
+      arg: 'data',
+      type: 'object',
+      http: {
+        source: 'body',
+      },
+      required: true,
+    },
+    http: {
+      verb: 'post',
+    },
+    returns: null,
   });
 };
