@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Projectlinter) {
+module.exports = function (Projectlinter) {
 
 };

@@ -9,12 +9,6 @@ export default (state = {}, action) => {
         pageLast: action.payload.repos.pageTotal
       }
       break;
-    case 'FETCH_REPO':
-      newState = {
-        ...state,
-        project: state.repos.repos.filter(project => project.id === Number.parseInt(action.payload.id, 10))[0]
-      };
-      break;
     default:
       newState = state;
   }

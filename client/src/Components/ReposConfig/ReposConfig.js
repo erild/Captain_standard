@@ -8,18 +8,18 @@ import LinterConfig from '../LinterConfig';
 import WebHookModal from '../WebHookModal';
 
 
-const mapStateToProps = state => ({...state.repos});
+const mapStateToProps = state => ({...state.projects});
 
 const mapDispatchToProps = dispatch => ({
-  onLoad: () =>
-    dispatch({type: 'FETCH_REPOS', meta: {ifNeeded: true, key: 'repos.projects'}, payload: agent.Customers.repos})
+  onLoad: (id) =>
+    agent.Project.get(id).then(res => dispatch({type: 'FETCH_PROJECT', payload: res}))
 });
 
 
 class ReposConfig extends React.Component {
   constructor() {
     super();
-    this.state = { project: null, linters: null, projectLinters: null, submitting: false, webhookModal: false };
+    this.state = { linters: null, projectLinters: null, submitting: false, webhookModal: false };
     agent.Linters.all().then(res => this.setState({linters: res}));
     this.AddLinter = this.AddLinter.bind(this);
     this.handleLinterChange = this.handleLinterChange.bind(this);
@@ -28,13 +28,10 @@ class ReposConfig extends React.Component {
   }
 
   componentWillMount() {
-    this.props.onLoad();
-    if (this.props.projects) {
-      const repo = this.props.projects.filter(project => project.id === Number.parseInt(this.props.params.projectId, 10))[0];
-      this.setState({project: repo });
-      agent.Project.getProjectLinters(repo.id).then(res => this.setState({projectLinters: res}));
-      agent.Project.get(repo.id).then(res => this.setState({configCmd: res.configCmd}));
-    }
+    this.props.onLoad(this.props.params.projectId).then(() => {
+      agent.Project.getProjectLinters(this.props.project.id).then(res => this.setState({projectLinters: res}));
+      this.setState({configCmd: this.props.project.configCmd});
+    });
   }
 
   handleLinterChange(linterInfo, key) {
@@ -45,7 +42,7 @@ class ReposConfig extends React.Component {
 
   handleWebHookModal(event) {
     if (event.hasOwnProperty('secret')) {
-      agent.Project.putWebHookSecret(this.state.project.id, event.secret);
+      agent.Project.putWebHookSecret(this.props.project.id, event.secret);
     }
     browserHistory.push('/#/app');
     window.location.reload();
@@ -54,10 +51,10 @@ class ReposConfig extends React.Component {
   handleSubmit(event) {
     this.setState({submitting: true});
     agent.Customers.current().then(user => {
-      agent.Project.put(this.state.project.full_name, this.state.project.id, this.state.project.clone_url, this.state.configCmd).then((res) => {
-        agent.Project.linkCustomer(this.state.project.id, user.id);
-        agent.Project.updateAllLinterRel(this.state.project.id, this.state.projectLinters);
-        if (res.webhook_secret == "") {
+      agent.Project.put(this.props.project.fullName, this.props.project.id, this.props.project.cloneUrl, this.state.configCmd).then((res) => {
+        agent.Project.linkCustomer(this.props.project.id, user.id);
+        agent.Project.updateAllLinterRel(this.props.project.id, this.state.projectLinters);
+        if (res.webhookSecret === '') {
           this.setState({webhookModal: true});
         } else {
           browserHistory.push('/#/app');
@@ -70,15 +67,15 @@ class ReposConfig extends React.Component {
 
   AddLinter() {
     let projectLinters = this.state.projectLinters;
-    projectLinters.push({projectId: this.state.project.id, linterId: 1, directory: "", arguments: ""});
+    projectLinters.push({projectId: this.props.project.id, linterId: 1, directory: "", arguments: ""});
     this.setState({projectLinters: projectLinters});
   }
 
   render() {
 
-    return this.state.project && this.state.linters && this.state.projectLinters ? (
+    return this.props.project && this.state.linters && this.state.projectLinters ? (
       <div>
-        <h2>Configuring {this.state.project.full_name}</h2>
+        <h2>Configuring {this.props.project.fullName}</h2>
         <div>
           <span>Commands to initialize the project and install linter dependencies:</span>
           <FormControl componentClass="textarea" style={{ height: 150, "maxWidth": 500 }} placeholder="npm install --only=dev" value={this.state.configCmd} onChange={event => this.setState({"configCmd": event.target.value})}/>
