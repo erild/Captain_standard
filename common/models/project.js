@@ -415,10 +415,24 @@ module.exports = function (Project) {
     }
   });
 
-  Project['integration-hook'] = (data, callback) => {
+  Project['integration-hook'] = (res, callback) => {
+    const headers = res.headers;
+    const data = res.body;
+    const computed = new Buffer(`sha1=${
+      crypto
+        .createHmac('sha1', new Buffer(process.env.INTEGRATION_SECRET))
+        .update(JSON.stringify(data))
+        .digest('hex')
+      }`);
+    const received = new Buffer(headers['x-hub-signature']);
+    if (!crypto.timingSafeEqual(computed, received)) {
+      let error = new Error('Invalid secret');
+      error.status = 401;
+      return callback(error);
+    }
+    const installationId = data.installation && data.installation.id;
+    const url = data.installation && data.installation.repositories_url;
     if (data.action === 'created') {
-      const installationId = data.installation.id;
-      const url = data.installation.repositories_url;
       getRepos(url, installationId);
     } else if (data.action === 'added' || data.action === 'removed') {
       data.repositories_removed.forEach(repo =>
@@ -471,7 +485,7 @@ module.exports = function (Project) {
       arg: 'data',
       type: 'object',
       http: {
-        source: 'body',
+        source: 'req',
       },
       required: true,
     },
