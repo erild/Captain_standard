@@ -5,6 +5,6 @@ module.exports = function enableAuthentication(server) {
   server.enableAuth();
   server.middleware('auth', loopback.token({
     model: server.models.AccessToken,
-    currentUserLiteral: 'me'
+    currentUserLiteral: 'me',
   }));
 };

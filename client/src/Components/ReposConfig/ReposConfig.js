@@ -1,11 +1,11 @@
-import React from "react";
-import {connect} from "react-redux";
-import {browserHistory} from "react-router";
-import Button from "react-bootstrap/lib/Button";
-import FormControl from "react-bootstrap/lib/FormControl";
-import agent from "../../agent";
-import LinterConfig from "../LinterConfig";
-import WebHookModal from "../WebHookModal";
+import React from 'react';
+import {connect} from 'react-redux';
+import { browserHistory } from 'react-router'
+import Button from 'react-bootstrap/lib/Button';
+import FormControl from 'react-bootstrap/lib/FormControl';
+import agent from '../../agent';
+import LinterConfig from '../LinterConfig';
+import WebHookModal from '../WebHookModal';
 
 
 const mapStateToProps = state => ({...state.projects});
@@ -51,10 +51,10 @@ class ReposConfig extends React.Component {
   handleSubmit(event) {
     this.setState({submitting: true});
     agent.Customers.current().then(user => {
-      agent.Project.put(this.props.project.full_name, this.props.project.id, this.props.project.cloneUrl, this.state.configCmd).then((res) => {
+      agent.Project.put(this.props.project.fullName, this.props.project.id, this.props.project.cloneUrl, this.state.configCmd).then((res) => {
         agent.Project.linkCustomer(this.props.project.id, user.id);
         agent.Project.updateAllLinterRel(this.props.project.id, this.state.projectLinters);
-        if (res.webhook_secret == "") {
+        if (res.webhookSecret === '') {
           this.setState({webhookModal: true});
         } else {
           browserHistory.push('/#/app');
@@ -75,7 +75,7 @@ class ReposConfig extends React.Component {
 
     return this.props.project && this.state.linters && this.state.projectLinters ? (
       <div>
-        <h2>Configuring {this.props.project.full_name}</h2>
+        <h2>Configuring {this.props.project.fullName}</h2>
         <div>
           <span>Commands to initialize the project and install linter dependencies:</span>
           <FormControl componentClass="textarea" style={{ height: 150, "maxWidth": 500 }} placeholder="npm install --only=dev" value={this.state.configCmd} onChange={event => this.setState({"configCmd": event.target.value})}/>

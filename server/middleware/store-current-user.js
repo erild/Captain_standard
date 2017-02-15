@@ -4,7 +4,7 @@ module.exports = function (app) {
     if (!req.accessToken) {
       return next();
     }
-    app.models.Customer.findById(req.accessToken.userId, function(err, user) {
+    app.models.Customer.findById(req.accessToken.userId, (err, user) => {
       if (err) {
         return next(err);
       }
@@ -17,5 +17,5 @@ module.exports = function (app) {
       }
       next();
     });
-  }
-}
+  };
+};
