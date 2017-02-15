@@ -420,6 +420,15 @@ module.exports = function (Project) {
       const installationId = data.installation.id;
       const url = data.installation.repositories_url;
       getRepos(url, installationId);
+    } else if (data.action === 'added' || data.action === 'removed') {
+      data.repositories_removed.forEach(repo =>
+        app.models.ProjectInstallation.destroyById(repo.id)
+      );
+      data.repositories_added.forEach(repo =>
+        app.models.ProjectInstallation.upsert({projectId: repo.id, installationId})
+      );
+    } else if (data.action === 'deleted') {
+      app.models.ProjectInstallation.destroyAll({installationId});
     }
     callback();
   };
