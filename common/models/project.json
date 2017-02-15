@@ -37,11 +37,6 @@
       "type": "string",
       "default": "",
       "required": false
-    },
-    "installationId": {
-      "type": "number",
-      "default": 0,
-      "required": false
     }
   },
   "validations": [],

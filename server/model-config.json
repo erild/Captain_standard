@@ -63,5 +63,9 @@
   "ProjectLinter": {
     "dataSource": "db",
     "public": true
+  },
+  "ProjectInstallation": {
+    "dataSource": "db",
+    "public": false
   }
 }

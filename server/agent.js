@@ -14,12 +14,8 @@ const getToken = (options) => new Promise((resolve, reject) => {
       .post(`${GITHUB_API}/installations/${options.installationId}/access_tokens`)
       .set('accept', 'application/vnd.github.machine-man-preview+json')
       .set('authorization', 'Bearer ' + jwt)
-      .then(res => {
-        resolve(res.body.token)
-      })
-      .catch(err => {
-        reject(err);
-      });
+      .then(res => resolve(res.body.token))
+      .catch(err => reject(err));
   } else {
     const ctx = LoopBackContext.getCurrentContext();
     const user = options.user || (ctx && ctx.get('currentUser'));
@@ -44,7 +40,6 @@ const generateJWT = () => {
     iss: 1402, // integrationId
   };
   const header = {alg: 'RS256', typ: 'JWT'};
-  console.log(process.env.PRIVATE_KEY)
   return KJUR.jws.JWS.sign(
     'RS256',
     JSON.stringify(header),

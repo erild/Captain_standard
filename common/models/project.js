@@ -98,7 +98,7 @@ module.exports = function (Project) {
         data: {state: 'pending', context: 'ci/captain-standard'},
       });
       return Promise.all([
-        new Promise((resolve, reject) => {
+        new Promise((resolve, reject) =>
           app.models.ProjectLinter.find({
             where: {projectId: project.id},
           }, (err, projectLinters) => {
@@ -107,14 +107,26 @@ module.exports = function (Project) {
             } else {
               resolve(projectLinters);
             }
-          });
-        }),
+          })
+        ),
         agent.getToken({user: project.customers()[0]}),
+        new Promise((resolve, reject) =>
+          app.models.ProjectInstallation.findOne({
+            where: {projectId: project.id},
+          }, (err, installationId) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(installationId);
+            }
+          })
+        ),
       ]);
     })
     .then((results) => {
       const projectLinters = results[0];
       const token = results[1];
+      project.installationId = results[2] && results[2].installationId;
       let linters = {};
       project.linters().forEach((linter) => {
         linters[linter.id] = linter;
@@ -223,8 +235,7 @@ module.exports = function (Project) {
         });
       });
 
-      let body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' :
-        'Oh no, it failed :cry:\n';
+      const body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
       agent.post({
         url: data.pull_request._links.statuses.href,
         raw: true,
@@ -334,18 +345,18 @@ module.exports = function (Project) {
         required: true,
         description: 'array of all the linter relation',
         http: {
-          source: 'body'
-        }
-      }
+          source: 'body',
+        },
+      },
     ],
     returns: [],
     description: 'Update all the linter relation of the project',
     http: [
       {
         path: '/updateAllRel',
-        verb: 'post'
-      }
-    ]
+        verb: 'post',
+      },
+    ],
   });
 
   Project.observe('after save', (ctx, next) => {
@@ -419,7 +430,7 @@ module.exports = function (Project) {
         url: url,
         raw: true,
         headers: {
-          accept: 'application/vnd.github.machine-man-preview'
+          accept: 'application/vnd.github.machine-man-preview',
         },
         fullResponse: true,
         installationId,
@@ -428,19 +439,16 @@ module.exports = function (Project) {
         let promises = [];
         res.body.repositories.forEach(repo =>
           promises.push(new Promise((resolve, reject) =>
-            Project.findById(repo.id, (err, foundRepo) => {
-              if (!err && foundRepo) {
-                foundRepo.updateAttribute('installationId', installationId, resolve);
-              } else {
-                resolve();
-              }
-            })
+            app.models.ProjectInstallation.upsert({
+              projectId: repo.id,
+              installationId,
+            }, resolve)
           ))
         );
         return Promise.all(promises).then(() => {
           const nextPage = /<([^>]+)>; rel="next"/.exec(res.header.link);
           if (nextPage) {
-             return getRepos(nextPage[1], installationId);
+            return getRepos(nextPage[1], installationId);
           } else {
             return Promise.resolve('over');
           }
