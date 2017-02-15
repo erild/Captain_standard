@@ -3,16 +3,21 @@
   "plural": "Customers",
   "base": "User",
   "idInjection": true,
-  "injectOptionsFromRemoteContext": true,
   "options": {
     "validateUpsert": true
   },
+  "injectOptionsFromRemoteContext": true,
   "properties": {},
   "validations": [],
   "relations": {
     "projects": {
       "type": "hasAndBelongsToMany",
       "model": "Project",
+      "foreignKey": ""
+    },
+    "scripts": {
+      "type": "hasMany",
+      "model": "Script",
       "foreignKey": ""
     }
   },
