@@ -20,16 +20,16 @@ module.exports = function (Project) {
           Object.assign(ctx.result, {
             id: res.id,
             // eslint-disable-next-line camelcase
-            full_name: res.full_name,
+            fullName: res.full_name,
             cloneUrl: res.clone_url,
             // eslint-disable-next-line camelcase
-            from_github: true,
+            fromGithub: true,
           });
           next();
         }, err => next());
     } else {
       // eslint-disable-next-line camelcase
-      ctx.result.from_github = false;
+      ctx.result.fromGithub = false;
       next();
     }
   });
@@ -67,7 +67,7 @@ module.exports = function (Project) {
           } else {
             const computed = new Buffer(`sha1=${
               crypto
-              .createHmac('sha1', project.webhook_secret)
+              .createHmac('sha1', project.webhookSecret)
               .update(JSON.stringify(data))
               .digest('hex')
             }`);
@@ -79,7 +79,7 @@ module.exports = function (Project) {
               reject(error);
             } else {
               callback();
-              folderName = project.full_name.replace('/', '-') + Math.random();
+              folderName = project.fullName.replace('/', '-') + Math.random();
               resolve(project);
             }
           }
@@ -236,9 +236,9 @@ module.exports = function (Project) {
         data: {
           body: body,
           event: allLintPassed ? 'APPROVE' : 'REQUEST_CHANGES',
-          comments: comments
+          comments: comments,
         },
-        raw: true
+        raw: true,
       });
     })
     .catch((error) => {
@@ -336,7 +336,7 @@ module.exports = function (Project) {
         },
       };
       agent.post({
-        url: `/repos/${ctx.instance.full_name}/hooks`,
+        url: `/repos/${ctx.instance.fullName}/hooks`,
         data: webhookConf,
       })
       .then(res => {
@@ -356,13 +356,13 @@ module.exports = function (Project) {
     if (ctx.where.hasOwnProperty('id')) {
       Project.findById(ctx.where.id, (err, project) => {
         if (!err && project) {
-          agent.get({url: `/repos/${project.full_name}/hooks`}).then(res => {
+          agent.get({url: `/repos/${project.fullName}/hooks`}).then(res => {
             const hookUrl = process.env.GITHUB_BACKEND_URL
                 .replace(/\/$/, '') + '/api/Projects/linters-exec';
             res.forEach(hook => {
               if (hook.name === 'web' && hook.config.url === hookUrl) {
                 agent.delete(
-                  {url: `/repos/${project.full_name}/hooks/${hook.id}`}
+                  {url: `/repos/${project.fullName}/hooks/${hook.id}`}
                 );
               }
             });

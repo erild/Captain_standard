@@ -49,7 +49,7 @@ const Linters = {
 
 const Project = {
   get:(projectId) => requests.get(`/Projects/${projectId}`),
-  put: (projectName, projectId, cloneUrl, configCmd) => requests.put('/Projects',{ full_name: projectName, id: projectId, cloneUrl: cloneUrl, configCmd: configCmd}),
+  put: (projectName, projectId, cloneUrl, configCmd) => requests.put('/Projects',{ fullName: projectName, id: projectId, cloneUrl: cloneUrl, configCmd: configCmd}),
   putWebHookSecret: (projectId, secret) => requests.put('/Projects',{ id: projectId, webhookSecret: secret}),
   linkCustomer: (projectId, customerId) => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}),
   getProjectLinters: (projectId) => requests.get(`/ProjectLinters?filter[where][projectId]=${projectId}`),

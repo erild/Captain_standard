@@ -19,7 +19,7 @@
       "id": true,
       "generated": false
     },
-    "full_name": {
+    "fullName": {
       "type": "string",
       "required": true,
       "default": ""
