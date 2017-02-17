@@ -37,7 +37,7 @@ const generateJWT = () => {
   const payload = {
     iat: KJUR.jws.IntDate.get('now'),
     exp: KJUR.jws.IntDate.get('now') + 60,
-    iss: 1402, // integrationId
+    iss: parseInt(process.env.INTEGRATION_ID, 10),
   };
   const header = {alg: 'RS256', typ: 'JWT'};
   return KJUR.jws.JWS.sign(

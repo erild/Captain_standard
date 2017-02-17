@@ -9,7 +9,8 @@ Some things to configure :
 - the oauth credentials : With environment variables (which you can put in `server/.env`), GITHUB_BACKEND_URL (for instance http://728738da72.ngrok.io), GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET, which you can get by creating an app [here](https://github.com/settings/applications/new)
 - the port for the server app, if you want something else than 2000 : In a file `server/config.local.json`
 - the private key, to store as a string in env var PRIVATE_KEY
-- the webhook secret for integration, to map integration installations with repos
+- the webhook secret for integration, to map integration installations with repos; to store in env var INTEGRATION_SECRET
+- the integration id, to store in env var INTEGRATION_ID
 
 After having created the database in the psql command line (`psql -h localhost -p 5432 -U postgres -W` then `CREATE DATABASE captain_standard;`), update the schema with `node bin/autoupdate.js`;
 #### Docker
