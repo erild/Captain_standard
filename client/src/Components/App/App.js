@@ -6,6 +6,7 @@ import HomePage from '../HomePage';
 import agent from '../../agent';
 import Template from '../Template';
 import ReposManager from '../ReposManager';
+import ScriptsManager from '../ScriptsManager';
 import ReposConfig from '../ReposConfig';
 
 const mapStateToProps = state => ({rehydrated: state.notPersisted.rehydrated});
@@ -29,6 +30,7 @@ class App extends Component {
           <Route path="/app" onEnter={this.props.requireAuth} component={Template}>
             <IndexRoute component={HomePage}/>
             <Route path="repos" component={ReposManager} />
+            <Route path="scripts" component={ScriptsManager} />
             <Route path="projects/:projectId/edit" component={ReposConfig}/>
           </Route>
         </Router>

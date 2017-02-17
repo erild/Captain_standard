@@ -64,6 +64,12 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__get__projects"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__scripts"
     }
   ],
   "methods": {}

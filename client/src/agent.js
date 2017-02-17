@@ -39,7 +39,9 @@ const Customers = {
   repos: (page) =>
     requests.get(`/Customers/me/repos?page=${page}`).then(res => res, err => requests.get(`/Customers/me/repos?page=${page}`)),
   projects: () =>
-    requests.get('/Customers/me/projects')
+    requests.get('/Customers/me/projects'),
+  scripts: () =>
+    requests.get('/Customers/me/scripts')
 };
 
 const Linters = {
@@ -56,11 +58,18 @@ const Project = {
   updateAllLinterRel: (projectId, listLinter) => requests.post(`/Projects/${projectId}/updateAllRel`, listLinter)
 };
 
+const Script = {
+  get:(scriptId) => requests.get(`/Scripts/${scriptId}`),
+  put:(scriptObject) => requests.put('/Scripts', scriptObject)
+};
+
+
 export default {
   API_ROOT,
   Customers,
   Linters,
   Project,
+  Script,
   setToken: _token => { token = _token; },
   getToken: () => token
 };
