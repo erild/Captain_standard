@@ -12,6 +12,7 @@ class ScriptModal extends React.Component {
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
     this.handleContentChange = this.handleContentChange.bind(this);
+    this.handleFileUploaded = this.handleFileUploaded.bind(this);
     this.saveScript = this.saveScript.bind(this);
   }
 
@@ -41,6 +42,16 @@ class ScriptModal extends React.Component {
     this.setState({ scriptObject: script });
   }
 
+  handleFileUploaded(event) {
+    var reader  = new FileReader();
+    reader.onload = function(output) {
+      let script = this.state.scriptObject;
+      script.content = output.target.result;
+      this.setState({ scriptObject: script });
+    }.bind(this);
+    reader.readAsText(event.target.files[0]);
+  }
+
   saveScript() {
     this.props.onChange(this.state.scriptObject);
   }
@@ -60,6 +71,8 @@ class ScriptModal extends React.Component {
           <ControlLabel>Description</ControlLabel>
           <FormControl type="text" placeholder="description" onChange={this.handleDescriptionChange} value={this.state.scriptObject.description}/>
           <ControlLabel>Script</ControlLabel>
+          <p>Upload content of the function here on type it below</p>
+          <FormControl type="file" label="File" accept='.js' onChange={this.handleFileUploaded}/>
           <FormControl componentClass="textarea" style={{ height: 300 }} placeholder="return []" onChange={this.handleContentChange} value={this.state.scriptObject.content}/>
           <br />
         </Modal.Body>
