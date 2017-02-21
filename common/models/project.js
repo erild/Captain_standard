@@ -310,35 +310,68 @@ module.exports = function (Project) {
    * @param {Array} listRel array of all the linter relation
    * @param {function(Error)} callback
    */
-  Project.prototype.updateAllRel = function (listRel, callback) {
-    listRel.forEach(rel => {
+  Project.prototype.updateAllRel = function (listLinterRel, listScriptRel, callback) {
+    listLinterRel.forEach(rel => {
       if (rel.hasOwnProperty('projectId') == false ||
         rel.hasOwnProperty('linterId') == false ||
         rel.hasOwnProperty('directory') == false ||
         rel.hasOwnProperty('arguments') == false) {
-        callback(new Error('Invalid projectLinter parameters'));
+        callback(new Error('Invalid projectLinter relation parameters'));
         next();
       }
     });
-    new Promise((resolve, reject) => {
-      Project.app.models.ProjectLinter.find({
-        fields: ['id'],
-        where: {'projectId': this.id},
-      }, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    }).then(projectLinters => {
+    listScriptRel.forEach(rel => {
+      if (rel.hasOwnProperty('projectId') == false ||
+        rel.hasOwnProperty('scriptId') == false ||
+        rel.hasOwnProperty('directory') == false) {
+        callback(new Error('Invalid projectScript relation  parameters'));
+        next();
+      }
+    });
+    Promise.all([
+      new Promise((resolve, reject) => {
+        Project.app.models.ProjectLinter.find({
+          fields: ['id'],
+          where: {'projectId': this.id},
+        }, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      }),
+      new Promise((resolve, reject) => {
+        Project.app.models.ProjectScript.find({
+          fields: ['id'],
+          where: {'projectId': this.id},
+        }, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      }),
+    ]).then(res => {
+      let projectLinters = res[0];
+      let projectScripts = res[1];
+
       projectLinters.forEach(projectLinter => {
-        if (listRel.find(rel => rel.id === projectLinter.id) === undefined) {
+        if (listLinterRel.find(rel => rel.id === projectLinter.id) === undefined) {
           Project.app.models.ProjectLinter.destroyById(projectLinter.id);
         }
       });
-      listRel.forEach(rel => {
+      listLinterRel.forEach(rel => {
         Project.app.models.ProjectLinter.upsert(rel);
+      });
+      projectScripts.forEach(projectScript => {
+        if (listScriptRel.find(rel => rel.id === projectScript.id) === undefined) {
+          Project.app.models.ProjectScript.destroyById(projectScript.id);
+        }
+      });
+      listScriptRel.forEach(rel => {
+        Project.app.models.ProjectScript.upsert(rel);
       });
       callback();
     });
@@ -348,14 +381,17 @@ module.exports = function (Project) {
     isStatic: false,
     accepts: [
       {
-        arg: 'listRel',
+        arg: 'listLinterRel',
         type: 'array',
         required: true,
         description: 'array of all the linter relation',
-        http: {
-          source: 'body',
-        },
       },
+      {
+        arg: 'listScriptRel',
+        type: 'array',
+        required: true,
+        description: 'array of all the script relation',
+      }
     ],
     returns: [],
     description: 'Update all the linter relation of the project',

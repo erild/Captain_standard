@@ -12,9 +12,9 @@ class ScriptConfig extends React.Component {
     this.state = { newScript: false };
     this.handleScriptDirChange = this.handleScriptDirChange.bind(this);
     this.handleScriptIdChange = this.handleScriptIdChange.bind(this);
+    this.handleScriptModal = this.handleScriptModal.bind(this);
     this.handleRemove = this.handleRemove.bind(this);
     this.handleNew = this.handleNew.bind(this);
-    this.handleScriptModal = this.handleScriptModal.bind(this);
   }
 
   handleScriptDirChange(event) {
