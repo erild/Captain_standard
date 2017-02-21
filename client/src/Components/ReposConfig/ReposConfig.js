@@ -133,6 +133,8 @@ class ReposConfig extends React.Component {
           <Button bsStyle="primary" className="button-left" onClick={this.AddLinter}>Add another linter</Button>
           <Button bsStyle="primary" className="button-right" onClick={this.AddScript}>Add a custom script</Button>
         </ul>
+        <br />
+        <br />
         <Button type="submit" bsStyle="success" disabled={this.state.submitting}>Save</Button>
         </form>
         <WebHookModal display={this.state.webhookModal} API_ROOT={agent.API_ROOT} onChange={this.handleWebHookModal}/>

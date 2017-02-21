@@ -36,7 +36,7 @@ class ScriptConfig extends React.Component {
   handleScriptModal(event) {
     if (event.hasOwnProperty('close')) {
       this.setState({ newScript: false })
-      if (this.props.scripts){
+      if (!this.props.scripts){
         this.props.onChange('delete');
       }
     } else if (event.hasOwnProperty('name') && event.hasOwnProperty('description') && event.hasOwnProperty('content')) {
