@@ -55,7 +55,9 @@ const Project = {
   putWebHookSecret: (projectId, secret) => requests.put('/Projects',{ id: projectId, webhookSecret: secret}),
   linkCustomer: (projectId, customerId) => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}),
   getProjectLinters: (projectId) => requests.get(`/ProjectLinters?filter[where][projectId]=${projectId}`),
-  updateAllLinterRel: (projectId, listLinter) => requests.post(`/Projects/${projectId}/updateAllRel`, listLinter)
+  getProjectScripts: (projectId) => requests.get(`/ProjectScripts?filter[where][projectId]=${projectId}`),
+  updateAllLinterRel: (projectId, listLinter) => requests.post(`/Projects/${projectId}/updateAllLinterRel`, listLinter),
+  updateAllScriptRel: (projectId, listScript) => requests.post(`/Projects/${projectId}/updateAllScriptRel`, listScript)
 };
 
 const Script = {

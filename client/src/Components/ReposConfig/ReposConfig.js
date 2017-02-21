@@ -5,6 +5,7 @@ import Button from 'react-bootstrap/lib/Button';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import agent from '../../agent';
 import LinterConfig from '../LinterConfig';
+import ScriptConfig from '../ScriptConfig';
 import WebHookModal from '../WebHookModal';
 
 
@@ -19,10 +20,13 @@ const mapDispatchToProps = dispatch => ({
 class ReposConfig extends React.Component {
   constructor() {
     super();
-    this.state = { linters: null, projectLinters: null, submitting: false, webhookModal: false };
+    this.state = { linters: null, customScripts: null, projectLinters: null, projectScripts: null, submitting: false, webhookModal: false };
     agent.Linters.all().then(res => this.setState({linters: res}));
+    agent.Customers.scripts().then(res => this.setState({customScripts: res}));
     this.AddLinter = this.AddLinter.bind(this);
+    this.AddScript = this.AddScript.bind(this);
     this.handleLinterChange = this.handleLinterChange.bind(this);
+    this.handleScriptChange = this.handleScriptChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleWebHookModal = this.handleWebHookModal.bind(this);
   }
@@ -31,6 +35,7 @@ class ReposConfig extends React.Component {
     this.props.onLoad(this.props.params.projectId).then(() => {
       agent.Project.getProjectLinters(this.props.project.id).then(res => this.setState({projectLinters: res}));
       this.setState({configCmd: this.props.project.configCmd});
+      agent.Project.getProjectScripts(this.props.project.id).then(res => this.setState({projectScripts: res}));
     });
   }
 
@@ -38,6 +43,23 @@ class ReposConfig extends React.Component {
     let projectLinters = this.state.projectLinters;
     linterInfo === 'delete' ? projectLinters.splice(key, 1) : projectLinters[key] = Object.assign(projectLinters[key], linterInfo);
     this.setState({projectLinters: projectLinters});
+  }
+
+  handleScriptChange(scriptInfo, key) {
+    if(scriptInfo === 'update') {
+      agent.Customers.scripts().then(res => {
+        this.setState({customScripts: res});
+        if (res.length) {
+          let projectScripts = this.state.projectScripts;
+          Object.assign(projectScripts[key], { scriptId: res[res.length-1].id });
+          this.setState({ projectScripts: projectScripts })
+        }
+      });
+    } else {
+      let projectScripts = this.state.projectScripts;
+      scriptInfo === 'delete' ? projectScripts.splice(key, 1) : projectScripts[key] = Object.assign(projectScripts[key], scriptInfo);
+      this.setState({projectScripts: projectScripts});
+    }
   }
 
   handleWebHookModal(event) {
@@ -50,25 +72,18 @@ class ReposConfig extends React.Component {
 
   handleSubmit(event) {
     this.setState({submitting: true});
-    let user;
-    let project;
-    Promise.all([
-      agent.Customers.current(),
-      agent.Project.put(this.props.project.fullName, this.props.project.id, this.props.project.cloneUrl, this.state.configCmd),
-    ]).then(res => {
-        user = res[0];
-        project = res[1];
-        return Promise.all([
-          agent.Project.linkCustomer(this.props.project.id, user.id),
-          agent.Project.updateAllLinterRel(this.props.project.id, this.state.projectLinters),
-        ]);
-    }).then(() => {
-      if (project.webhookSecret === '') {
-        this.setState({webhookModal: true});
-      } else {
-        browserHistory.push('/#/app');
-        window.location.reload();
-      }
+    agent.Customers.current().then(user => {
+      agent.Project.put(this.props.project.fullName, this.props.project.id, this.props.project.cloneUrl, this.state.configCmd).then((res) => {
+        agent.Project.linkCustomer(this.props.project.id, user.id);
+        agent.Project.updateAllLinterRel(this.props.project.id, this.state.projectLinters);
+        agent.Project.updateAllScriptRel(this.props.project.id, this.state.projectScripts);
+        if (res.webhookSecret === '') {
+          this.setState({webhookModal: true});
+        } else {
+          browserHistory.push('/#/app');
+          window.location.reload();
+        }
+      });
     });
     event.preventDefault();
   }
@@ -79,9 +94,15 @@ class ReposConfig extends React.Component {
     this.setState({projectLinters: projectLinters});
   }
 
+  AddScript() {
+    let projectScripts = this.state.projectScripts;
+    this.state.customScripts.length ? projectScripts.push({projectId: this.props.project.id, scriptId: this.state.customScripts[0].id, directory: ""}) : projectScripts.push({projectId: this.props.project.id, scriptId: null, directory: ""})
+    this.setState({projectScripts: projectScripts});
+  }
+
   render() {
 
-    return this.props.project && this.state.linters && this.state.projectLinters ? (
+    return this.props.project && this.state.linters && this.state.customScripts && this.state.projectLinters && this.state.projectScripts ? (
       <div>
         <h2>Configuring {this.props.project.fullName}</h2>
         <div>
@@ -96,7 +117,13 @@ class ReposConfig extends React.Component {
               <LinterConfig linters={this.state.linters} selectedLinter={projectLinter.linterId} directory={projectLinter.directory} arguments={projectLinter.arguments} key={key} onChange={event => this.handleLinterChange(event, key)}/>
               )
             })}
+          {this.state.projectScripts.map((projectScript, key) => {
+            return (
+              <ScriptConfig scripts={this.state.customScripts} selectedScript={projectScript.scriptId} directory={projectScript.directory} key={key} onChange={event => this.handleScriptChange(event, key)}/>
+              )
+            })}
           <Button bsStyle="primary" onClick={this.AddLinter}>Add another linter</Button>
+          <Button bsStyle="primary" onClick={this.AddScript}>Add a custom script</Button>
         </ul>
         <Button type="submit" bsStyle="success" disabled={this.state.submitting}>Save</Button>
         </form>
