@@ -6,7 +6,7 @@ const ds = app.datasources.db;
 const tables = [
   'Customer', 'User', 'AccessToken', 'ACL', 'RoleMapping', 'Role',
   'UserCredential', 'UserIdentity', 'Linter', 'PersistedModel', 'Project',
-  'ProjectLinter', 'ProjectCustomer',
+  'ProjectLinter', 'ProjectCustomer', 'ProjectInstallation',
 ];
 ds.autoupdate(tables, err => {
   if (err) {

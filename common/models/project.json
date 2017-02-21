@@ -98,30 +98,14 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "updateAllRel"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "integration-hook"
     }
   ],
   "methods": {
-    "updateAllRel": {
-      "isStatic": false,
-      "accepts": [
-        {
-          "arg": "listRel",
-          "type": "array",
-          "required": true,
-          "description": "array of all the linter relation",
-          "http": {
-            "source": "body"
-          }
-        }
-      ],
-      "returns": [],
-      "description": "Update all the linter relation of the project",
-      "http": [
-        {
-          "path": "/updateAllRel",
-          "verb": "post"
-        }
-      ]
-    }
   }
 }

@@ -23,6 +23,7 @@ class HomePage extends React.Component {
         return (
           <div>
             <h1>Hey {this.props.currentUser && this.props.currentUser.username }</h1>
+            <h4>If you want Captain Standard to post comments on your PR, you need to install Captain Standard's GitHub integration, by clicking <a href="https://github.com/integrations/captain-standard/installations/new">here</a>.</h4>
             <Button bsStyle="success" href="/#/app/repos"><i className="fa fa-plus"/> Add a project</Button>
             <br />
             <ProjectsList projects={this.props.projects} configured={true} />

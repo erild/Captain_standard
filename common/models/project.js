@@ -57,6 +57,12 @@ module.exports = function (Project) {
           reject(err);
         } else {
           project = result;
+          if (!project) {
+            let error = new Error('Project is not configured');
+            error.status = 404;
+            reject(error);
+            return callback(error);
+          }
           if (project.webhookSecret === '') {
             let error = new Error('Please add a secret and save it to Captain Standard');
             error.status = 401;
@@ -92,7 +98,7 @@ module.exports = function (Project) {
         data: {state: 'pending', context: 'ci/captain-standard'},
       });
       return Promise.all([
-        new Promise((resolve, reject) => {
+        new Promise((resolve, reject) =>
           app.models.ProjectLinter.find({
             where: {projectId: project.id},
           }, (err, projectLinters) => {
@@ -101,14 +107,26 @@ module.exports = function (Project) {
             } else {
               resolve(projectLinters);
             }
-          });
-        }),
-        agent.getToken(project.customers()[0]),
+          })
+        ),
+        agent.getToken({user: project.customers()[0]}),
+        new Promise((resolve, reject) =>
+          app.models.ProjectInstallation.findOne({
+            where: {projectId: project.id},
+          }, (err, installationId) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(installationId);
+            }
+          })
+        ),
       ]);
     })
     .then((results) => {
       const projectLinters = results[0];
       const token = results[1];
+      project.installationId = results[2] && results[2].installationId;
       let linters = {};
       project.linters().forEach((linter) => {
         linters[linter.id] = linter;
@@ -217,8 +235,7 @@ module.exports = function (Project) {
         });
       });
 
-      let body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' :
-        'Oh no, it failed :cry:\n';
+      const body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
       agent.post({
         url: data.pull_request._links.statuses.href,
         raw: true,
@@ -229,7 +246,7 @@ module.exports = function (Project) {
         },
       });
       return agent.post({
-        user: project.customers()[0],
+        installationId: project.installationId,
         url: `${data.pull_request.url}/reviews`,
         data: {
           body: body,
@@ -319,6 +336,29 @@ module.exports = function (Project) {
     });
   };
 
+  Project.remoteMethod('updateAllRel', {
+    isStatic: false,
+    accepts: [
+      {
+        arg: 'listRel',
+        type: 'array',
+        required: true,
+        description: 'array of all the linter relation',
+        http: {
+          source: 'body',
+        },
+      },
+    ],
+    returns: [],
+    description: 'Update all the linter relation of the project',
+    http: [
+      {
+        path: '/updateAllRel',
+        verb: 'post',
+      },
+    ],
+  });
+
   Project.observe('after save', (ctx, next) => {
     if (ctx.instance && ctx.isNewInstance) {
       const baseUrl = process.env.GITHUB_BACKEND_URL.replace(/\/$/, '');
@@ -373,5 +413,85 @@ module.exports = function (Project) {
     } else {
       next();
     }
+  });
+
+  Project['integration-hook'] = (res, callback) => {
+    const headers = res.headers;
+    const data = res.body;
+    const computed = new Buffer(`sha1=${
+      crypto
+        .createHmac('sha1', new Buffer(process.env.INTEGRATION_SECRET))
+        .update(JSON.stringify(data))
+        .digest('hex')
+      }`);
+    if (!headers['x-hub-signature'] ||
+      !crypto.timingSafeEqual(computed, new Buffer(headers['x-hub-signature']))) {
+      let error = new Error('Invalid secret');
+      error.status = 401;
+      return callback(error);
+    }
+    const installationId = data.installation && data.installation.id;
+    const url = data.installation && data.installation.repositories_url;
+    if (data.action === 'created') {
+      getRepos(url, installationId);
+    } else if (data.action === 'added' || data.action === 'removed') {
+      data.repositories_removed.forEach(repo =>
+        app.models.ProjectInstallation.destroyById(repo.id)
+      );
+      data.repositories_added.forEach(repo =>
+        app.models.ProjectInstallation.upsert({projectId: repo.id, installationId})
+      );
+    } else if (data.action === 'deleted') {
+      app.models.ProjectInstallation.destroyAll({installationId});
+    }
+    callback();
+  };
+
+  function getRepos(url, installationId) {
+    agent
+      .get({
+        url: url,
+        raw: true,
+        headers: {
+          accept: 'application/vnd.github.machine-man-preview',
+        },
+        fullResponse: true,
+        installationId,
+      })
+      .then(res => {
+        let promises = [];
+        res.body.repositories.forEach(repo =>
+          promises.push(new Promise((resolve, reject) =>
+            app.models.ProjectInstallation.upsert({
+              projectId: repo.id,
+              installationId,
+            }, resolve)
+          ))
+        );
+        return Promise.all(promises).then(() => {
+          const nextPage = /<([^>]+)>; rel="next"/.exec(res.header.link);
+          if (nextPage) {
+            return getRepos(nextPage[1], installationId);
+          } else {
+            return Promise.resolve('over');
+          }
+        });
+      });
+  }
+
+  Project.remoteMethod('integration-hook', {
+    description: 'Hook for Github integration',
+    accepts: {
+      arg: 'data',
+      type: 'object',
+      http: {
+        source: 'req',
+      },
+      required: true,
+    },
+    http: {
+      verb: 'post',
+    },
+    returns: null,
   });
 };
