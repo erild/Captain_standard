@@ -6,5 +6,13 @@
     ],
     "installCmd": "npm install -g eslint",
     "runCmd": "eslint -f json"
+  },
+  {
+    "name": "coffeelint",
+    "languages": [
+      "coffeescript"
+    ],
+    "installCmd": "npm install -g coffeelint",
+    "runCmd": "coffeelint --reporter raw"
   }
 ]
