@@ -46,6 +46,7 @@ module.exports = function (Project) {
     let lintResults = [];
     let comments = [];
     let allLintPassed = true;
+    let scriptResults = [];
     new Promise((resolve, reject) => {
       Project.findById(projectId, {
         include: [
@@ -53,6 +54,8 @@ module.exports = function (Project) {
             relation: 'linters',
           }, {
             relation: 'customers',
+          }, {
+            relation: 'scripts',
           }],
       }, (err, result) => {
         if (err) {
@@ -111,6 +114,17 @@ module.exports = function (Project) {
             }
           })
         ),
+        new Promise((resolve, reject) =>
+          app.models.ProjectScript.find({
+            where: {projectId: project.id},
+          }, (err, projectScripts) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(projectScripts);
+            }
+          })
+        ),
         agent.getToken({user: project.customers()[0]}),
         new Promise((resolve, reject) =>
           app.models.ProjectInstallation.findOne({
@@ -127,11 +141,16 @@ module.exports = function (Project) {
     })
     .then((results) => {
       const projectLinters = results[0];
-      const token = results[1];
-      project.installationId = results[2] && results[2].installationId;
+      const projectScripts = results[1];
+      const token = results[2];
+      project.installationId = results[3] && results[3].installationId;
       let linters = {};
       project.linters().forEach((linter) => {
         linters[linter.id] = linter;
+      });
+      let scripts = {};
+      project.scripts().forEach((script) => {
+        scripts[script.id] = script;
       });
 
       let initCommands = [
@@ -181,6 +200,20 @@ module.exports = function (Project) {
                 resolve();
               }
             );
+          });
+        });
+      });
+      projectScripts.forEach((scan) => {
+        promiseChain = promiseChain.then(() => {
+          return new Promise((resolve, reject) => {
+            try {
+              let scriptFunction = new Function('dir', `'use strict';${scripts[scan.scriptId].content}`);
+              let output = scriptFunction(`${projectsDirectory}/${folderName}${scan.directory}`);
+              scriptResults.push(output);
+              resolve();
+            } catch(err) {
+              return reject(`${err.name}: ${err.message}`);
+            }
           });
         });
       });
