@@ -50,17 +50,25 @@ class ReposConfig extends React.Component {
 
   handleSubmit(event) {
     this.setState({submitting: true});
-    agent.Customers.current().then(user => {
-      agent.Project.put(this.props.project.fullName, this.props.project.id, this.props.project.cloneUrl, this.state.configCmd).then((res) => {
-        agent.Project.linkCustomer(this.props.project.id, user.id);
-        agent.Project.updateAllLinterRel(this.props.project.id, this.state.projectLinters);
-        if (res.webhookSecret === '') {
-          this.setState({webhookModal: true});
-        } else {
-          browserHistory.push('/#/app');
-          window.location.reload();
-        }
-      });
+    let user;
+    let project;
+    Promise.all([
+      agent.Customers.current(),
+      agent.Project.put(this.props.project.fullName, this.props.project.id, this.props.project.cloneUrl, this.state.configCmd),
+    ]).then(res => {
+        user = res[0];
+        project = res[1];
+        return Promise.all([
+          agent.Project.linkCustomer(this.props.project.id, user.id),
+          agent.Project.updateAllLinterRel(this.props.project.id, this.state.projectLinters),
+        ]);
+    }).then(() => {
+      if (project.webhookSecret === '') {
+        this.setState({webhookModal: true});
+      } else {
+        browserHistory.push('/#/app');
+        window.location.reload();
+      }
     });
     event.preventDefault();
   }
