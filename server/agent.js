@@ -15,7 +15,10 @@ const getToken = (options) => new Promise((resolve, reject) => {
       .set('accept', 'application/vnd.github.machine-man-preview+json')
       .set('authorization', 'Bearer ' + jwt)
       .then(res => resolve(res.body.token))
-      .catch(err => reject(err));
+      .catch(err => {
+        console.error(err);
+        reject(err);
+      });
   } else {
     const ctx = LoopBackContext.getCurrentContext();
     const user = options.user || (ctx && ctx.get('currentUser'));
