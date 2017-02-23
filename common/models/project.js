@@ -236,25 +236,27 @@ module.exports = function (Project) {
       });
 
       const body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
-      agent.post({
-        url: data.pull_request._links.statuses.href,
-        raw: true,
-        user: project.customers()[0],
-        data: {
-          state: allLintPassed ? 'success' : 'failure',
-          context: 'ci/captain-standard',
-        },
-      });
-      return agent.post({
-        installationId: project.installationId,
-        url: `${data.pull_request.url}/reviews`,
-        data: {
-          body: body,
-          event: allLintPassed ? 'APPROVE' : 'REQUEST_CHANGES',
-          comments: comments,
-        },
-        raw: true,
-      });
+      return Promise.all([
+        agent.post({
+          url: data.pull_request._links.statuses.href,
+          raw: true,
+          user: project.customers()[0],
+          data: {
+            state: allLintPassed ? 'success' : 'failure',
+            context: 'ci/captain-standard',
+          },
+        }),
+        agent.post({
+          installationId: project.installationId,
+          url: `${data.pull_request.url}/reviews`,
+          data: {
+            body: body,
+            event: allLintPassed ? 'APPROVE' : 'REQUEST_CHANGES',
+            comments: comments,
+          },
+          raw: true,
+        }),
+      ]);
     })
     .catch((error) => {
       agent.post({
@@ -264,8 +266,10 @@ module.exports = function (Project) {
         data: {
           state: 'error',
           context: 'ci/captain-standard',
+          description: error,
         },
       });
+      console.error(error);
     })
     .then(() => {
       const cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
@@ -476,6 +480,9 @@ module.exports = function (Project) {
             return Promise.resolve('over');
           }
         });
+      })
+      .catch(err => {
+        console.error(err);
       });
   }
 
