@@ -246,16 +246,6 @@ module.exports = function (Project) {
             context: 'ci/captain-standard',
           },
         }),
-        agent.post({
-          installationId: project.installationId,
-          url: `${data.pull_request.url}/reviews`,
-          data: {
-            body: body,
-            event: allLintPassed ? 'APPROVE' : 'REQUEST_CHANGES',
-            comments: comments,
-          },
-          raw: true,
-        }),
       ]);
     })
     .catch((error) => {
@@ -272,6 +262,16 @@ module.exports = function (Project) {
       console.error(error);
     })
     .then(() => {
+      agent.post({
+        installationId: project.installationId,
+        url: `${data.pull_request.url}/reviews`,
+        data: {
+          body: body,
+          event: allLintPassed ? 'APPROVE' : 'REQUEST_CHANGES',
+          comments: comments,
+        },
+        raw: true,
+      });
       const cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
       async.until(() => {
         let projectCleaned = false;
@@ -282,7 +282,10 @@ module.exports = function (Project) {
         }
         return projectCleaned;
       }, () => exec(cleanCommand));
-    });
+    })
+      .catch(error => {
+        console.error(error);
+      });
   };
 
   Project.remoteMethod('linters-exec', {
