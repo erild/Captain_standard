@@ -8,7 +8,6 @@ const process = require('process');
 const parse = require('parse-diff');
 const app = require('../../server/server');
 const agent = require('../../server/agent');
-const resultsParsers = require('../../server/linters-results-parsers/parsers');
 const _ = require('lodash');
 
 module.exports = function (Project) {
@@ -175,7 +174,8 @@ module.exports = function (Project) {
                 if (stderr) {
                   return reject(stderr);
                 }
-                const parsedResults = resultsParsers[linters[scan.linterId].name](
+                const parser = require(linters[scan.linterId].pathToParser);
+                const parsedResults = parser(
                   stdout, `${projectsDirectory}/${folderName}/`);
                 lintResults.push(parsedResults);
                 resolve();
