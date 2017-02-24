@@ -8,6 +8,7 @@ const process = require('process');
 const parse = require('parse-diff');
 const app = require('../../server/server');
 const agent = require('../../server/agent');
+const resultsParsers = require('../../server/linters-results-parsers/parsers');
 const _ = require('lodash');
 
 module.exports = function (Project) {
@@ -174,7 +175,9 @@ module.exports = function (Project) {
                 if (stderr) {
                   return reject(stderr);
                 }
-                lintResults.push(stdout);
+                const parsedResults = resultsParsers[linters[scan.linterId].name](
+                  stdout, `${projectsDirectory}/${folderName}/`);
+                lintResults.push(parsedResults);
                 resolve();
               }
             );
@@ -194,11 +197,8 @@ module.exports = function (Project) {
     .then((diff) => {
       const filesChanged = parse(diff);
       // Flatten array of arrays
-      lintResults = JSON.parse([].concat.apply([], lintResults));
+      lintResults = [].concat.apply([], lintResults);
       lintResults.forEach(file => {
-        file.filePath = file.filePath
-          .replace('\\', '/')
-          .slice(`${projectsDirectory}/${folderName}/`.length);
         file.messages.forEach(message => {
           const fileDiff = _.find(filesChanged, {to: file.filePath});
           if (!fileDiff) {
