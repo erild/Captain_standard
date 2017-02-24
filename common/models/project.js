@@ -45,6 +45,8 @@ module.exports = function (Project) {
     const projectsDirectory = process.env.PROJECTS_DIRECTORY;
     let project, folderName;
     let lintResults = [];
+    let comments = [];
+    let allLintPassed = true;
     new Promise((resolve, reject) => {
       Project.findById(projectId, {
         include: [
@@ -196,8 +198,6 @@ module.exports = function (Project) {
       const filesChanged = parse(diff);
       // Flatten array of arrays
       lintResults = [].concat.apply([], lintResults);
-      let comments = [];
-      let allLintPassed = true;
       lintResults.forEach(file => {
         file.messages.forEach(message => {
           const fileDiff = _.find(filesChanged, {to: file.filePath});
@@ -235,26 +235,18 @@ module.exports = function (Project) {
         });
       });
 
-      const body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
-      agent.post({
-        url: data.pull_request._links.statuses.href,
-        raw: true,
-        user: project.customers()[0],
-        data: {
-          state: allLintPassed ? 'success' : 'failure',
-          context: 'ci/captain-standard',
-        },
-      });
-      return agent.post({
-        installationId: project.installationId,
-        url: `${data.pull_request.url}/reviews`,
-        data: {
-          body: body,
-          event: allLintPassed ? 'APPROVE' : 'REQUEST_CHANGES',
-          comments: comments,
-        },
-        raw: true,
-      });
+      return Promise.all([
+        agent.post({
+          url: data.pull_request._links.statuses.href,
+          raw: true,
+          user: project.customers()[0],
+          data: {
+            state: allLintPassed ? 'success' : 'failure',
+            context: 'ci/captain-standard',
+            description: 'Lint check',
+          },
+        }),
+      ]);
     })
     .catch((error) => {
       agent.post({
@@ -264,10 +256,23 @@ module.exports = function (Project) {
         data: {
           state: 'error',
           context: 'ci/captain-standard',
+          description: error,
         },
       });
+      console.error(error);
     })
     .then(() => {
+      const body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
+      agent.post({
+        installationId: project.installationId,
+        url: `${data.pull_request.url}/reviews`,
+        data: {
+          body: body,
+          event: allLintPassed ? 'APPROVE' : 'REQUEST_CHANGES',
+          comments: comments,
+        },
+        raw: true,
+      });
       const cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
       async.until(() => {
         let projectCleaned = false;
@@ -278,7 +283,10 @@ module.exports = function (Project) {
         }
         return projectCleaned;
       }, () => exec(cleanCommand));
-    });
+    })
+      .catch(error => {
+        console.error(error);
+      });
   };
 
   Project.remoteMethod('linters-exec', {
@@ -476,6 +484,9 @@ module.exports = function (Project) {
             return Promise.resolve('over');
           }
         });
+      })
+      .catch(err => {
+        console.error(err);
       });
   }
 
