@@ -23,7 +23,7 @@
       "javascript"
     ],
     "installCmd": "npm install eslint",
-    "runCmd": "node ./node_modules/eslint/bin/eslint .",
+    "runCmd": "node ./node_modules/eslint/bin/eslint -f json",
     "pathToParser": "../../server/linters-results-parsers/eslint-parser"
   },
   {
