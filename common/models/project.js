@@ -44,6 +44,8 @@ module.exports = function (Project) {
     const projectsDirectory = process.env.PROJECTS_DIRECTORY;
     let project, folderName;
     let lintResults = [];
+    let comments = [];
+    let allLintPassed = true;
     new Promise((resolve, reject) => {
       Project.findById(projectId, {
         include: [
@@ -193,8 +195,6 @@ module.exports = function (Project) {
       const filesChanged = parse(diff);
       // Flatten array of arrays
       lintResults = JSON.parse([].concat.apply([], lintResults));
-      let comments = [];
-      let allLintPassed = true;
       lintResults.forEach(file => {
         file.filePath = file.filePath
           .replace('\\', '/')
@@ -235,7 +235,6 @@ module.exports = function (Project) {
         });
       });
 
-      const body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
       return Promise.all([
         agent.post({
           url: data.pull_request._links.statuses.href,
@@ -244,6 +243,7 @@ module.exports = function (Project) {
           data: {
             state: allLintPassed ? 'success' : 'failure',
             context: 'ci/captain-standard',
+            description: 'Lint check',
           },
         }),
       ]);
@@ -262,6 +262,7 @@ module.exports = function (Project) {
       console.error(error);
     })
     .then(() => {
+      const body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
       agent.post({
         installationId: project.installationId,
         url: `${data.pull_request.url}/reviews`,
