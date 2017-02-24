@@ -34,6 +34,11 @@
     "runCmd": {
       "type": "string",
       "required": true
+    },
+    "pathToParser": {
+      "type": "string",
+      "required": true,
+      "default": "../../server/linters-results-parsers/default-parser"
     }
   },
   "validations": [],

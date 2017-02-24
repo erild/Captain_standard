@@ -5,7 +5,8 @@
       "javascript"
     ],
     "installCmd": "npm install -g eslint",
-    "runCmd": "eslint -f json"
+    "runCmd": "eslint -f json",
+    "pathToParser": "../../server/linters-results-parsers/eslint-parser"
   },
   {
     "name": "coffeelint",
@@ -13,7 +14,8 @@
       "coffeescript"
     ],
     "installCmd": "npm install -g coffeelint",
-    "runCmd": "coffeelint --reporter raw"
+    "runCmd": "coffeelint --reporter raw",
+    "pathToParser": "../../server/linters-results-parsers/coffeelint-parser"
   },
   {
     "name": "Local eslint",
@@ -21,7 +23,8 @@
       "javascript"
     ],
     "installCmd": "npm install eslint",
-    "runCmd": "node ./node_modules/eslint/bin/eslint ."
+    "runCmd": "node ./node_modules/eslint/bin/eslint .",
+    "pathToParser": "../../server/linters-results-parsers/eslint-parser"
   },
   {
     "name": "Local coffeelint",
@@ -29,6 +32,7 @@
       "coffeescript"
     ],
     "installCmd": "npm install coffeelint",
-    "runCmd": "node ./node_modules/coffeelint/bin/coffeelint --reporter raw"
+    "runCmd": "node ./node_modules/coffeelint/bin/coffeelint --reporter raw",
+    "pathToParser": "../../server/linters-results-parsers/coffeelint-parser"
   }
 ]
