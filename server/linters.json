@@ -14,5 +14,21 @@
     ],
     "installCmd": "npm install -g coffeelint",
     "runCmd": "coffeelint --reporter raw"
+  },
+  {
+    "name": "Local eslint",
+    "languages": [
+      "javascript"
+    ],
+    "installCmd": "npm install eslint",
+    "runCmd": "node ./node_modules/eslint/bin/eslint ."
+  },
+  {
+    "name": "Local coffeelint",
+    "languages": [
+      "coffeescript"
+    ],
+    "installCmd": "npm install coffeelint",
+    "runCmd": "node ./node_modules/coffeelint/bin/coffeelint --reporter raw"
   }
 ]
