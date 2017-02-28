@@ -65,7 +65,19 @@ class ScriptModal extends React.Component {
         <Modal.Body>
           <p>Add a JavaScript function to do custom evaluation of the code</p>
           <p>The function take a directory `dir` to analyse as an input</p>
-          <br />
+          <p>The output should be of the following format : </p>
+          <pre>
+{`return [{ filePath: fileName,
+          messages:
+            [ { message: message,
+                line: lineNumber,
+                severity: value,
+                ruleId: ruleBroken
+              },
+            ...],
+          },
+         ...]`}
+          </pre>
           <ControlLabel>Name</ControlLabel>
           <FormControl type="text" placeholder="name" onChange={this.handleNameChange} value={this.state.scriptObject.name}/>
           <ControlLabel>Description</ControlLabel>
@@ -73,7 +85,7 @@ class ScriptModal extends React.Component {
           <ControlLabel>Script</ControlLabel>
           <p>Upload content of the function here on type it below</p>
           <FormControl type="file" label="File" accept='.js' onChange={this.handleFileUploaded}/>
-          <FormControl componentClass="textarea" style={{ height: 300 }} placeholder="return []" onChange={this.handleContentChange} value={this.state.scriptObject.content}/>
+          <FormControl componentClass="textarea" style={{ height: 200 }} placeholder="return [ ]" onChange={this.handleContentChange} value={this.state.scriptObject.content}/>
           <br />
         </Modal.Body>
         <Modal.Footer>
