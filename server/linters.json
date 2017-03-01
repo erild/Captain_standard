@@ -34,5 +34,14 @@
     "installCmd": "npm install coffeelint",
     "runCmd": "node ./node_modules/coffeelint/bin/coffeelint --reporter raw",
     "pathToParser": "../../server/linters-results-parsers/coffeelint-parser"
+  },
+  {
+    "name": "React-scripts eslint",
+    "languages": [
+      "javascript"
+    ],
+    "installCmd": "npm install react-scripts",
+    "runCmd": "node ./node_modules/react-scripts/node_modules/.bin/eslint -f json",
+    "pathToParser": "../../server/linters-results-parsers/eslint-parser"
   }
 ]
