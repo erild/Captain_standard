@@ -270,12 +270,12 @@ module.exports = function (Project) {
           }
         });
       });
-      scriptResults.forEach(message => {
-        const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'}: ${message.message}`;
-        comments.push({body: commentBody});
-        allLintPassed = false;
+      // scriptResults.forEach(message => {
+      //   const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'}: ${message.message}`;
+      //   comments.push({body: commentBody});
+      //   allLintPassed = false;
 
-      });
+      // });
       return Promise.all([
         agent.post({
           url: data.pull_request._links.statuses.href,
