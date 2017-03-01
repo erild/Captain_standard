@@ -8,7 +8,8 @@ module.exports = {
     'callbackURL': process.env.GITHUB_BACKEND_URL + '/auth/github/callback',
     'authPath': '/auth/github',
     'callbackPath': '/auth/github/callback',
-    'successRedirect': '/api/Customers/me',
+    'successRedirect': process.env.NODE_ENV === 'production' ?
+      '/#/app' : 'http://localhost:3000/#/app',
     'scope': ['user:email', 'admin:repo_hook', 'repo'],
   },
 };
