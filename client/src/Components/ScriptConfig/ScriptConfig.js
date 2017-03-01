@@ -50,7 +50,7 @@ class ScriptConfig extends React.Component {
   }
 
   render() {
-    if(this.props.scripts && !this.state.newScript) {
+    if(this.props.scripts && this.props.scripts.length && !this.state.newScript) {
       return (
         <Well>
           <FormControl componentClass="select" placeholder="select linter" onChange={this.handleScriptIdChange} value={this.props.selectedScript}>

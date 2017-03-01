@@ -67,16 +67,23 @@ class ScriptModal extends React.Component {
           <p>The function take a directory `dir` to analyse as an input</p>
           <p>The output should be of the following format : </p>
           <pre>
-{`return [{ filePath: fileName,
-          messages:
-            [ { message: message,
-                line: lineNumber,
-                severity: value,
-                ruleId: ruleBroken
-              },
-            ...],
+{`return { fileComments: [
+            { filePath: fileName,
+              messages: [
+                { message: message,
+                  line: lineNumber,
+                  severity: value,
+                  ruleId: ruleBroken
+                },
+                ...],
           },
-         ...]`}
+          ...],
+          globalComments:  [
+            { message: message,
+              severity: severity (1 for warning, 2 for error)
+            },
+            ...]
+          }`}
           </pre>
           <ControlLabel>Name</ControlLabel>
           <FormControl type="text" placeholder="name" onChange={this.handleNameChange} value={this.state.scriptObject.name}/>

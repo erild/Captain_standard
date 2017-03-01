@@ -209,7 +209,10 @@ module.exports = function (Project) {
             try {
               let scriptFunction = new Function('dir', `'use strict';${scripts[scan.scriptId].content}`);
               let output = scriptFunction(`${projectsDirectory}/${folderName}${scan.directory}`);
-              scriptResults.push(output);
+              const parser = require("../../server/linters-results-parsers/custom-script-parser");
+              const parsedResults = parser(output.fileComments, `${projectsDirectory}/${folderName}/`);
+              lintResults.push(parsedResults);
+              scriptResults.push(output.globalComments);
               resolve();
             } catch(err) {
               return reject(`${err.name}: ${err.message}`);
@@ -267,7 +270,12 @@ module.exports = function (Project) {
           }
         });
       });
+      scriptResults.forEach(message => {
+        const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'}: ${message.message}`;
+        comments.push({body: commentBody});
+        allLintPassed = false;
 
+      });
       return Promise.all([
         agent.post({
           url: data.pull_request._links.statuses.href,
