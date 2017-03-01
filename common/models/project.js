@@ -265,7 +265,13 @@ module.exports = function (Project) {
               position += count;
             }
             const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'} Line ${message.line}: ${message.message} - ${message.ruleId}`;
-            comments.push({body: commentBody, path: file.filePath, position: position});
+            comments.push({
+              body: commentBody,
+              path: file.filePath,
+              position: position,
+              // eslint-disable-next-line camelcase
+              commit_id: data.pull_request.head.sha,
+            });
             allLintPassed = false;
           }
         });
@@ -303,17 +309,23 @@ module.exports = function (Project) {
       console.error(error);
     })
     .then(() => {
-      const body = allLintPassed ? 'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
+      comments.forEach(comment => {
+        agent.post({
+          installationId: project.installationId,
+          url: data.pull_request.review_comments_url,
+          data: comment,
+          raw: true,
+        });
+      });
+      const globalComment = allLintPassed ?
+        'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
       agent.post({
         installationId: project.installationId,
-        url: `${data.pull_request.url}/reviews`,
-        data: {
-          body: body,
-          event: allLintPassed ? 'APPROVE' : 'REQUEST_CHANGES',
-          comments: comments,
-        },
+        url: data.pull_request.comments_url,
+        data: {body: globalComment},
         raw: true,
       });
+
       const cleanCommand = `cd ${projectsDirectory} && rm -rf ${folderName}`;
       async.until(() => {
         let projectCleaned = false;
