@@ -17,8 +17,11 @@ const tokenPlugin = req => {
 };
 
 const redirectUnauthenticated = err => {
-  if (err && err.status === 401) {
+  if (err.status === 401) {
     store.dispatch({type: 'REDIRECT_AUTH'});
+  } else {
+    const error = err.response.type === 'application/json' ? JSON.parse(err.response.text).error : new Error(err.response.text);
+    store.dispatch({type: 'ADD_ERROR', payload: error});
   }
 };
 
