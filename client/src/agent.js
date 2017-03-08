@@ -39,7 +39,9 @@ const Customers = {
   repos: (page) =>
     requests.get(`/Customers/me/repos?page=${page}`).then(res => res, err => requests.get(`/Customers/me/repos?page=${page}`)),
   projects: () =>
-    requests.get('/Customers/me/projects')
+    requests.get('/Customers/me/projects'),
+  scripts: () =>
+    requests.get('/Customers/me/scripts')
 };
 
 const Linters = {
@@ -53,14 +55,23 @@ const Project = {
   putWebHookSecret: (projectId, secret) => requests.put('/Projects',{ id: projectId, webhookSecret: secret}),
   linkCustomer: (projectId, customerId) => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}),
   getProjectLinters: (projectId) => requests.get(`/ProjectLinters?filter[where][projectId]=${projectId}`),
-  updateAllLinterRel: (projectId, listLinter) => requests.post(`/Projects/${projectId}/updateAllRel`, listLinter)
+  getProjectScripts: (projectId) => requests.get(`/ProjectScripts?filter[where][projectId]=${projectId}`),
+  updateAllRel: (projectId, listLinter, listScript) => requests.post(`/Projects/${projectId}/updateAllRel`, { listLinterRel: listLinter, listScriptRel: listScript})
+  // updateAllScriptRel: (projectId, listScript) => requests.post(`/Projects/${projectId}/updateAllScriptRel`, listScript)
 };
+
+const Script = {
+  get:(scriptId) => requests.get(`/Scripts/${scriptId}`),
+  put:(scriptObject) => requests.put('/Scripts', scriptObject)
+};
+
 
 export default {
   API_ROOT,
   Customers,
   Linters,
   Project,
+  Script,
   setToken: _token => { token = _token; },
   getToken: () => token
 };
