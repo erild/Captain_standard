@@ -208,8 +208,8 @@ module.exports = function (Project) {
         promiseChain = promiseChain.then(() => {
           return new Promise((resolve, reject) => {
             try {
-              let scriptFunction = new Function('dir', `'use strict';${scripts[scan.scriptId].content}`);
-              let output = scriptFunction(`${projectsDirectory}/${folderName}${scan.directory}`);
+              let scriptFunction = new Function('require','dir', `'use strict';${scripts[scan.scriptId].content}`);
+              let output = scriptFunction(require, `${projectsDirectory}/${folderName}${scan.directory}`);
               const parser = require("../../server/linters-results-parsers/custom-script-parser");
               const parsedResults = parser(output.fileComments, `${projectsDirectory}/${folderName}/`);
               lintResults.push(parsedResults);
