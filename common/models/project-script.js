@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Projectscript) {
+module.exports = function (Projectscript) {
 
 };

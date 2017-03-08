@@ -45,6 +45,7 @@ module.exports = function (Project) {
     let project, folderName;
     let lintResults = [];
     let comments = [];
+    let globalScriptComments = [];
     let allLintPassed = true;
     let scriptResults = [];
     new Promise((resolve, reject) => {
@@ -212,9 +213,9 @@ module.exports = function (Project) {
               const parser = require("../../server/linters-results-parsers/custom-script-parser");
               const parsedResults = parser(output.fileComments, `${projectsDirectory}/${folderName}/`);
               lintResults.push(parsedResults);
-              scriptResults.push(output.globalComments);
+              scriptResults.push.apply(scriptResults, output.globalComments);
               resolve();
-            } catch(err) {
+            } catch (err) {
               return reject(`${err.name}: ${err.message}`);
             }
           });
@@ -276,12 +277,12 @@ module.exports = function (Project) {
           }
         });
       });
-      // scriptResults.forEach(message => {
-      //   const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'}: ${message.message}`;
-      //   comments.push({body: commentBody});
-      //   allLintPassed = false;
+      scriptResults.forEach(message => {
+        const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'}: ${message.message}`;
+        globalScriptComments.push({body: commentBody});
+        allLintPassed = false;
 
-      // });
+      });
       return Promise.all([
         agent.post({
           url: data.pull_request._links.statuses.href,
@@ -317,6 +318,16 @@ module.exports = function (Project) {
           raw: true,
         });
       });
+
+      globalScriptComments.forEach(comment => {
+        agent.post({
+          installationId: project.installationId,
+          url: data.pull_request.comments_url,
+          data: comment,
+          raw: true,
+        });
+      });
+
       const globalComment = allLintPassed ?
         'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
       agent.post({
@@ -444,7 +455,7 @@ module.exports = function (Project) {
         type: 'array',
         required: true,
         description: 'array of all the script relation',
-      }
+      },
     ],
     returns: [],
     description: 'Update all the linter relation of the project',
