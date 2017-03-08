@@ -45,7 +45,9 @@ module.exports = function (Project) {
     let project, folderName;
     let lintResults = [];
     let comments = [];
+    let globalScriptComments = [];
     let allLintPassed = true;
+    let scriptResults = [];
     new Promise((resolve, reject) => {
       Project.findById(projectId, {
         include: [
@@ -53,6 +55,8 @@ module.exports = function (Project) {
             relation: 'linters',
           }, {
             relation: 'customers',
+          }, {
+            relation: 'scripts',
           }],
       }, (err, result) => {
         if (err) {
@@ -111,6 +115,17 @@ module.exports = function (Project) {
             }
           })
         ),
+        new Promise((resolve, reject) =>
+          app.models.ProjectScript.find({
+            where: {projectId: project.id},
+          }, (err, projectScripts) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(projectScripts);
+            }
+          })
+        ),
         agent.getToken({user: project.customers()[0]}),
         new Promise((resolve, reject) =>
           app.models.ProjectInstallation.findOne({
@@ -127,11 +142,16 @@ module.exports = function (Project) {
     })
     .then((results) => {
       const projectLinters = results[0];
-      const token = results[1];
-      project.installationId = results[2] && results[2].installationId;
+      const projectScripts = results[1];
+      const token = results[2];
+      project.installationId = results[3] && results[3].installationId;
       let linters = {};
       project.linters().forEach((linter) => {
         linters[linter.id] = linter;
+      });
+      let scripts = {};
+      project.scripts().forEach((script) => {
+        scripts[script.id] = script;
       });
 
       let initCommands = [
@@ -181,6 +201,23 @@ module.exports = function (Project) {
                 resolve();
               }
             );
+          });
+        });
+      });
+      projectScripts.forEach((scan) => {
+        promiseChain = promiseChain.then(() => {
+          return new Promise((resolve, reject) => {
+            try {
+              let scriptFunction = new Function('require', 'dir', `'use strict';${scripts[scan.scriptId].content}`);
+              let output = scriptFunction(require, `${projectsDirectory}/${folderName}${scan.directory}`);
+              const parser = require('../../server/linters-results-parsers/custom-script-parser');
+              const parsedResults = parser(output.fileComments, `${projectsDirectory}/${folderName}/`);
+              lintResults.push(parsedResults);
+              scriptResults.push.apply(scriptResults, output.globalComments);
+              resolve();
+            } catch (err) {
+              return reject(`${err.name}: ${err.message}`);
+            }
           });
         });
       });
@@ -240,7 +277,11 @@ module.exports = function (Project) {
           }
         });
       });
-
+      scriptResults.forEach(message => {
+        const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'}: ${message.message}`;
+        globalScriptComments.push({body: commentBody});
+        allLintPassed = false;
+      });
       return Promise.all([
         agent.post({
           url: data.pull_request._links.statuses.href,
@@ -276,6 +317,16 @@ module.exports = function (Project) {
           raw: true,
         });
       });
+
+      globalScriptComments.forEach(comment => {
+        agent.post({
+          installationId: project.installationId,
+          url: data.pull_request.comments_url,
+          data: comment,
+          raw: true,
+        });
+      });
+
       const globalComment = allLintPassed ?
         'Yeah ! Well done ! :fireworks:\n' : 'Oh no, it failed :cry:\n';
       agent.post({
@@ -322,35 +373,68 @@ module.exports = function (Project) {
    * @param {Array} listRel array of all the linter relation
    * @param {function(Error)} callback
    */
-  Project.prototype.updateAllRel = function (listRel, callback) {
-    listRel.forEach(rel => {
+  Project.prototype.updateAllRel = function (listLinterRel, listScriptRel, callback) {
+    listLinterRel.forEach(rel => {
       if (rel.hasOwnProperty('projectId') == false ||
         rel.hasOwnProperty('linterId') == false ||
         rel.hasOwnProperty('directory') == false ||
         rel.hasOwnProperty('arguments') == false) {
-        callback(new Error('Invalid projectLinter parameters'));
+        callback(new Error('Invalid projectLinter relation parameters'));
         next();
       }
     });
-    new Promise((resolve, reject) => {
-      Project.app.models.ProjectLinter.find({
-        fields: ['id'],
-        where: {'projectId': this.id},
-      }, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    }).then(projectLinters => {
+    listScriptRel.forEach(rel => {
+      if (rel.hasOwnProperty('projectId') == false ||
+        rel.hasOwnProperty('scriptId') == false ||
+        rel.hasOwnProperty('directory') == false) {
+        callback(new Error('Invalid projectScript relation  parameters'));
+        next();
+      }
+    });
+    Promise.all([
+      new Promise((resolve, reject) => {
+        Project.app.models.ProjectLinter.find({
+          fields: ['id'],
+          where: {'projectId': this.id},
+        }, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      }),
+      new Promise((resolve, reject) => {
+        Project.app.models.ProjectScript.find({
+          fields: ['id'],
+          where: {'projectId': this.id},
+        }, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      }),
+    ]).then(res => {
+      let projectLinters = res[0];
+      let projectScripts = res[1];
+
       projectLinters.forEach(projectLinter => {
-        if (listRel.find(rel => rel.id === projectLinter.id) === undefined) {
+        if (listLinterRel.find(rel => rel.id === projectLinter.id) === undefined) {
           Project.app.models.ProjectLinter.destroyById(projectLinter.id);
         }
       });
-      listRel.forEach(rel => {
+      listLinterRel.forEach(rel => {
         Project.app.models.ProjectLinter.upsert(rel);
+      });
+      projectScripts.forEach(projectScript => {
+        if (listScriptRel.find(rel => rel.id === projectScript.id) === undefined) {
+          Project.app.models.ProjectScript.destroyById(projectScript.id);
+        }
+      });
+      listScriptRel.forEach(rel => {
+        Project.app.models.ProjectScript.upsert(rel);
       });
       callback();
     });
@@ -360,13 +444,16 @@ module.exports = function (Project) {
     isStatic: false,
     accepts: [
       {
-        arg: 'listRel',
+        arg: 'listLinterRel',
         type: 'array',
         required: true,
         description: 'array of all the linter relation',
-        http: {
-          source: 'body',
-        },
+      },
+      {
+        arg: 'listScriptRel',
+        type: 'array',
+        required: true,
+        description: 'array of all the script relation',
       },
     ],
     returns: [],
