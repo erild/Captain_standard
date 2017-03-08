@@ -21,6 +21,7 @@
     "lodash": "^4.17.4",
     "loopback": "^2.22.0",
     "loopback-boot": "^2.6.5",
+    "loopback-cascade-delete-mixin": "^1.0.1",
     "loopback-component-explorer": "^2.4.0",
     "loopback-component-passport-c": "^1.6.8",
     "loopback-connector-postgresql": "^2.7.0",
