@@ -168,8 +168,7 @@ module.exports = function (Project) {
         promiseChain = promiseChain.then(() => {
           return new Promise((resolve, reject) => {
             exec(
-              `cd ${projectsDirectory}/${folderName}${scan.directory} && ` +
-              `${linters[scan.linterId].runCmd} ${scan.arguments}`,
+              `cd ${projectsDirectory}/${folderName}${scan.directory} && ${linters[scan.linterId].runCmd}`,
               (error, stdout, stderr) => {
                 if (stderr) {
                   return reject(stderr);
@@ -326,8 +325,7 @@ module.exports = function (Project) {
     listRel.forEach(rel => {
       if (rel.hasOwnProperty('projectId') == false ||
         rel.hasOwnProperty('linterId') == false ||
-        rel.hasOwnProperty('directory') == false ||
-        rel.hasOwnProperty('arguments') == false) {
+        rel.hasOwnProperty('directory') == false) {
         callback(new Error('Invalid projectLinter parameters'));
         next();
       }

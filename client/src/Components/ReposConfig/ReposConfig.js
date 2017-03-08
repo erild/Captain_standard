@@ -75,7 +75,7 @@ class ReposConfig extends React.Component {
 
   AddLinter() {
     let projectLinters = this.state.projectLinters;
-    projectLinters.push({projectId: this.props.project.id, linterId: 1, directory: "", arguments: ""});
+    projectLinters.push({projectId: this.props.project.id, linterId: 1, directory: ""});
     this.setState({projectLinters: projectLinters});
   }
 
@@ -93,7 +93,7 @@ class ReposConfig extends React.Component {
         <ul>
           {this.state.projectLinters.map((projectLinter, key) => {
             return (
-              <LinterConfig linters={this.state.linters} selectedLinter={projectLinter.linterId} directory={projectLinter.directory} arguments={projectLinter.arguments} key={key} onChange={event => this.handleLinterChange(event, key)}/>
+              <LinterConfig linters={this.state.linters} selectedLinter={projectLinter.linterId} directory={projectLinter.directory} key={key} onChange={event => this.handleLinterChange(event, key)}/>
               )
             })}
           <Button bsStyle="primary" onClick={this.AddLinter}>Add another linter</Button>
