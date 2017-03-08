@@ -30,13 +30,13 @@
     },
     "configCmd": {
       "type": "string",
-      "default": "",
-      "required": false
+      "required": false,
+      "default": ""
     },
     "webhookSecret": {
       "type": "string",
-      "default": "",
-      "required": false
+      "required": false,
+      "default": ""
     }
   },
   "validations": [],
@@ -51,6 +51,12 @@
       "type": "hasAndBelongsToMany",
       "model": "Customer",
       "foreignKey": ""
+    },
+    "scripts": {
+      "type": "hasMany",
+      "model": "Script",
+      "foreignKey": "projectId",
+      "through": "ProjectScript"
     }
   },
   "acls": [
