@@ -210,7 +210,7 @@ module.exports = function (Project) {
             try {
               let scriptFunction = new Function('require','dir', `'use strict';${scripts[scan.scriptId].content}`);
               let output = scriptFunction(require, `${projectsDirectory}/${folderName}${scan.directory}`);
-              const parser = require("../../server/linters-results-parsers/custom-script-parser");
+              const parser = require('../../server/linters-results-parsers/custom-script-parser');
               const parsedResults = parser(output.fileComments, `${projectsDirectory}/${folderName}/`);
               lintResults.push(parsedResults);
               scriptResults.push.apply(scriptResults, output.globalComments);
@@ -281,7 +281,6 @@ module.exports = function (Project) {
         const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'}: ${message.message}`;
         globalScriptComments.push({body: commentBody});
         allLintPassed = false;
-
       });
       return Promise.all([
         agent.post({
