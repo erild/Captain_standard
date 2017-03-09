@@ -56,15 +56,16 @@
   },
   "acls": [
     {
+      "accessType": "*",
       "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW"
+      "principalId": "$everyone",
+      "permission": "DENY"
     },
     {
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "__get__creator"
+      "property": "find"
     }
   ],
   "methods": {}
