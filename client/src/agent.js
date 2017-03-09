@@ -59,8 +59,8 @@ const Project = {
   linkCustomer: (projectId, customerId) => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}),
   getProjectLinters: (projectId) => requests.get(`/ProjectLinters?filter[where][projectId]=${projectId}`),
   getProjectScripts: (projectId) => requests.get(`/ProjectScripts?filter[where][projectId]=${projectId}`),
+  getProjectInstallation: (fullName) => requests.get(`/ProjectInstallations?filter[where][fullName]=${fullName}`),
   updateAllRel: (projectId, listLinter, listScript) => requests.post(`/Projects/${projectId}/updateAllRel`, { listLinterRel: listLinter, listScriptRel: listScript})
-  // updateAllScriptRel: (projectId, listScript) => requests.post(`/Projects/${projectId}/updateAllScriptRel`, listScript)
 };
 
 const Script = {
