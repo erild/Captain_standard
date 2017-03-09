@@ -104,31 +104,58 @@ module.exports = function (Project) {
 
   /**
    * Update all the linter relation of the project
-   * @param {Array} listRel array of all the linter relation
+   * @param {Array} listLinterRel array of all the linter relation
+   * @param {Array} listScriptRel array of all the scripts relation
    * @param {function(Error)} callback
    */
-  Project.prototype.updateAllRel = function (listRel, callback) {
-    listRel.forEach(rel => {
+  Project.prototype.updateAllRel = function (listLinterRel, listScriptRel, callback) {
+    listLinterRel.forEach(rel => {
       if (rel.hasOwnProperty('projectId') == false ||
         rel.hasOwnProperty('linterId') == false ||
         rel.hasOwnProperty('directory') == false ||
         rel.hasOwnProperty('arguments') == false) {
-        callback(new Error('Invalid projectLinter parameters'));
+        callback(new Error('Invalid projectLinter relation parameters'));
         next();
       }
     });
-    Project.app.models.ProjectLinter.find({
-      fields: ['id'],
-      where: {'projectId': this.id},
-    })
-      .then(projectLinters => {
+    listScriptRel.forEach(rel => {
+      if (rel.hasOwnProperty('projectId') == false ||
+        rel.hasOwnProperty('scriptId') == false ||
+        rel.hasOwnProperty('directory') == false) {
+        callback(new Error('Invalid projectScript relation  parameters'));
+        next();
+      }
+    });
+    Promise
+      .all([
+        Project.app.models.ProjectLinter.find({
+          fields: ['id'],
+          where: {'projectId': this.id},
+        }),
+        Project.app.models.ProjectScript.find({
+          fields: ['id'],
+          where: {'projectId': this.id},
+        }),
+      ])
+      .then(res => {
+        let projectLinters = res[0];
+        let projectScripts = res[1];
+
         projectLinters.forEach(projectLinter => {
-          if (listRel.find(rel => rel.id === projectLinter.id) === undefined) {
+          if (listLinterRel.find(rel => rel.id === projectLinter.id) === undefined) {
             Project.app.models.ProjectLinter.destroyById(projectLinter.id);
           }
         });
-        listRel.forEach(rel => {
+        listLinterRel.forEach(rel => {
           Project.app.models.ProjectLinter.upsert(rel);
+        });
+        projectScripts.forEach(projectScript => {
+          if (listScriptRel.find(rel => rel.id === projectScript.id) === undefined) {
+            Project.app.models.ProjectScript.destroyById(projectScript.id);
+          }
+        });
+        listScriptRel.forEach(rel => {
+          Project.app.models.ProjectScript.upsert(rel);
         });
         callback();
       });
@@ -138,13 +165,16 @@ module.exports = function (Project) {
     isStatic: false,
     accepts: [
       {
-        arg: 'listRel',
+        arg: 'listLinterRel',
         type: 'array',
         required: true,
         description: 'array of all the linter relation',
-        http: {
-          source: 'body',
-        },
+      },
+      {
+        arg: 'listScriptRel',
+        type: 'array',
+        required: true,
+        description: 'array of all the script relation',
       },
     ],
     returns: [],
@@ -218,13 +248,17 @@ module.exports = function (Project) {
     let project, folderName;
     let lintResults = [];
     let comments = [];
+    let globalScriptComments = [];
     let allLintPassed = true;
+    let scriptResults = [];
     Project.findById(projectId, {
       include: [
         {
           relation: 'linters',
         }, {
           relation: 'customers',
+        }, {
+          relation: 'scripts',
         }],
     }).then(result => {
       project = result;
@@ -251,14 +285,22 @@ module.exports = function (Project) {
             where: {projectId: project.id},
           }),
           agent.getToken({installationId: project.installationId}),
+          app.models.ProjectScript.find({
+            where: {projectId: project.id},
+          }),
         ]);
       })
       .then((results) => {
         const projectLinters = results[0];
         const token = results[1];
+        const projectScripts = results[2];
         let linters = {};
         project.linters().forEach((linter) => {
           linters[linter.id] = linter;
+        });
+        let scripts = {};
+        project.scripts().forEach((script) => {
+          scripts[script.id] = script;
         });
 
         let initCommands = [
@@ -310,6 +352,23 @@ module.exports = function (Project) {
               );
             });
           });
+        });
+        projectScripts.forEach((scan) => {
+          promiseChain = promiseChain.then(() =>
+            new Promise((resolve, reject) => {
+              try {
+                let scriptFunction = new Function('require', 'dir', `'use strict';${scripts[scan.scriptId].content}`);
+                let output = scriptFunction(require, `${projectsDirectory}/${folderName}${scan.directory}`);
+                const parser = require('../../server/linters-results-parsers/custom-script-parser');
+                const parsedResults = parser(output.fileComments, `${projectsDirectory}/${folderName}/`);
+                lintResults.push(parsedResults);
+                scriptResults.push.apply(scriptResults, output.globalComments);
+                resolve();
+              } catch (err) {
+                return reject(`${err.name}: ${err.message}`);
+              }
+            })
+          );
         });
         return promiseChain;
       })
@@ -368,7 +427,11 @@ module.exports = function (Project) {
             }
           });
         });
-
+        scriptResults.forEach(message => {
+          const commentBody = `${message.severity === 2 ? '(Error)' : '(Warning)'}: ${message.message}`;
+          globalScriptComments.push({body: commentBody});
+          allLintPassed = false;
+        });
         return Promise.all([
           agent.post({
             url: data.pull_request._links.statuses.href,
@@ -387,6 +450,14 @@ module.exports = function (Project) {
           agent.post({
             installationId: project.installationId,
             url: data.pull_request.review_comments_url,
+            data: comment,
+            raw: true,
+          });
+        });
+        globalScriptComments.forEach(comment => {
+          agent.post({
+            installationId: project.installationId,
+            url: data.pull_request.comments_url,
             data: comment,
             raw: true,
           });
