@@ -112,8 +112,7 @@ module.exports = function (Project) {
     listLinterRel.forEach(rel => {
       if (rel.hasOwnProperty('projectId') == false ||
         rel.hasOwnProperty('linterId') == false ||
-        rel.hasOwnProperty('directory') == false ||
-        rel.hasOwnProperty('arguments') == false) {
+        rel.hasOwnProperty('directory') == false) {
         callback(new Error('Invalid projectLinter relation parameters'));
         next();
       }

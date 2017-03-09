@@ -11,6 +11,9 @@
       "required": false,
       "validateUpsert": true,
       "silenceWarnings": false
+    },
+    "CascadeDelete": {
+      "relations": ["linters", "customers"]
     }
   },
   "properties": {

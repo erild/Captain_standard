@@ -17,9 +17,6 @@
     "directory": {
       "type": "string",
       "required": true
-    },
-    "arguments": {
-      "type": "string"
     }
   },
   "validations": [],

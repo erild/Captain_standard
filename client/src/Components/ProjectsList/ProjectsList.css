@@ -1,0 +1,11 @@
+.projects-list {
+  margin-top: 20px;
+}
+
+.projects-list .well {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px;
+  min-height: 56px;
+}

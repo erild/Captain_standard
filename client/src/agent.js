@@ -55,6 +55,7 @@ const Linters = {
 const Project = {
   get:(projectId) => requests.get(`/Projects/${projectId}`),
   put: (projectName, projectId, cloneUrl, configCmd) => requests.put('/Projects',{ fullName: projectName, id: projectId, cloneUrl: cloneUrl, configCmd: configCmd}),
+  delete: (projectId) => requests.del(`/Projects/${projectId}`),
   linkCustomer: (projectId, customerId) => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}),
   getProjectLinters: (projectId) => requests.get(`/ProjectLinters?filter[where][projectId]=${projectId}`),
   getProjectScripts: (projectId) => requests.get(`/ProjectScripts?filter[where][projectId]=${projectId}`),
