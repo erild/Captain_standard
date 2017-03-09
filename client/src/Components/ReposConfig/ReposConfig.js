@@ -6,7 +6,6 @@ import FormControl from 'react-bootstrap/lib/FormControl';
 import agent from '../../agent';
 import LinterConfig from '../LinterConfig';
 import ScriptConfig from '../ScriptConfig';
-import WebHookModal from '../WebHookModal';
 import './ReposConfig.css';
 
 
@@ -21,15 +20,15 @@ const mapDispatchToProps = dispatch => ({
 class ReposConfig extends React.Component {
   constructor() {
     super();
-    this.state = { linters: null, customScripts: null, projectLinters: null, projectScripts: null, submitting: false, webhookModal: false };
+    this.state = { linters: null, customScripts: null, projectLinters: null, projectScripts: null, submitting: false };
     agent.Linters.all().then(res => this.setState({linters: res}));
     agent.Customers.scripts().then(res => this.setState({customScripts: res}));
     this.handleLinterChange = this.handleLinterChange.bind(this);
     this.handleScriptChange = this.handleScriptChange.bind(this);
-    this.handleWebHookModal = this.handleWebHookModal.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.AddLinter = this.AddLinter.bind(this);
     this.AddScript = this.AddScript.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentWillMount() {
@@ -86,12 +85,8 @@ class ReposConfig extends React.Component {
           agent.Project.updateAllRel(this.props.project.id, this.state.projectLinters, this.state.projectScripts),
         ]);
     }).then(() => {
-      if (project.webhookSecret === '') {
-        this.setState({webhookModal: true});
-      } else {
-        browserHistory.push('/#/app');
-        window.location.reload();
-      }
+      browserHistory.push('/#/app');
+      window.location.reload();
     });
     event.preventDefault();
   }
@@ -137,7 +132,6 @@ class ReposConfig extends React.Component {
         <br />
         <Button type="submit" bsStyle="success" disabled={this.state.submitting}>Save</Button>
         </form>
-        <WebHookModal display={this.state.webhookModal} API_ROOT={agent.API_ROOT} onChange={this.handleWebHookModal}/>
       </div>
     ) : null;
   }

@@ -44,6 +44,7 @@ app.use((req, res, next) => {
     if (!user) {
       return next(new Error('No user with this access token was found.'));
     }
+    req.user = user;
     let loopbackContext = LoopBackContext.getCurrentContext();
     if (loopbackContext) {
       loopbackContext.set('currentUser', user);
