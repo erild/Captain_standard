@@ -55,7 +55,13 @@ module.exports = function (Project) {
     }
   });
 
-  ['upsert', 'findById', 'prototype.__link__customers', 'prototype.updateAllRel'].forEach(event =>
+  [
+    'upsert',
+    'findById',
+    'prototype.__link__customers',
+    'prototype.updateAllRel',
+    'deleteById',
+  ].forEach(event =>
     Project.beforeRemote(event, (ctx, project, callback) => {
       Project.app.models.ProjectInstallation
         .findOne({where: {projectId: parseInt(ctx.req.params.id || ctx.req.body.id, 10)}})
@@ -184,35 +190,6 @@ module.exports = function (Project) {
         verb: 'post',
       },
     ],
-  });
-
-  Project.observe('before delete', (ctx, next) => {
-    if (ctx.where.hasOwnProperty('id')) {
-      Project.findById(ctx.where.id, (err, project) => {
-        if (!err && project && !project.fromGithub) {
-          agent.get({
-            url: `/repos/${project.fullName}/hooks`,
-            installationId: project.installationId,
-          }).then(res => {
-            const hookUrl = process.env.GITHUB_BACKEND_URL
-                .replace(/\/$/, '') + '/api/Projects/linters-exec';
-            res.forEach(hook => {
-              if (hook.name === 'web' && hook.config.url === hookUrl) {
-                agent.delete({
-                  url: `/repos/${project.fullName}/hooks/${hook.id}`,
-                  installationId: project.installationId,
-                });
-              }
-            });
-            next();
-          });
-        } else {
-          next();
-        }
-      });
-    } else {
-      next();
-    }
   });
 
   const handleIntegrationEvent = (data) => {

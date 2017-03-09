@@ -70,13 +70,6 @@
       "permission": "DENY"
     },
     {
-      "accessType": "EXECUTE",
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "create"
-    },
-    {
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
@@ -99,13 +92,6 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "delProjectLinters"
-    },
-    {
-      "accessType": "EXECUTE",
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
       "property": "updateAllRel"
     },
     {
@@ -114,6 +100,13 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "integration-hook"
+    },
+    {
+      "accessType": "WRITE",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "deleteById"
     }
   ],
   "methods": {

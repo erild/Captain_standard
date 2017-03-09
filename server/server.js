@@ -66,6 +66,10 @@ boot(app, __dirname, (err) => {
   }
 });
 
+process.on('unhandledRejection', (err) => {
+  throw err;
+});
+
 if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') {
   app.get('remoting').errorHandler = {
     handler: Raven.errorHandler(),
