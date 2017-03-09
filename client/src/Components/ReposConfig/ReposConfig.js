@@ -28,7 +28,6 @@ class ReposConfig extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.AddLinter = this.AddLinter.bind(this);
     this.AddScript = this.AddScript.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentWillMount() {
@@ -60,14 +59,6 @@ class ReposConfig extends React.Component {
       scriptInfo === 'delete' ? projectScripts.splice(key, 1) : projectScripts[key] = Object.assign(projectScripts[key], scriptInfo);
       this.setState({projectScripts: projectScripts});
     }
-  }
-
-  handleWebHookModal(event) {
-    if (event.hasOwnProperty('secret')) {
-      agent.Project.putWebHookSecret(this.props.project.id, event.secret);
-    }
-    browserHistory.push('/#/app');
-    window.location.reload();
   }
 
   handleSubmit(event) {
