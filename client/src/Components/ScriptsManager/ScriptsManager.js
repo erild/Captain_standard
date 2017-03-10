@@ -7,7 +7,7 @@ import ScriptModal from '../ScriptModal';
 class ScriptsManager extends React.Component {
   constructor() {
     super();
-    this.state = { scripts: [], scriptModal: { name: '', description: '', content: ''}, displayScriptModal: false};
+    this.state = { scripts: [], scriptModal: { name: '', description: '', content: 'return {fileComments: [], globalComments: []};'}, displayScriptModal: false};
     agent.Customers.scripts().then(res => this.setState({scripts: res}));
     this.activateModalNew = this.activateModalNew.bind(this);
     this.activateModalEdit = this.activateModalEdit.bind(this);
@@ -15,7 +15,7 @@ class ScriptsManager extends React.Component {
   }
 
   activateModalNew() {
-    this.setState({ displayScriptModal: true, scriptModal: { name: '', description: '', content: ''} })
+    this.setState({ displayScriptModal: true, scriptModal: { name: '', description: '', content: 'return {fileComments: [], globalComments: []};'} })
   }
 
   activateModalEdit(key) {

@@ -72,8 +72,8 @@ class ReposConfig extends React.Component {
         user = res[0];
         project = res[1];
         return Promise.all([
-          agent.Project.linkCustomer(this.props.project.id, user.id),
-          agent.Project.updateAllRel(this.props.project.id, this.state.projectLinters, this.state.projectScripts),
+          agent.Project.linkCustomer(project.id, user.id),
+          agent.Project.updateAllRel(project.id, this.state.projectLinters, this.state.projectScripts),
         ]);
     }).then(() => {
       browserHistory.push('/#/app');

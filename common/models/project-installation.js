@@ -2,7 +2,11 @@
 const agent = require('../../server/agent');
 
 module.exports = function (ProjectInstallation) {
-  ProjectInstallation.beforeRemote('find', (ctx, project, callback) =>
+  ProjectInstallation.beforeRemote('find', (ctx, project, callback) => {
+    if (ctx.req.checkingPerms) {
+      return callback();
+    }
+    ctx.req.checkingPerms = true;
     ProjectInstallation
       .findOne({where: {fullName: ctx.args.filter.where.fullName}})
       .then(projectInstallation => {
@@ -29,6 +33,6 @@ module.exports = function (ProjectInstallation) {
           })
           .catch(err => callback(err));
       })
-      .catch(err => callback(err))
-  );
+      .catch(err => callback(err));
+  });
 };

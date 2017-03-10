@@ -1,9 +1,14 @@
 'use strict';
+const agent = require('../../server/agent');
 
 module.exports = function (Projectlinter) {
-  Projectlinter.beforeRemote('find', (ctx, project, callback) =>
+  Projectlinter.beforeRemote('find', (ctx, project, callback) => {
+    if (ctx.req.checkingPerms) {
+      return callback();
+    }
+    ctx.req.checkingPerms = true;
     Projectlinter.app.models.ProjectInstallation
-      .findOne({where: {projectId: parseInt(ctx.args.filter.where.id, 10)}})
+      .findOne({where: {projectId: parseInt(ctx.args.filter.where.projectId, 10)}})
       .then(projectInstallation => {
         if (!projectInstallation) {
           const error = new Error('Please check integration is installed for this repo.\n');
@@ -28,6 +33,6 @@ module.exports = function (Projectlinter) {
           })
           .catch(err => callback(err));
       })
-      .catch(err => callback(err))
-  );
+      .catch(err => callback(err));
+  });
 };

@@ -63,11 +63,20 @@ module.exports = function (Project) {
     'deleteById',
   ].forEach(event =>
     Project.beforeRemote(event, (ctx, project, callback) => {
+      if (ctx.req.checkingPerms) {
+        return callback();
+      }
+      ctx.req.checkingPerms = true;
       Project.app.models.ProjectInstallation
         .findOne({where: {projectId: parseInt(ctx.req.params.id || ctx.req.body.id, 10)}})
         .then(projectInstallation => {
           if (!projectInstallation) {
             const error = new Error('Please check integration is installed for this repo.\n');
+            error.statusCode = 400;
+            return callback(error);
+          }
+          if (projectInstallation && !projectInstallation.fullName) {
+            const error = new Error('Repos data is outdated. Please reinstall the integration.');
             error.statusCode = 400;
             return callback(error);
           }
@@ -192,7 +201,7 @@ module.exports = function (Project) {
     ],
   });
 
-  const handleIntegrationEvent = (data) => {
+  const handleIntegrationEvent = (data, callback) => {
     const installationId = data.installation && data.installation.id;
     const url = data.installation && data.installation.repositories_url;
     if (data.action === 'created') {
@@ -214,7 +223,7 @@ module.exports = function (Project) {
     callback();
   };
 
-  const handlePullRequestEvent = (data) => {
+  const handlePullRequestEvent = (data, callback) => {
     if (!data.pull_request ||
       ['opened', 'reopened', 'edited'].indexOf(data.action) < 0) {
       return callback();
@@ -491,9 +500,9 @@ module.exports = function (Project) {
       return callback(error);
     }
     if (headers['x-github-event'].indexOf('integration_installation') > -1) {
-      handleIntegrationEvent(data);
+      handleIntegrationEvent(data, callback);
     } else if (headers['x-github-event'] === 'pull_request') {
-      handlePullRequestEvent(data);
+      handlePullRequestEvent(data, callback);
     }
   };
 
