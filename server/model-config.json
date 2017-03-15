@@ -12,6 +12,7 @@
       "loopback/common/mixins",
       "loopback/server/mixins",
       "../node_modules/loopback-ds-timestamp-mixin",
+      "../node_modules/loopback-cascade-delete-mixin",
       "../common/mixins",
       "./mixins"
     ]
@@ -66,6 +67,14 @@
   },
   "ProjectInstallation": {
     "dataSource": "db",
-    "public": false
+    "public": true
+  },
+  "Script": {
+    "dataSource": "db",
+    "public": true
+  },
+  "ProjectScript": {
+    "dataSource": "db",
+    "public": true
   }
 }

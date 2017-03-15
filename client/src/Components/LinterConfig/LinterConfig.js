@@ -9,20 +9,15 @@ class LinterConfig extends React.Component {
     super(props);
     this.handleLinterChange = this.handleLinterChange.bind(this);
     this.handleLinterDirChange = this.handleLinterDirChange.bind(this);
-    this.handleLinterArgChange = this.handleLinterArgChange.bind(this);
     this.handleRemove = this.handleRemove.bind(this);
   }
 
   handleLinterChange(event) {
-    this.props.onChange({linterId: Number(event.target.value), directory: this.props.directory, arguments: this.props.arguments});
+    this.props.onChange({linterId: Number(event.target.value), directory: this.props.directory});
   }
 
   handleLinterDirChange(event) {
-    this.props.onChange({linterId: this.props.selectedLinter, directory: event.target.value, arguments: this.props.arguments});
-  }
-
-  handleLinterArgChange(event) {
-    this.props.onChange({linterId: this.props.selectedLinter, directory: this.props.directory, arguments: event.target.value});
+    this.props.onChange({linterId: this.props.selectedLinter, directory: event.target.value});
   }
 
   handleRemove() {
@@ -36,7 +31,6 @@ class LinterConfig extends React.Component {
           {this.props.linters.map(linter => <option value={linter.id} key={linter.id}>{linter.name}</option>)}
         </FormControl>
         <FormControl type="text" placeholder="Directory" onChange={this.handleLinterDirChange} value={this.props.directory} key={this.props.id+"_dir"} />
-        <FormControl type="text" placeholder="Arguments" onChange={this.handleLinterArgChange} value={this.props.arguments} key={this.props.id+"_arg"} />
         <Button onClick={this.handleRemove}><Glyphicon glyph="remove" /></Button>
       </Well>
     );

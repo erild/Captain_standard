@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Header from '../Header';
 import {connect} from 'react-redux';
+import ErrorAlert from '../ErrorAlert';
 
 const mapStateToProps = state => ({redirecting: state.notPersisted.redirecting, currentUser: state.auth.currentUser});
 
@@ -17,6 +18,7 @@ class Template extends Component {
       <div>
         <Header currentUser={this.props.currentUser} onLogout={this.props.onLogout}/>
         <div className="container">
+          <ErrorAlert/>
           {this.props.children}
         </div>
       </div>

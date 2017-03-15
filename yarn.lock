@@ -1355,7 +1355,7 @@ libqp@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/libqp/-/libqp-1.1.0.tgz#f5e6e06ad74b794fb5b5b66988bf728ef1dedbe8"
 
-lodash, lodash@^4.0.0, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.16.1, lodash@^4.3.0:
+lodash, lodash@^4.0.0, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.16.1, lodash@^4.17.2, lodash@^4.3.0:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
@@ -1444,6 +1444,12 @@ loopback-boot@^2.6.5:
     semver "^4.1.0"
     strong-globalize "^2.6.2"
     toposort "^0.2.10"
+
+loopback-cascade-delete-mixin@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/loopback-cascade-delete-mixin/-/loopback-cascade-delete-mixin-1.0.1.tgz#6890775b18e19e2110ebf35431839edeecc73f88"
+  dependencies:
+    lodash "^4.17.2"
 
 loopback-component-explorer@^2.4.0:
   version "2.7.0"
