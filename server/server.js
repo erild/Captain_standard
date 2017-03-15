@@ -44,6 +44,7 @@ app.use((req, res, next) => {
     if (!user) {
       return next(new Error('No user with this access token was found.'));
     }
+    req.user = user;
     let loopbackContext = LoopBackContext.getCurrentContext();
     if (loopbackContext) {
       loopbackContext.set('currentUser', user);
@@ -63,6 +64,10 @@ boot(app, __dirname, (err) => {
   if (require.main === module) {
     app.start();
   }
+});
+
+process.on('unhandledRejection', (err) => {
+  throw err;
 });
 
 if (process.env.NODE_ENV === 'production' || process.env.USE_SENTRY === 'true') {

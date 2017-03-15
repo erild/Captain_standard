@@ -67,7 +67,7 @@
   },
   "ProjectInstallation": {
     "dataSource": "db",
-    "public": false
+    "public": true
   },
   "Script": {
     "dataSource": "db",

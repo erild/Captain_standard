@@ -10,6 +10,6 @@ module.exports = {
     'callbackPath': '/auth/github/callback',
     'successRedirect': process.env.NODE_ENV === 'production' ?
       '/#/app' : 'http://localhost:3000/#/app',
-    'scope': ['user:email', 'admin:repo_hook', 'repo'],
+    'scope': [],
   },
 };

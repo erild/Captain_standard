@@ -17,8 +17,11 @@ const tokenPlugin = req => {
 };
 
 const redirectUnauthenticated = err => {
-  if (err && err.status === 401) {
+  if (err.status === 401) {
     store.dispatch({type: 'REDIRECT_AUTH'});
+  } else {
+    const error = err.response.type === 'application/json' ? JSON.parse(err.response.text).error : new Error(err.response.text);
+    store.dispatch({type: 'ADD_ERROR', payload: error});
   }
 };
 
@@ -53,12 +56,11 @@ const Project = {
   get:(projectId) => requests.get(`/Projects/${projectId}`),
   put: (projectName, projectId, cloneUrl, configCmd) => requests.put('/Projects',{ fullName: projectName, id: projectId, cloneUrl: cloneUrl, configCmd: configCmd}),
   delete: (projectId) => requests.del(`/Projects/${projectId}`),
-  putWebHookSecret: (projectId, secret) => requests.put('/Projects',{ id: projectId, webhookSecret: secret}),
   linkCustomer: (projectId, customerId) => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}),
   getProjectLinters: (projectId) => requests.get(`/ProjectLinters?filter[where][projectId]=${projectId}`),
   getProjectScripts: (projectId) => requests.get(`/ProjectScripts?filter[where][projectId]=${projectId}`),
+  getProjectInstallation: (fullName) => requests.get(`/ProjectInstallations?filter[where][fullName]=${fullName}`),
   updateAllRel: (projectId, listLinter, listScript) => requests.post(`/Projects/${projectId}/updateAllRel`, { listLinterRel: listLinter, listScriptRel: listScript})
-  // updateAllScriptRel: (projectId, listScript) => requests.post(`/Projects/${projectId}/updateAllScriptRel`, listScript)
 };
 
 const Script = {

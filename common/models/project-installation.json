@@ -14,6 +14,11 @@
       "type": "number",
       "default": 0,
       "required": true
+    },
+    "fullName": {
+      "type": "string",
+      "default": "",
+      "required": true
     }
   },
   "validations": [],
@@ -27,10 +32,10 @@
       "permission": "DENY"
     },
     {
-      "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$authenticated",
-      "permission": "ALLOW"
+      "permission": "ALLOW",
+      "property": "find"
     }
   ],
   "methods": {}

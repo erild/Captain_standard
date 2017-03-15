@@ -108,6 +108,6 @@ const store = createStore(reducer, {},
     composeEnhancers(autoRehydrate(), applyMiddleware(ifNeededFetchMiddleware, authenticatedFetchMiddleware, thunkMiddleware, promiseMiddleware)),
 );
 
-persistStore(store, {blacklist: ['notPersisted']});
+persistStore(store, {blacklist: ['notPersisted', 'errors']});
 
 export default store;

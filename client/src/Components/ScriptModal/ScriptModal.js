@@ -7,7 +7,7 @@ import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 class ScriptModal extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { scriptObject: { name: '', description: '', content: ''} };
+    this.state = { scriptObject: { name: '', description: '', content: 'return {fileComments: [], globalComments: []};'} };
     this.close = this.close.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
@@ -25,25 +25,25 @@ class ScriptModal extends React.Component {
   }
 
   handleNameChange(event) {
-    let script = this.state.scriptObject;
+    const script = this.state.scriptObject;
     script.name = event.target.value;
     this.setState({ scriptObject: script });
   }
 
   handleDescriptionChange(event) {
-    let script = this.state.scriptObject;
+    const script = this.state.scriptObject;
     script.description = event.target.value;
     this.setState({ scriptObject: script });
   }
 
   handleContentChange(event) {
-    let script = this.state.scriptObject;
+    const script = this.state.scriptObject;
     script.content = event.target.value;
     this.setState({ scriptObject: script });
   }
 
   handleFileUploaded(event) {
-    var reader  = new FileReader();
+    const reader  = new FileReader();
     reader.onload = function(output) {
       let script = this.state.scriptObject;
       script.content = output.target.result;
@@ -63,16 +63,16 @@ class ScriptModal extends React.Component {
           <Modal.Title>Custom Script</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Add a JavaScript function to do custom evaluation of the code</p>
-          <p>The function take a directory `dir` to analyse as an input</p>
-          <p>The output should be of the following format : </p>
+          <p>Write a JavaScript function to do custom evaluation of the code</p>
+          <p>The function can use one variable, <code>dir</code>, which is a string representing the absolute path to the directory to lint.</p>
+          <p>The output should be of the following format, with two arrays, <code>fileComments</code> and <code>globalComments</code> : </p>
           <pre>
-{`return { fileComments: [
+{`{ fileComments: [
             { filePath: fileName,
               messages: [
                 { message: message,
                   line: lineNumber,
-                  severity: value,
+                  severity: severity (1 for warning, 2 for error),
                   ruleId: ruleBroken
                 },
                 ...],
@@ -90,9 +90,9 @@ class ScriptModal extends React.Component {
           <ControlLabel>Description</ControlLabel>
           <FormControl type="text" placeholder="description" onChange={this.handleDescriptionChange} value={this.state.scriptObject.description}/>
           <ControlLabel>Script</ControlLabel>
-          <p>Upload content of the function here on type it below</p>
+          <p>Upload content of the function here or type it below</p>
           <FormControl type="file" label="File" accept='.js' onChange={this.handleFileUploaded}/>
-          <FormControl componentClass="textarea" style={{ height: 200 }} placeholder="return [ ]" onChange={this.handleContentChange} value={this.state.scriptObject.content}/>
+          <FormControl componentClass="textarea" style={{ height: 200 }} onChange={this.handleContentChange} value={this.state.scriptObject.content}/>
           <br />
         </Modal.Body>
         <Modal.Footer>

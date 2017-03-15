@@ -14,7 +14,8 @@ const mapStateToProps = state => ({rehydrated: state.notPersisted.rehydrated});
 const mapDispatchToProps = dispatch => ({
   requireAuth: (nextState) =>
     // https://github.com/rt2zz/redux-persist/issues/193
-    dispatch({type: 'FETCH_USER', meta: {location: nextState.location, authenticated: true}, payload: agent.Customers.current})
+    dispatch({type: 'FETCH_USER', meta: {location: nextState.location, authenticated: true}, payload: agent.Customers.current}),
+  clearErrors: () => dispatch({type: 'CLEAR_ERRORS'})
 });
 
 class App extends Component {
@@ -27,7 +28,7 @@ class App extends Component {
           <Route path="/">
             <IndexRoute component={LandingPage}/>
           </Route>
-          <Route path="/app" onEnter={this.props.requireAuth} component={Template}>
+          <Route path="/app" onEnter={this.props.requireAuth} onChange={this.props.clearErrors} component={Template}>
             <IndexRoute component={HomePage}/>
             <Route path="repos" component={ReposManager} />
             <Route path="scripts" component={ScriptsManager} />
