@@ -71,6 +71,10 @@ module.exports = function (Project) {
         .findOne({where: {projectId: parseInt(ctx.req.params.id || ctx.req.body.id, 10)}})
         .then(projectInstallation => {
           if (!projectInstallation) {
+            if (ctx.method.name.indexOf('delete') > -1) {
+              // We allow deletion of an orphan project
+              return callback();
+            }
             const error = new Error('Please check integration is installed for this repo.\n');
             error.statusCode = 400;
             return callback(error);
@@ -101,21 +105,6 @@ module.exports = function (Project) {
         .catch(err => callback(err));
     })
   );
-
-  Project.observe('loaded', (ctx, callback) => {
-    let data = ctx.instance || ctx.data;
-    Project.app.models.ProjectInstallation
-      .findOne({where: {projectId: parseInt(data.id, 10)}})
-      .then(projectInstallation => {
-        if (!projectInstallation) {
-          const error = new Error(`Please check integration is installed for ${data.fullName}`);
-          error.statusCode = 400;
-          return callback(error);
-        }
-        data.installationId = projectInstallation.installationId;
-        callback();
-      }, err => callback(err));
-  });
 
   /**
    * Update all the linter relation of the project
@@ -208,7 +197,7 @@ module.exports = function (Project) {
       getRepos(url, installationId);
     } else if (data.action === 'added' || data.action === 'removed') {
       data.repositories_removed.forEach(repo =>
-        app.models.ProjectInstallation.destroyById(repo.id)
+        repo && app.models.ProjectInstallation.destroyById(repo.id)
       );
       data.repositories_added.forEach(repo =>
         app.models.ProjectInstallation.upsert({
@@ -236,17 +225,27 @@ module.exports = function (Project) {
     let globalScriptComments = [];
     let allLintPassed = true;
     let scriptResults = [];
-    Project.findById(projectId, {
-      include: [
-        {
-          relation: 'linters',
-        }, {
-          relation: 'customers',
-        }, {
-          relation: 'scripts',
-        }],
-    }).then(result => {
-      project = result;
+    Promise.all([
+      Project.findById(projectId, {
+        include: [
+          {
+            relation: 'linters',
+          }, {
+            relation: 'customers',
+          }, {
+            relation: 'scripts',
+          }],
+      }),
+      Project.app.models.ProjectInstallation
+        .findOne({where: {projectId}}),
+    ]).then(result => {
+      project = result[0];
+      if (!result[1]) {
+        const error = new Error(`Please check integration is installed for ${data.fullName}`);
+        error.statusCode = 400;
+        throw error;
+      }
+      project.installationId = result[1].installationId;
       if (!project || project.fromGithub) {
         let error = new Error('Project is not configured');
         error.status = 404;

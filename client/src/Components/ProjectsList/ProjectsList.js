@@ -4,6 +4,7 @@ import Well from 'react-bootstrap/lib/Well';
 import Button from 'react-bootstrap/lib/Button';
 import './ProjectsList.css';
 import agent from '../../agent';
+import {MarkGithubIcon} from 'react-octicons';
 
 class ProjectsList extends React.Component {
   static deleteProject(projectId) {
@@ -21,7 +22,10 @@ class ProjectsList extends React.Component {
           <Well key={project.id}>
             <Link to={`/app/projects/${project.id}/edit`}>{project.fullName || project.full_name}</Link>
             {project.configured || this.props.configured ? (
-              <Button bsStyle="danger" onClick={() => ProjectsList.deleteProject(project.id)}><i className="fa fa-trash"/></Button>
+              <span>
+                <a href={'https://github.com/' + (project.fullName || project.full_name)} target="_blank"><MarkGithubIcon className="octocat" /></a>
+                <Button bsStyle="danger" onClick={() => ProjectsList.deleteProject(project.id)}><i className="fa fa-trash"/></Button>
+              </span>
               ) : <span> (Projet non configuré)</span>}
           </Well>
         ))}</ul>

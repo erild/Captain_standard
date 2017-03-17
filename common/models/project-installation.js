@@ -35,4 +35,15 @@ module.exports = function (ProjectInstallation) {
       })
       .catch(err => callback(err));
   });
+
+  ProjectInstallation.observe('after delete', (ctx, next) => {
+    if (!ctx.where.projectId) {
+      return next();
+    }
+    ProjectInstallation.app.models
+      .Project
+      .destroyById(ctx.where.projectId)
+      .then(() => next())
+      .catch(err => next(err));
+  });
 };
