@@ -7,6 +7,7 @@ import agent from '../../agent';
 import LinterConfig from '../LinterConfig';
 import ScriptConfig from '../ScriptConfig';
 import './ReposConfig.css';
+import {MarkGithubIcon} from 'react-octicons';
 
 
 const mapStateToProps = state => ({...state.projects});
@@ -98,7 +99,7 @@ class ReposConfig extends React.Component {
 
     return this.props.project && this.state.linters && this.state.customScripts && this.state.projectLinters && this.state.projectScripts ? (
       <div>
-        <h2>Configuring {this.props.project.fullName}</h2>
+        <h2>Configuring {this.props.project.fullName} <a href={'https://github.com/' + this.props.project.fullName} target="_blank"><MarkGithubIcon  size="mega" className="octocat" /></a></h2>
         <div>
           <span>Commands to initialize the project and install linter dependencies:</span>
           <FormControl componentClass="textarea" style={{ height: 150, "maxWidth": 500 }} placeholder="npm install --only=dev" value={this.state.configCmd} onChange={event => this.setState({"configCmd": event.target.value})}/>
