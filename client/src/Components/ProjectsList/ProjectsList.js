@@ -1,6 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router';
 import Well from 'react-bootstrap/lib/Well';
+import Label from 'react-bootstrap/lib/Label';
 import Button from 'react-bootstrap/lib/Button';
 import './ProjectsList.css';
 import agent from '../../agent';
@@ -23,6 +24,11 @@ class ProjectsList extends React.Component {
             <Link to={`/app/projects/${project.id}/edit`}>{project.fullName || project.full_name}</Link>
             {project.configured || this.props.configured ? (
               <span>
+                {project.installationId ? '' : (
+                <Label  bsStyle="danger" title="Please check repo exists on Github and Captain Standard has access to it through the integration">
+                  Integration not installed
+                </Label>
+                  )}
                 <a href={'https://github.com/' + (project.fullName || project.full_name)} target="_blank"><MarkGithubIcon className="octocat" /></a>
                 <Button bsStyle="danger" onClick={() => ProjectsList.deleteProject(project.id)}><i className="fa fa-trash"/></Button>
               </span>

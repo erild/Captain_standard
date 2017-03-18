@@ -3,6 +3,7 @@ const config = {
   development: require('./development.js'),
   test: require('./test.js'),
   production: require('./production.js'),
+  default: require('./default.js'),
 };
-const exportedConfig = config[env].default;
+const exportedConfig = Object.assign(config.default.default, config[env].default);
 export default exportedConfig;
