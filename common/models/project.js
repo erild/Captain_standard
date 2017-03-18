@@ -106,6 +106,49 @@ module.exports = function (Project) {
     })
   );
 
+  Project.beforeRemote('prototype.updateAllRel', (ctx, project, callback) => {
+    const projectId = parseInt(ctx.req.params.id || ctx.req.body.id, 10);
+    Project.app.models.ProjectInstallation
+      .findOne({where: {projectId}})
+      .then(projectInstallation => {
+        if (!projectInstallation) {
+          const error = new Error('Please check integration is installed for this repo.\n');
+          error.statusCode = 400;
+          return callback(error);
+        }
+        const checkers = [].concat.apply(ctx.args.listLinterRel, ctx.args.listScriptRel);
+        const checkerPromise = checker => new Promise((resolve, reject) =>
+          agent
+            .get({
+              url: `/repositories/${projectId}/contents/${typeof checker.directory === 'string' ? checker.directory.slice(1) : ''}`,
+              installationId: projectInstallation.installationId,
+            })
+            .then(res => {
+              if (Array.isArray(res)) {
+                resolve();
+              } else {
+                const error = new Error('Please indicate the path of a directory, not a file.');
+                error.statusCode = 422;
+                reject(error);
+              }
+            })
+            .catch(err => {
+              if (err.status === 404) {
+                const error = new Error(`Path ${checker.directory} doesn't exist on branch master.`);
+                error.statusCode = 422;
+                reject(error);
+              } else {
+                reject(err);
+              }
+            })
+        );
+        Promise
+          .all(checkers.map(checker => checkerPromise(checker)))
+          .then(() => callback())
+          .catch(error => callback(error));
+      });
+  });
+
   Project.observe('loaded', (ctx, callback) => {
     let data = ctx.instance || ctx.data;
     Project.app.models.ProjectInstallation
@@ -224,7 +267,7 @@ module.exports = function (Project) {
 
   const handlePullRequestEvent = (data, callback) => {
     if (!data.pull_request ||
-      ['opened', 'reopened', 'edited'].indexOf(data.action) < 0) {
+      ['opened', 'reopened', 'edited', 'synchronize'].indexOf(data.action) < 0) {
       return callback();
     }
     const projectId = data.repository.id;
@@ -327,7 +370,7 @@ module.exports = function (Project) {
             return new Promise((resolve, reject) => {
               exec(
                 `cd ${projectsDirectory}/${folderName}${scan.directory} && ` +
-                `${linters[scan.linterId].runCmd} ${scan.arguments}`,
+                `${linters[scan.linterId].runCmd}`,
                 (error, stdout, stderr) => {
                   if (stderr) {
                     return reject(stderr);

@@ -23,7 +23,7 @@ class ReposConfig extends React.Component {
     super();
     this.state = { linters: null, customScripts: null, projectLinters: null, projectScripts: null, submitting: false };
     agent.Linters.all().then(res => this.setState({linters: res}));
-    agent.Customers.scripts().then(res => this.setState({customScripts: res}));
+    agent.Script.get().then(res => this.setState({customScripts: res}));
     this.handleLinterChange = this.handleLinterChange.bind(this);
     this.handleScriptChange = this.handleScriptChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -47,7 +47,7 @@ class ReposConfig extends React.Component {
 
   handleScriptChange(scriptInfo, key) {
     if(scriptInfo === 'update') {
-      agent.Customers.scripts().then(res => {
+      agent.Script.get().then(res => {
         this.setState({customScripts: res});
         if (res.length) {
           let projectScripts = this.state.projectScripts;
@@ -79,6 +79,8 @@ class ReposConfig extends React.Component {
     }).then(() => {
       browserHistory.push('/#/app');
       window.location.reload();
+    }).catch(() => {
+      this.setState({submitting: false});
     });
     event.preventDefault();
   }
