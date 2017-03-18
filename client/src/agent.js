@@ -65,7 +65,8 @@ const Project = {
 };
 
 const Script = {
-  get:(scriptId) => requests.get(`/Scripts/${scriptId}`),
+  get:(scriptId) => requests.get(`/Scripts/${scriptId || ''}`),
+  del:(scriptId) => requests.del(`/Scripts/${scriptId}`),
   put:(scriptObject) => requests.put('/Scripts', scriptObject)
 };
 

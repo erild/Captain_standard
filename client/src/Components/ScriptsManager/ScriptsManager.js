@@ -8,10 +8,11 @@ class ScriptsManager extends React.Component {
   constructor() {
     super();
     this.state = { scripts: [], scriptModal: { name: '', description: '', content: 'return {fileComments: [], globalComments: []};'}, displayScriptModal: false};
-    agent.Customers.scripts().then(res => this.setState({scripts: res}));
+    agent.Script.get().then(res => this.setState({scripts: res}));
     this.activateModalNew = this.activateModalNew.bind(this);
     this.activateModalEdit = this.activateModalEdit.bind(this);
     this.handleScriptModal = this.handleScriptModal.bind(this);
+    this.deleteScript = this.deleteScript.bind(this);
   }
 
   activateModalNew() {
@@ -26,14 +27,28 @@ class ScriptsManager extends React.Component {
     if (event.hasOwnProperty('close')) {
       this.setState({ displayScriptModal: false })
     } else if (event.hasOwnProperty('name') && event.hasOwnProperty('description') && event.hasOwnProperty('content')) {
-      let script = event
+      const script = event;
       agent.Customers.current().then(customer => {
         Object.assign(script, { customerId: customer.id });
-        agent.Script.put(event);
-        this.setState({ displayScriptModal: false })
-      })
+        agent.Script
+          .put(script)
+          .then(() => agent.Script.get())
+          .then(res => this.setState({scripts: res, displayScriptModal: false}));
+      });
     }
   }
+
+  deleteScript(event, script, index) {
+    event.stopPropagation();
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le script ${script.name} de Captain Standard?`)) {
+      agent.Script.del(script.id).then(() =>
+        this.setState(state => {
+          state.scripts.splice(index, 1);
+          return {scripts: state.scripts};
+        })
+      );
+    }
+  };
 
   render() {
     if (this.state.scripts) {
@@ -43,6 +58,7 @@ class ScriptsManager extends React.Component {
         <ul style={{marginTop: '20px'}}>{this.state.scripts.map((script, index) => (
           <Well onClick={() => this.activateModalEdit(index)} key={script.id}>
             <p>{script.name}: {script.description}</p>
+            <Button bsStyle="danger" onClick={(e) => this.deleteScript(e, script, index)}><i className="fa fa-trash"/></Button>
           </Well>
         ))}
         </ul>
