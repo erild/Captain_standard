@@ -22,6 +22,7 @@ const redirectUnauthenticated = err => {
   } else {
     const error = err.response.type === 'application/json' ? JSON.parse(err.response.text).error : new Error(err.response.text);
     store.dispatch({type: 'ADD_ERROR', payload: error});
+    throw error;
   }
 };
 

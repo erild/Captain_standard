@@ -30,7 +30,7 @@ class LinterConfig extends React.Component {
         <FormControl componentClass="select" placeholder="select linter" onChange={this.handleLinterChange} value={this.props.selectedLinter}>
           {this.props.linters.map(linter => <option value={linter.id} key={linter.id}>{linter.name}</option>)}
         </FormControl>
-        <FormControl type="text" placeholder="Directory" onChange={this.handleLinterDirChange} value={this.props.directory} key={this.props.id+"_dir"} />
+        <FormControl type="text" placeholder="Directory (must exists on master branch)" onChange={this.handleLinterDirChange} value={this.props.directory} key={this.props.id+"_dir"} />
         <Button onClick={this.handleRemove}><Glyphicon glyph="remove" /></Button>
       </Well>
     );

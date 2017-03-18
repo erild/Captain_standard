@@ -79,6 +79,8 @@ class ReposConfig extends React.Component {
     }).then(() => {
       browserHistory.push('/#/app');
       window.location.reload();
+    }).catch(() => {
+      this.setState({submitting: false});
     });
     event.preventDefault();
   }
