@@ -106,6 +106,16 @@ module.exports = function (Project) {
     })
   );
 
+  Project.observe('loaded', (ctx, callback) => {
+    let data = ctx.instance || ctx.data;
+    Project.app.models.ProjectInstallation
+      .findOne({where: {projectId: parseInt(data.id, 10)}})
+      .then(projectInstallation => {
+        data.installationId = projectInstallation && projectInstallation.installationId;
+        callback();
+      }, err => callback(err));
+  });
+
   /**
    * Update all the linter relation of the project
    * @param {Array} listLinterRel array of all the linter relation
@@ -225,27 +235,22 @@ module.exports = function (Project) {
     let globalScriptComments = [];
     let allLintPassed = true;
     let scriptResults = [];
-    Promise.all([
-      Project.findById(projectId, {
-        include: [
-          {
-            relation: 'linters',
-          }, {
-            relation: 'customers',
-          }, {
-            relation: 'scripts',
-          }],
-      }),
-      Project.app.models.ProjectInstallation
-        .findOne({where: {projectId}}),
-    ]).then(result => {
-      project = result[0];
-      if (!result[1]) {
+    Project.findById(projectId, {
+      include: [
+        {
+          relation: 'linters',
+        }, {
+          relation: 'customers',
+        }, {
+          relation: 'scripts',
+        }],
+    }).then(result => {
+      project = result;
+      if (!project.installationId) {
         const error = new Error(`Please check integration is installed for ${data.fullName}`);
         error.statusCode = 400;
         throw error;
       }
-      project.installationId = result[1].installationId;
       if (!project || project.fromGithub) {
         let error = new Error('Project is not configured');
         error.status = 404;

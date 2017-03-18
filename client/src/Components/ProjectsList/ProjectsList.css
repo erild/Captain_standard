@@ -9,3 +9,10 @@
   padding: 10px;
   min-height: 56px;
 }
+
+.octocat {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+  margin-left: 10px;
+}
