@@ -55,28 +55,42 @@ const Linters = {
 
 const Project = {
   get:(projectId) => requests.get(`/Projects/${projectId}`),
-  put: (projectName, projectId, cloneUrl, configCmd) => requests.put('/Projects',{ fullName: projectName, id: projectId, cloneUrl: cloneUrl, configCmd: configCmd}),
+  put: (projectName, projectId, cloneUrl, configCmd) => requests.put('/Projects', {
+    fullName: projectName,
+    id: projectId,
+    cloneUrl,
+    configCmd
+  }),
   delete: (projectId) => requests.del(`/Projects/${projectId}`),
   linkCustomer: (projectId, customerId) => requests.put(`/Projects/${projectId}/customers/rel/${customerId}`,{}),
   getProjectLinters: (projectId) => requests.get(`/ProjectLinters?filter[where][projectId]=${projectId}`),
   getProjectScripts: (projectId) => requests.get(`/ProjectScripts?filter[where][projectId]=${projectId}`),
+  getProjectConfigCmds: (projectId) => requests.get(`/ProjectConfigCmds?filter[where][projectId]=${projectId}`),
   getProjectInstallation: (fullName) => requests.get(`/ProjectInstallations?filter[where][fullName]=${fullName}`),
-  updateAllRel: (projectId, listLinter, listScript) => requests.post(`/Projects/${projectId}/updateAllRel`, { listLinterRel: listLinter, listScriptRel: listScript})
+  updateAllRel: (projectId, listLinterRel, listScriptRel, listConfigCmdRel) => requests.post(`/Projects/${projectId}/updateAllRel`, {
+    listLinterRel,
+    listScriptRel,
+    listConfigCmdRel,
+  })
 };
 
 const Script = {
-  get:(scriptId) => requests.get(`/Scripts/${scriptId || ''}`),
+  get:(scriptId) => requests.get(`/Scripts/${scriptId}`),
+  all:(scriptId) => requests.get('/Scripts/'),
   del:(scriptId) => requests.del(`/Scripts/${scriptId}`),
   put:(scriptObject) => requests.put('/Scripts', scriptObject)
 };
 
-
+const ConfigCmds = {
+  all: () => requests.get('/ConfigCmds')
+}
 export default {
   API_ROOT,
   Customers,
   Linters,
   Project,
   Script,
+  ConfigCmds,
   setToken: _token => { token = _token; },
   getToken: () => token
 };

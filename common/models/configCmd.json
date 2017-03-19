@@ -1,0 +1,51 @@
+{
+  "name": "ConfigCmd",
+  "plural": "ConfigCmds",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "TimeStamp": {
+      "required": false,
+      "validateUpsert": true,
+      "silenceWarnings": false
+    }
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "command": {
+      "type": "string",
+      "required": true,
+      "default": "npm install"
+    }
+  },
+  "validations": [],
+  "relations": {
+      "projects": {
+      "type": "hasMany",
+      "model": "Project",
+      "foreignKey": "configCmdId",
+      "through": "ProjectConfigCmd"
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "find"
+    }
+  ],
+  "methods": {}
+}
