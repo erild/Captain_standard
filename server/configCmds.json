@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Install all npm deps",
+    "command": "npm install --loglevel=error"
+  },
+  {
+    "name": "Install npm dev deps",
+    "command": "npm install --only=dev --loglevel=error"
+  }
+]

@@ -116,25 +116,35 @@ module.exports = function (Project) {
           error.statusCode = 400;
           return callback(error);
         }
-        const checkers = [].concat.apply(ctx.args.listLinterRel, ctx.args.listScriptRel);
-        const checkerPromise = checker => new Promise((resolve, reject) =>
+        const checkers = ctx.args.listLinterRel.concat(
+          ctx.args.listConfigCmdRel,
+          ctx.args.listScriptRel
+        );
+        const directories = [];
+        checkers.forEach(checker => {
+          const dir =  typeof checker.directory === 'string' ? checker.directory.slice(1) : '';
+          if (directories.indexOf(dir) === -1) {
+            directories.push(dir);
+          }
+        });
+        const directoriesPromise = directory => new Promise((resolve, reject) =>
           agent
             .get({
-              url: `/repositories/${projectId}/contents/${typeof checker.directory === 'string' ? checker.directory.slice(1) : ''}`,
+              url: `/repositories/${projectId}/contents/${directory}`,
               installationId: projectInstallation.installationId,
             })
             .then(res => {
               if (Array.isArray(res)) {
                 resolve();
               } else {
-                const error = new Error('Please indicate the path of a directory, not a file.');
+                const error = new Error(`/${directory} is a file. Please indicate the path of a directory.`);
                 error.statusCode = 422;
                 reject(error);
               }
             })
             .catch(err => {
               if (err.status === 404) {
-                const error = new Error(`Path ${checker.directory} doesn't exist on branch master.`);
+                const error = new Error(`Path /${directory} doesn't exist on branch master.`);
                 error.statusCode = 422;
                 reject(error);
               } else {
@@ -143,7 +153,7 @@ module.exports = function (Project) {
             })
         );
         Promise
-          .all(checkers.map(checker => checkerPromise(checker)))
+          .all(directories.map(dir => directoriesPromise(dir)))
           .then(() => callback())
           .catch(error => callback(error));
       });
@@ -163,9 +173,11 @@ module.exports = function (Project) {
    * Update all the linter relation of the project
    * @param {Array} listLinterRel array of all the linter relation
    * @param {Array} listScriptRel array of all the scripts relation
+   * @param {Array} listConfigCmdRel array of all the configCmds relation
    * @param {function(Error)} callback
    */
-  Project.prototype.updateAllRel = function (listLinterRel, listScriptRel, callback) {
+  // eslint-disable-next-line max-len
+  Project.prototype.updateAllRel = function (listLinterRel, listScriptRel, listConfigCmdRel, callback) {
     listLinterRel.forEach(rel => {
       if (rel.hasOwnProperty('projectId') == false ||
         rel.hasOwnProperty('linterId') == false ||
@@ -182,6 +194,14 @@ module.exports = function (Project) {
         next();
       }
     });
+    listScriptRel.forEach(rel => {
+      if (rel.hasOwnProperty('projectId') == false ||
+        rel.hasOwnProperty('configCmdId') == false ||
+        rel.hasOwnProperty('directory') == false) {
+        callback(new Error('Invalid projectScript relation  parameters'));
+        next();
+      }
+    });
     Promise
       .all([
         Project.app.models.ProjectLinter.find({
@@ -192,10 +212,15 @@ module.exports = function (Project) {
           fields: ['id'],
           where: {'projectId': this.id},
         }),
+        Project.app.models.ProjectConfigCmd.find({
+          fields: ['id'],
+          where: {'projectId': this.id},
+        }),
       ])
       .then(res => {
         let projectLinters = res[0];
         let projectScripts = res[1];
+        let projectConfigCmds = res[2];
 
         projectLinters.forEach(projectLinter => {
           if (listLinterRel.find(rel => rel.id === projectLinter.id) === undefined) {
@@ -212,6 +237,14 @@ module.exports = function (Project) {
         });
         listScriptRel.forEach(rel => {
           Project.app.models.ProjectScript.upsert(rel);
+        });
+        projectConfigCmds.forEach(projectConfigCmd => {
+          if (listConfigCmdRel.find(rel => rel.id === projectConfigCmd.id) === undefined) {
+            Project.app.models.ProjectConfigCmd.destroyById(projectConfigCmd.id);
+          }
+        });
+        listConfigCmdRel.forEach(rel => {
+          Project.app.models.ProjectConfigCmd.upsert(rel);
         });
         callback();
       });
@@ -231,6 +264,12 @@ module.exports = function (Project) {
         type: 'array',
         required: true,
         description: 'array of all the script relation',
+      },
+      {
+        arg: 'listConfigCmdRel',
+        type: 'array',
+        required: true,
+        description: 'array of all the configCmd relation',
       },
     ],
     returns: [],
@@ -283,6 +322,8 @@ module.exports = function (Project) {
         {
           relation: 'linters',
         }, {
+          relation: 'configCmds',
+        }, {
           relation: 'customers',
         }, {
           relation: 'scripts',
@@ -320,15 +361,23 @@ module.exports = function (Project) {
           app.models.ProjectScript.find({
             where: {projectId: project.id},
           }),
+          app.models.ProjectConfigCmd.find({
+            where: {projectId: project.id},
+          }),
         ]);
       })
       .then((results) => {
         const projectLinters = results[0];
         const token = results[1];
         const projectScripts = results[2];
+        const projectConfigCmds = results[3];
         let linters = {};
         project.linters().forEach((linter) => {
           linters[linter.id] = linter;
+        });
+        let configCmds = {};
+        project.configCmds().forEach((configCmd) => {
+          configCmds[configCmd.id] = configCmd;
         });
         let scripts = {};
         project.scripts().forEach((script) => {
@@ -342,14 +391,6 @@ module.exports = function (Project) {
           `${data.pull_request.head.sha} 2>&1`,
         ];
 
-        if (project.configCmd) {
-          project.configCmd
-            .split('\n')
-            .forEach((command) => {
-              initCommands.push(
-                `cd ${projectsDirectory}/${folderName} && ${command}`);
-            });
-        }
         let promiseChain = Promise.resolve();
         initCommands.forEach(cmd => {
           promiseChain = promiseChain.then(() => {
@@ -364,7 +405,22 @@ module.exports = function (Project) {
             });
           });
         });
-
+        projectConfigCmds.forEach((projectConfigCmd) => {
+          promiseChain = promiseChain.then(() => {
+            return new Promise((resolve, reject) => {
+              exec(
+                `cd ${projectsDirectory}/${folderName}${projectConfigCmd.directory} && ` +
+                `${configCmds[projectConfigCmd.configCmdId].command}`,
+                (error, stdout, stderr) => {
+                  if (stderr) {
+                    return reject(stderr);
+                  }
+                  resolve();
+                }
+              );
+            });
+          });
+        });
         projectLinters.forEach((scan) => {
           promiseChain = promiseChain.then(() => {
             return new Promise((resolve, reject) => {

@@ -13,7 +13,7 @@
       "silenceWarnings": false
     },
     "CascadeDelete": {
-      "relations": ["linters", "customers"]
+      "relations": ["linters", "customers", "configCmds"]
     }
   },
   "properties": {
@@ -30,11 +30,6 @@
     "cloneUrl": {
       "type": "string",
       "required": true
-    },
-    "configCmd": {
-      "type": "string",
-      "required": false,
-      "default": ""
     },
     "webhookSecret": {
       "type": "string",
@@ -60,6 +55,12 @@
       "model": "Script",
       "foreignKey": "projectId",
       "through": "ProjectScript"
+    },
+    "configCmds": {
+      "type": "hasMany",
+      "model": "ConfigCmd",
+      "foreignKey": "projectId",
+      "through": "ProjectConfigCmd"
     }
   },
   "acls": [

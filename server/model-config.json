@@ -76,5 +76,13 @@
   "ProjectScript": {
     "dataSource": "db",
     "public": true
+  },
+  "ProjectConfigCmd": {
+    "dataSource": "db",
+    "public": true
+  },
+  "ConfigCmd": {
+    "dataSource": "db",
+    "public": true
   }
 }

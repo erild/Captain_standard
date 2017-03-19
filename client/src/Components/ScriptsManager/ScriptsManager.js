@@ -8,7 +8,7 @@ class ScriptsManager extends React.Component {
   constructor() {
     super();
     this.state = { scripts: [], scriptModal: { name: '', description: '', content: 'return {fileComments: [], globalComments: []};'}, displayScriptModal: false};
-    agent.Script.get().then(res => this.setState({scripts: res}));
+    agent.Script.all().then(res => this.setState({scripts: res}));
     this.activateModalNew = this.activateModalNew.bind(this);
     this.activateModalEdit = this.activateModalEdit.bind(this);
     this.handleScriptModal = this.handleScriptModal.bind(this);
@@ -32,7 +32,7 @@ class ScriptsManager extends React.Component {
         Object.assign(script, { customerId: customer.id });
         agent.Script
           .put(script)
-          .then(() => agent.Script.get())
+          .then(() => agent.Script.all())
           .then(res => this.setState({scripts: res, displayScriptModal: false}));
       });
     }
