@@ -13,7 +13,11 @@
       "silenceWarnings": false
     },
     "CascadeDelete": {
-      "relations": ["linters", "customers", "configCmds"]
+      "relations": [
+        "linters",
+        "customers",
+        "configCmds"
+      ]
     }
   },
   "properties": {
@@ -110,6 +114,5 @@
       "property": "deleteById"
     }
   ],
-  "methods": {
-  }
+  "methods": {}
 }

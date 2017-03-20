@@ -1,4 +1,6 @@
 const agent = require('../../server/agent');
+// const app = require('../../server/server');
+
 
 module.exports = function (Customer) {
   Customer.observe('before save', (context, callback) => {
@@ -62,5 +64,79 @@ module.exports = function (Customer) {
       arg: 'repos',
       type: 'any',
     },
+  });
+
+  Customer.addAdmin = function(customerId, callback) {
+    Customer.app.models.Role.findOne({where: {name: 'admin'}}, function(err, role) {
+        if (err) {
+          console.log(err)
+          callback(err);
+        }
+        Customer.app.models.RoleMapping.upsertWithWhere(
+        {
+          principalType: "USER",
+          principalId: customerId,
+          roleId: role.id
+        },
+        {
+          principalType: "USER",
+          principalId: customerId,
+          roleId: role.id
+        }, function(err, roleMapping) {
+          if (err) {
+            console.log(err)
+            callback(err);
+          }
+          callback();
+        });
+      });
+  };
+
+  Customer.remoteMethod('addAdmin', {
+    description: 'Add admin right to a person.',
+    http: {
+      verb: 'post',
+    },
+    accepts: {arg: 'customerId', type: 'number'},
+    isStatic: true,
+  });
+
+  Customer.delAdmin = function(customerId, callback) {
+    Customer.app.models.Role.findOne({where: {name: 'admin'}}, function(err, role) {
+        if (err) {
+          console.log(err)
+          callback(err);
+        }
+        Customer.app.models.RoleMapping.findOne(
+        {
+          where: {
+            principalType: "USER",
+            principalId: customerId,
+            roleId: role.id
+          }
+        }, function(err, roleMapping) {
+          if (err) {
+            console.log(err)
+            callback(err);
+          }
+          Customer.app.models.RoleMapping.destroyById(roleMapping.id, function(err) {
+            if (err) {
+              console.log(err)
+              callback(err);
+            }
+            callback();
+          });
+        });
+      });
+  };
+
+
+  Customer.remoteMethod('delAdmin', {
+    description: 'remove admin right from a person.',
+    http: {
+      verb: 'post',
+    },
+    accepts: {arg: 'customerId', type: 'number'},
+    isStatic: true,
   });
 };

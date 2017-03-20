@@ -15,6 +15,7 @@ class Header extends Component {
         <Nav className="navbar-right">
           <NavDropdown id="nav-dropdown" title={<span><i className="fa fa-user" /> {this.props.currentUser && this.props.currentUser.username}</span>}>
             <MenuItem onClick={this.props.onLogout}>Logout</MenuItem>
+            <MenuItem href="/#/app/admin">Admin</MenuItem>
           </NavDropdown>
         </Nav>
       </Navbar>
