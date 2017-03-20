@@ -1,8 +1,13 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import Well from 'react-bootstrap/lib/Well';
 import Button from 'react-bootstrap/lib/Button';
 import agent from '../../agent';
 import ScriptModal from '../ScriptModal';
+
+const mapStateToProps = state => ({
+  currentUser: state.auth.currentUser
+});
 
 class ScriptsManager extends React.Component {
   constructor() {
@@ -51,7 +56,7 @@ class ScriptsManager extends React.Component {
   };
 
   render() {
-    if (this.state.scripts) {
+    if (this.props.currentUser && this.props.currentUser.roles && this.props.currentUser.roles.find(role => {return role.name == 'admin'}) && this.state.scripts) {
       return (
         <div>
         <Button bsStyle="success" onClick={this.activateModalNew}><i className="fa fa-plus"/> Add new script</Button>
@@ -71,4 +76,4 @@ class ScriptsManager extends React.Component {
   }
 }
 
-export default ScriptsManager;
+export default connect(mapStateToProps)(ScriptsManager);

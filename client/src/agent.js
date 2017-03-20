@@ -46,8 +46,6 @@ const Customers = {
     requests.get(`/Customers/me/repos?page=${page}`).then(res => res, err => requests.get(`/Customers/me/repos?page=${page}`)),
   projects: () =>
     requests.get('/Customers/me/projects'),
-  scripts: () =>
-    requests.get('/Customers/me/scripts'),
   addAdmin: (customerId) =>
     requests.post('/Customers/addAdmin', {customerId: customerId}),
   removeAdmin: (customerId) =>

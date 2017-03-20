@@ -62,20 +62,9 @@ class ReposConfig extends React.Component {
   }
 
   handleScriptChange(scriptInfo, key) {
-    if(scriptInfo === 'update') {
-      agent.Script.all().then(res => {
-        this.setState({customScripts: res});
-        if (res.length) {
-          let projectScripts = this.state.projectScripts;
-          Object.assign(projectScripts[key], { scriptId: res[res.length-1].id });
-          this.setState({ projectScripts })
-        }
-      });
-    } else {
-      let projectScripts = this.state.projectScripts;
-      scriptInfo === 'delete' ? projectScripts.splice(key, 1) : projectScripts[key] = Object.assign(projectScripts[key], scriptInfo);
-      this.setState({projectScripts});
-    }
+    let projectScripts = this.state.projectScripts;
+    scriptInfo === 'delete' ? projectScripts.splice(key, 1) : projectScripts[key] = Object.assign(projectScripts[key], scriptInfo);
+    this.setState({projectScripts});
   }
 
   handleSubmit(event) {
@@ -115,16 +104,21 @@ class ReposConfig extends React.Component {
 
   AddScript() {
     let projectScripts = this.state.projectScripts;
-    this.state.customScripts.length ? projectScripts.push({
+    if (this.state.customScripts.length) {
+      projectScripts.push({
         projectId: this.props.project.id,
         scriptId: this.state.customScripts[0].id,
         directory: "/"
-      }) : projectScripts.push({projectId: this.props.project.id, scriptId: null, directory: ""})
-    this.setState({projectScripts: projectScripts});
+      });
+      this.setState({projectScripts: projectScripts});
+    }
   }
 
   render() {
-
+    scriptButton = ''
+    if (this.state.customScripts.length) {
+      scriptButton = <Button bsStyle="primary" className="button-right" onClick={this.AddScript}>Add a custom script</Button>
+    }
     return this.props.project && this.state.linters && this.state.customScripts && this.state.projectLinters && this.state.projectScripts && this.state.projectConfigCmds ? (
       <div>
         <h2>Configuring {this.props.project.fullName} <a href={'https://github.com/' + this.props.project.fullName}
@@ -160,7 +154,7 @@ class ReposConfig extends React.Component {
               )
             })}
             <Button bsStyle="primary" className="button-left" onClick={this.AddLinter}>Add another linter</Button>
-            <Button bsStyle="primary" className="button-right" onClick={this.AddScript}>Add a custom script</Button>
+            {scriptButton}
           </ul>
           <br />
           <br />
