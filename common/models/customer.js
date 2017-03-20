@@ -1,5 +1,4 @@
 const agent = require('../../server/agent');
-// const app = require('../../server/server');
 
 
 module.exports = function (Customer) {

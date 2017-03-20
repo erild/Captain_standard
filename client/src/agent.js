@@ -38,10 +38,17 @@ const requests = {
 };
 
 const Customers = {
-  all: () =>
+  allWithRoles: () =>
     requests.get('/Customers?filter[include]=roles'),
   current: () =>
-    requests.get('/Customers/me'),
+    requests.get('/Customers/me?filter[include]=roles'),
+    // .then(user => {
+    //   requests.get('/Customers/me/roles').then(roles => {
+    //     user.roles = roles;
+    //     console.log('dd');
+    //     return user;
+    //   })
+    // }),
   repos: (page) =>
     requests.get(`/Customers/me/repos?page=${page}`).then(res => res, err => requests.get(`/Customers/me/repos?page=${page}`)),
   projects: () =>

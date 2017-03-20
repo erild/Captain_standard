@@ -9,7 +9,7 @@ class Admin extends React.Component {
   constructor() {
     super();
     this.state = { customers: [], selectedUser: 'none', actionType: 'Add'};
-    agent.Customers.all().then(res => this.setState({customers: res}));
+    agent.Customers.allWithRoles().then(res => this.setState({customers: res}));
     this.handleUserChange = this.handleUserChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -32,7 +32,7 @@ class Admin extends React.Component {
   }
 
   render() {
-    if (this.state.customers) {
+    if (this.state.customers.length) {
       return (
         <div>
         <h2>Handle admin access for users</h2>
