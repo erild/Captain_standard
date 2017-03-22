@@ -5,6 +5,12 @@ import './Header.css';
 
 class Header extends Component {
   render() {
+    let adminAccess = null
+    if (this.props.currentUser && this.props.currentUser.roles && this.props.currentUser.roles.find(role => {return role.name === 'admin'})) {
+      adminAccess = <MenuItem href="/#/app/admin">Admin</MenuItem>
+    } else {
+      adminAccess = '';
+    }
     return (
       <Navbar>
         <Navbar.Header>
@@ -15,6 +21,7 @@ class Header extends Component {
         <Nav className="navbar-right">
           <NavDropdown id="nav-dropdown" title={<span><i className="fa fa-user" /> {this.props.currentUser && this.props.currentUser.username}</span>}>
             <MenuItem onClick={this.props.onLogout}>Logout</MenuItem>
+            {adminAccess}
           </NavDropdown>
         </Nav>
       </Navbar>

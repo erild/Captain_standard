@@ -63,4 +63,63 @@ module.exports = function (Customer) {
       type: 'any',
     },
   });
+
+  Customer.addAdmin = function (customerId, callback) {
+    Customer.app.models.Role.findOne({where: {name: 'admin'}})
+      .then(role =>
+        Customer.app.models.RoleMapping.upsertWithWhere(
+          {
+            principalType: 'USER',
+            principalId: customerId,
+            roleId: role.id,
+          },
+          {
+            principalType: 'USER',
+            principalId: customerId,
+            roleId: role.id,
+          }
+        )
+      )
+      .then(() => callback())
+      .catch(err => {
+        console.error(err);
+        callback(err);
+      });
+  };
+
+  Customer.remoteMethod('addAdmin', {
+    description: 'Add admin right to a person.',
+    http: {
+      verb: 'post',
+    },
+    accepts: {arg: 'customerId', type: 'number'},
+    isStatic: true,
+  });
+
+  Customer.delAdmin = function (customerId, callback) {
+    Customer.app.models.Role
+      .findOne({where: {name: 'admin'}})
+      .then(role =>
+        Customer.app.models.RoleMapping.findOne(
+          {
+            where: {
+              principalType: 'USER',
+              principalId: customerId,
+              roleId: role.id,
+            },
+          })
+      )
+      .then(roleMapping => Customer.app.models.RoleMapping.destroyById(roleMapping.id))
+      .then(() => callback())
+      .catch(err => callback(err));
+  };
+
+  Customer.remoteMethod('delAdmin', {
+    description: 'remove admin right from a person.',
+    http: {
+      verb: 'post',
+    },
+    accepts: {arg: 'customerId', type: 'number'},
+    isStatic: true,
+  });
 };

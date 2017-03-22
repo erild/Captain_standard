@@ -3,10 +3,10 @@
   "plural": "Customers",
   "base": "User",
   "idInjection": true,
-  "injectOptionsFromRemoteContext": true,
   "options": {
     "validateUpsert": true
   },
+  "injectOptionsFromRemoteContext": true,
   "properties": {},
   "validations": [],
   "relations": {
@@ -19,6 +19,12 @@
       "type": "hasMany",
       "model": "Script",
       "foreignKey": ""
+    },
+    "roles": {
+      "type": "hasMany",
+      "model": "Role",
+      "foreignKey": "principalId",
+      "through": "RoleMapping"
     }
   },
   "acls": [
@@ -70,6 +76,32 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__get__scripts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__roles"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW",
+      "property": "addAdmin"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW",
+      "property": "delAdmin"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
     }
   ],
   "methods": {}
