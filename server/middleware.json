@@ -38,8 +38,6 @@
       "params": "false secret"
     }
   },
-  "session": {
-  },
   "auth": {},
   "parse": {},
   "routes": {

@@ -12,18 +12,17 @@
     },
     "installationId": {
       "type": "number",
-      "default": 0,
-      "required": true
+      "required": true,
+      "default": 0
     },
     "fullName": {
       "type": "string",
-      "default": "",
-      "required": true
+      "required": true,
+      "default": ""
     }
   },
   "validations": [],
-  "relations": {
-  },
+  "relations": {},
   "acls": [
     {
       "accessType": "*",

@@ -38,14 +38,20 @@ const requests = {
 };
 
 const Customers = {
+  allWithRoles: () =>
+    requests.get('/Customers?filter[include]=roles'),
   current: () =>
-    requests.get('/Customers/me'),
+    requests.get('/Customers/me?filter[include]=roles'),
   repos: (page) =>
     requests.get(`/Customers/me/repos?page=${page}`).then(res => res, err => requests.get(`/Customers/me/repos?page=${page}`)),
   projects: () =>
     requests.get('/Customers/me/projects'),
   scripts: () =>
-    requests.get('/Customers/me/scripts')
+    requests.get('/Customers/me/scripts'),
+  addAdmin: (customerId) =>
+    requests.post('/Customers/addAdmin', {customerId: customerId}),
+  removeAdmin: (customerId) =>
+    requests.post('/Customers/delAdmin', {customerId: customerId})
 };
 
 const Linters = {
