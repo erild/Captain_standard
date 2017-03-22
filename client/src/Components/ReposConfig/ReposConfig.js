@@ -115,8 +115,8 @@ class ReposConfig extends React.Component {
   }
 
   render() {
-    scriptButton = ''
-    if (this.state.customScripts.length) {
+    let scriptButton = ''
+    if (this.state.customScripts && this.state.customScripts.length) {
       scriptButton = <Button bsStyle="primary" className="button-right" onClick={this.AddScript}>Add a custom script</Button>
     }
     return this.props.project && this.state.linters && this.state.customScripts && this.state.projectLinters && this.state.projectScripts && this.state.projectConfigCmds ? (

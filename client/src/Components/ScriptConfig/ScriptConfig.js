@@ -2,7 +2,6 @@ import React from 'react';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import Well from 'react-bootstrap/lib/Well';
 import Button from 'react-bootstrap/lib/Button';
-import agent from '../../agent';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 
 class ScriptConfig extends React.Component {

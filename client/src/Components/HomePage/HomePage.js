@@ -21,11 +21,9 @@ class HomePage extends React.Component {
   }
 
   render() {
-    let scriptAccess = null
-    if (this.props.currentUser && this.props.currentUser.roles && this.props.currentUser.roles.find(role => {return role.name == 'admin'})) {
+    let scriptAccess = '';
+    if (this.props.currentUser && this.props.currentUser.roles && this.props.currentUser.roles.find(role => {return role.name === 'admin'})) {
       scriptAccess = <Button bsStyle="success" className="button-right" href="/#/app/scripts"><i className="fa fa-cog"/> Handle custom scripts</Button>
-    } else {
-      scriptAccess = '';
     }
     if (this.props.currentUser && this.props.projects) {
         return (

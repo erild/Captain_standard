@@ -194,11 +194,11 @@ module.exports = function (Project) {
         next();
       }
     });
-    listScriptRel.forEach(rel => {
+    listConfigCmdRel.forEach(rel => {
       if (rel.hasOwnProperty('projectId') == false ||
         rel.hasOwnProperty('configCmdId') == false ||
         rel.hasOwnProperty('directory') == false) {
-        callback(new Error('Invalid projectScript relation  parameters'));
+        callback(new Error('Invalid ConfigCmd parameters'));
         next();
       }
     });
