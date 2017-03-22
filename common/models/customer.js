@@ -1,6 +1,5 @@
 const agent = require('../../server/agent');
 
-
 module.exports = function (Customer) {
   Customer.observe('before save', (context, callback) => {
     if (context.instance && context.instance.__data) {
@@ -65,29 +64,26 @@ module.exports = function (Customer) {
     },
   });
 
-  Customer.addAdmin = function(customerId, callback) {
-    Customer.app.models.Role.findOne({where: {name: 'admin'}}, function(err, role) {
-        if (err) {
-          console.log(err)
-          callback(err);
-        }
+  Customer.addAdmin = function (customerId, callback) {
+    Customer.app.models.Role.findOne({where: {name: 'admin'}})
+      .then(role =>
         Customer.app.models.RoleMapping.upsertWithWhere(
-        {
-          principalType: "USER",
-          principalId: customerId,
-          roleId: role.id
-        },
-        {
-          principalType: "USER",
-          principalId: customerId,
-          roleId: role.id
-        }, function(err, roleMapping) {
-          if (err) {
-            console.log(err)
-            callback(err);
+          {
+            principalType: 'USER',
+            principalId: customerId,
+            roleId: role.id,
+          },
+          {
+            principalType: 'USER',
+            principalId: customerId,
+            roleId: role.id,
           }
-          callback();
-        });
+        )
+      )
+      .then(() => callback())
+      .catch(err => {
+        console.error(err);
+        callback(err);
       });
   };
 
@@ -100,35 +96,23 @@ module.exports = function (Customer) {
     isStatic: true,
   });
 
-  Customer.delAdmin = function(customerId, callback) {
-    Customer.app.models.Role.findOne({where: {name: 'admin'}}, function(err, role) {
-        if (err) {
-          console.log(err)
-          callback(err);
-        }
+  Customer.delAdmin = function (customerId, callback) {
+    Customer.app.models.Role
+      .findOne({where: {name: 'admin'}})
+      .then(role =>
         Customer.app.models.RoleMapping.findOne(
-        {
-          where: {
-            principalType: "USER",
-            principalId: customerId,
-            roleId: role.id
-          }
-        }, function(err, roleMapping) {
-          if (err) {
-            console.log(err)
-            callback(err);
-          }
-          Customer.app.models.RoleMapping.destroyById(roleMapping.id, function(err) {
-            if (err) {
-              console.log(err)
-              callback(err);
-            }
-            callback();
-          });
-        });
-      });
+          {
+            where: {
+              principalType: 'USER',
+              principalId: customerId,
+              roleId: role.id,
+            },
+          })
+      )
+      .then(roleMapping => Customer.app.models.RoleMapping.destroyById(roleMapping.id))
+      .then(() => callback())
+      .catch(err => callback(err));
   };
-
 
   Customer.remoteMethod('delAdmin', {
     description: 'remove admin right from a person.',

@@ -6,7 +6,7 @@ import './Header.css';
 class Header extends Component {
   render() {
     let adminAccess = null
-    if (this.props.currentUser && this.props.currentUser.roles && this.props.currentUser.roles.find(role => {return role.name == 'admin'})) {
+    if (this.props.currentUser && this.props.currentUser.roles && this.props.currentUser.roles.find(role => {return role.name === 'admin'})) {
       adminAccess = <MenuItem href="/#/app/admin">Admin</MenuItem>
     } else {
       adminAccess = '';

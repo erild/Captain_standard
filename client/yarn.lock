@@ -4401,9 +4401,9 @@ react-dom@^15.3.2:
   version "15.3.2"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.3.2.tgz#c46b0aa5380d7b838e7a59c4a7beff2ed315531f"
 
-react-octicons@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/react-octicons/-/react-octicons-0.0.4.tgz#3070d601d6bbfc6bd294eaf49ef8a7d78e699151"
+react-octicons@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/react-octicons/-/react-octicons-0.0.5.tgz#a6d3018d049429e7494707b4fe7d067419390d90"
 
 react-overlays@^0.6.10:
   version "0.6.10"
