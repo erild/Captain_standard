@@ -1,8 +1,14 @@
 import React from 'react';
-import Well from 'react-bootstrap/lib/Well';
+import {connect} from 'react-redux';
 import Button from 'react-bootstrap/lib/Button';
-import agent from '../../agent';
+import Well from 'react-bootstrap/lib/Well';
 import ScriptModal from '../ScriptModal';
+import agent from '../../agent';
+import store from '../../store';
+
+const mapStateToProps = state => ({
+  currentUser: state.auth.currentUser
+});
 
 class ScriptsManager extends React.Component {
   constructor() {
@@ -13,6 +19,12 @@ class ScriptsManager extends React.Component {
     this.activateModalEdit = this.activateModalEdit.bind(this);
     this.handleScriptModal = this.handleScriptModal.bind(this);
     this.deleteScript = this.deleteScript.bind(this);
+  }
+
+  componentWillMount() {
+    if (!this.props.currentUser || !this.props.currentUser.roles || !this.props.currentUser.roles.find(role => {return role.name === 'admin'})) {
+      store.dispatch({type: 'ADD_ERROR', payload: Error('Access denied')});
+    }
   }
 
   activateModalNew() {
@@ -51,7 +63,7 @@ class ScriptsManager extends React.Component {
   };
 
   render() {
-    if (this.state.scripts) {
+    if (this.props.currentUser && this.props.currentUser.roles && this.props.currentUser.roles.find(role => {return role.name === 'admin'}) && this.state.scripts) {
       return (
         <div>
         <Button bsStyle="success" onClick={this.activateModalNew}><i className="fa fa-plus"/> Add new script</Button>
@@ -71,4 +83,4 @@ class ScriptsManager extends React.Component {
   }
 }
 
-export default ScriptsManager;
+export default connect(mapStateToProps)(ScriptsManager);
