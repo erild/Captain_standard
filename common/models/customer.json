@@ -15,11 +15,6 @@
       "model": "Project",
       "foreignKey": ""
     },
-    "scripts": {
-      "type": "hasMany",
-      "model": "Script",
-      "foreignKey": ""
-    },
     "roles": {
       "type": "hasMany",
       "model": "Role",
@@ -70,12 +65,6 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__get__projects"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$owner",
-      "permission": "ALLOW",
-      "property": "__get__scripts"
     },
     {
       "principalType": "ROLE",

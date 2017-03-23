@@ -21,11 +21,6 @@
   },
   "validations": [],
   "relations": {
-    "customer": {
-      "type": "belongsTo",
-      "model": "Customer",
-      "foreignKey": ""
-    },
     "projects": {
       "type": "hasMany",
       "model": "Project",
@@ -43,11 +38,11 @@
     {
       "accessType": "*",
       "principalType": "ROLE",
-      "principalId": "$owner",
+      "principalId": "admin",
       "permission": "ALLOW"
     },
     {
-      "accessType": "*",
+      "accessType": "READ",
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW"

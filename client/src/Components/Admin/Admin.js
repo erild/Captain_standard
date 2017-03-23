@@ -2,6 +2,7 @@ import React from 'react';
 import Button from 'react-bootstrap/lib/Button';
 import agent from '../../agent';
 import FormControl from 'react-bootstrap/lib/FormControl';
+import './Admin.css';
 
 
 class Admin extends React.Component {
@@ -15,7 +16,7 @@ class Admin extends React.Component {
 
   handleUserChange(event) {
     this.setState({selectedUser: event.target.value})
-    if(this.state.customers[event.target.value].roles.find(role => {return role.name === 'admin'})) {
+    if(this.state.customers[event.target.value].roles.find(role => role.name === 'admin')) {
       this.setState({actionType: 'Remove'});
     } else {
       this.setState({actionType: 'Add'});
@@ -26,7 +27,10 @@ class Admin extends React.Component {
     if (this.state.actionType === 'Add') {
       agent.Customers.addAdmin(this.state.customers[this.state.selectedUser].id).then(window.location.reload());
     } else {
-      agent.Customers.removeAdmin(this.state.customers[this.state.selectedUser].id).then(window.location.reload());
+      if (this.state.customers.filter(customer => customer.roles.find(role => role.name === 'admin')).length > 1 ||
+        confirm('You are deleting the only admin. Are you sure you want to do this?')) {
+        agent.Customers.removeAdmin(this.state.customers[this.state.selectedUser].id).then(window.location.reload());
+      }
     }
   }
 
@@ -35,9 +39,9 @@ class Admin extends React.Component {
       return (
         <div>
         <h2>Handle admin access for users</h2>
-        <FormControl componentClass="select" placeholder="select user" onChange={this.handleUserChange} value={this.state.selectedUser}>
+        <FormControl className="pull-left" id="user-selection" componentClass="select" placeholder="select user" onChange={this.handleUserChange} value={this.state.selectedUser}>
           <option value='none' key='none'>--</option>
-          {this.state.customers.map((customer, index) => <option value={index} key={index}>{customer.username} {customer.roles.find(role => {return role.name === 'admin'}) ? ' (admin)' : ''}</option>)}
+          {this.state.customers.map((customer, index) => <option value={index} key={index}>{customer.username} {customer.roles.find(role => role.name === 'admin') ? ' (admin)' : ''}</option>)}
         </FormControl>
         <Button onClick={this.handleSubmit} disabled={this.state.selectedUser === 'none'}>{this.state.actionType} admin rights</Button>
         </div>
