@@ -6,8 +6,8 @@ import './Header.css';
 class Header extends Component {
   render() {
     let adminAccess = null;
-    const usersLink = <MenuItem href="/#/app/admin">Users admin</MenuItem>;
-    const scriptsLink = <MenuItem href="/#/app/scripts">Scripts admin</MenuItem>;
+    const usersLink = <MenuItem key="users" href="/#/app/admin">Users admin</MenuItem>;
+    const scriptsLink = <MenuItem key="scripts" href="/#/app/scripts">Scripts admin</MenuItem>;
     if (this.props.currentUser && this.props.currentUser.roles && this.props.currentUser.roles.find(role => {return role.name === 'admin'})) {
       adminAccess = [usersLink, scriptsLink]
     } else {
@@ -22,7 +22,7 @@ class Header extends Component {
         </Navbar.Header>
         <Nav className="navbar-right">
           <NavDropdown id="nav-dropdown" title={<span><i className="fa fa-user" /> {this.props.currentUser && this.props.currentUser.username}</span>}>
-            <MenuItem onClick={this.props.onLogout}>Logout</MenuItem>
+            <MenuItem key="logout" onClick={this.props.onLogout}>Logout</MenuItem>
             {adminAccess}
           </NavDropdown>
         </Nav>

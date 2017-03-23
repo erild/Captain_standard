@@ -7,7 +7,7 @@ import FeatureConfig from '../FeatureConfig';
 import ScriptConfig from '../ScriptConfig';
 import './ReposConfig.css';
 import {MarkGithubIcon} from 'react-octicons';
-
+import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 
 const mapStateToProps = state => ({...state.projects});
 
@@ -120,48 +120,48 @@ class ReposConfig extends React.Component {
       scriptButton = <Button bsStyle="primary" className="button-right" onClick={this.AddScript}>Add a custom script</Button>;
     }
     return this.props.project && this.state.linters && this.state.customScripts && this.state.projectLinters && this.state.projectScripts && this.state.projectConfigCmds ? (
-      <div>
-        <h2>Configuring {this.props.project.fullName} <a href={'https://github.com/' + this.props.project.fullName}
-                                                         target="_blank"><MarkGithubIcon size="mega"
-                                                                                         className="octocat"/></a></h2>
-        <form onSubmit={this.handleSubmit}>
-          <p>Please choose a command to initialize the project :
-            <Button bsStyle="primary" style={{marginLeft: '10px'}} onClick={this.AddConfigCmd}>Add a config command</Button>
-          </p>
-          <ul>
-            {this.state.projectConfigCmds.map((projectConfigCmd, key) => {
-              return (
-                <FeatureConfig features={this.state.configCmds} featureName="configCmd"
-                               selectedFeature={projectConfigCmd.configCmdId} directory={projectConfigCmd.directory} key={key}
-                               onChange={event => this.handleConfigCmdChange(event, key)}/>
-              )
-            })}
-          </ul>
-          <p>Please choose a linter : </p>
-          <ul>
-            {this.state.projectLinters.map((projectLinter, key) => {
-              return (
-                <FeatureConfig features={this.state.linters} featureName="linter" selectedFeature={projectLinter.linterId}
-                               directory={projectLinter.directory} key={key}
-                               onChange={event => this.handleLinterChange(event, key)}/>
-              )
-            })}
-            {this.state.projectScripts.map((projectScript, key) => {
-              return (
-                <ScriptConfig scripts={this.state.customScripts} selectedScript={projectScript.scriptId}
-                              directory={projectScript.directory} key={key}
-                              onChange={event => this.handleScriptChange(event, key)}/>
-              )
-            })}
-            <Button bsStyle="primary" className="button-left" onClick={this.AddLinter}>Add a linter</Button>
-            {scriptButton}
-          </ul>
-          <br />
-          <br />
-          <Button type="submit" bsStyle="success" disabled={this.state.submitting}>Save</Button>
-        </form>
-      </div>
-    ) : null;
+        <div>
+          <h2>Configuring {this.props.project.fullName} <a href={'https://github.com/' + this.props.project.fullName}
+                                                           target="_blank"><MarkGithubIcon size="mega"
+                                                                                           className="octocat"/></a></h2>
+          <form onSubmit={this.handleSubmit}>
+            <p>Please choose a command to initialize the project :
+              <Button bsStyle="primary" style={{marginLeft: '10px'}} onClick={this.AddConfigCmd}>Add a config command</Button>
+            </p>
+            <ul>
+              {this.state.projectConfigCmds.map((projectConfigCmd, key) => {
+                return (
+                  <FeatureConfig features={this.state.configCmds} featureName="configCmd"
+                                 selectedFeature={projectConfigCmd.configCmdId} directory={projectConfigCmd.directory} key={key}
+                                 onChange={event => this.handleConfigCmdChange(event, key)}/>
+                )
+              })}
+            </ul>
+            <p>Please choose a linter : </p>
+            <ul>
+              {this.state.projectLinters.map((projectLinter, key) => {
+                return (
+                  <FeatureConfig features={this.state.linters} featureName="linter" selectedFeature={projectLinter.linterId}
+                                 directory={projectLinter.directory} key={key}
+                                 onChange={event => this.handleLinterChange(event, key)}/>
+                )
+              })}
+              {this.state.projectScripts.map((projectScript, key) => {
+                return (
+                  <ScriptConfig scripts={this.state.customScripts} selectedScript={projectScript.scriptId}
+                                directory={projectScript.directory} key={key}
+                                onChange={event => this.handleScriptChange(event, key)}/>
+                )
+              })}
+              <Button bsStyle="primary" className="button-left" onClick={this.AddLinter}>Add a linter</Button>
+              {scriptButton}
+            </ul>
+            <br />
+            <br />
+            <Button type="submit" bsStyle="success" disabled={this.state.submitting}>Save</Button>
+          </form>
+        </div>
+      ) : <div>Loading project configuration... <Glyphicon glyph="refresh" className="refresh-animate" /></div>;
   }
 }
 
