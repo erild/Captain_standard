@@ -115,9 +115,9 @@ class ReposConfig extends React.Component {
   }
 
   render() {
-    let scriptButton = ''
+    let scriptButton = '';
     if (this.state.customScripts && this.state.customScripts.length) {
-      scriptButton = <Button bsStyle="primary" className="button-right" onClick={this.AddScript}>Add a custom script</Button>
+      scriptButton = <Button bsStyle="primary" className="button-right" onClick={this.AddScript}>Add a custom script</Button>;
     }
     return this.props.project && this.state.linters && this.state.customScripts && this.state.projectLinters && this.state.projectScripts && this.state.projectConfigCmds ? (
       <div>
@@ -153,7 +153,7 @@ class ReposConfig extends React.Component {
                               onChange={event => this.handleScriptChange(event, key)}/>
               )
             })}
-            <Button bsStyle="primary" className="button-left" onClick={this.AddLinter}>Add another linter</Button>
+            <Button bsStyle="primary" className="button-left" onClick={this.AddLinter}>Add a linter</Button>
             {scriptButton}
           </ul>
           <br />

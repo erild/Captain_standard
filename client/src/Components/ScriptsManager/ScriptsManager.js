@@ -23,7 +23,7 @@ class ScriptsManager extends React.Component {
 
   componentWillMount() {
     if (!this.props.currentUser || !this.props.currentUser.roles || !this.props.currentUser.roles.find(role => {return role.name === 'admin'})) {
-      store.dispatch({type: 'ADD_ERROR', payload: Error("Accès refusé")});
+      store.dispatch({type: 'ADD_ERROR', payload: Error('Access denied')});
     }
   }
 
