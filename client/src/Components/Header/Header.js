@@ -5,9 +5,11 @@ import './Header.css';
 
 class Header extends Component {
   render() {
-    let adminAccess = null
+    let adminAccess = null;
+    const usersLink = <MenuItem href="/#/app/admin">Users admin</MenuItem>;
+    const scriptsLink = <MenuItem href="/#/app/scripts">Scripts admin</MenuItem>;
     if (this.props.currentUser && this.props.currentUser.roles && this.props.currentUser.roles.find(role => {return role.name === 'admin'})) {
-      adminAccess = <MenuItem href="/#/app/admin">Admin</MenuItem>
+      adminAccess = [usersLink, scriptsLink]
     } else {
       adminAccess = '';
     }
